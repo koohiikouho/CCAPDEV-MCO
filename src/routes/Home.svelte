@@ -6,7 +6,7 @@
 
 <div class="relative flex h-250 w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl">
 
-    <img src="/src/assets/logo.png" alt="logo" class="w-auto h-75 mt-50 mb-10">
+    <img src="/src/assets/logo.png" alt="logo" class="w-auto h-75 mt-50 mb-10 opacity-90">
     <span 
     class="pointer-events-none whitespace-pre-wrap bg-linear-to-br from-primary-200 to-primary-600 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
     >
