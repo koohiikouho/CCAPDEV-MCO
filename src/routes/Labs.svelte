@@ -17,21 +17,21 @@
                 <Card img="/src/assets/comlabs/comlab2.jpg" reverse={vCard}>
                     <div class="m-6">
                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">GK 210 Laboratory</h5>
-                    <p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">Air-Conditioned Room equipped with 3 large TVs on each side. Quite Chilly in here so remember to bring a jacket!</p>
-                    <Button class="w-40">
-                        Read more <ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
+                    <p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!</p>
+                    <Button class="w-51">
+                        Check Reservations <ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
                     </Button>
                     </div>
                 </Card>
                 </div>
-                
+
                 <div class="space-y-4">
                 <Card img="/src/assets/comlabs/comlab2.jpg" reverse={vCard}>
                     <div class="m-6">
                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">GK 210 Laboratory</h5>
-                    <p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">Air-Conditioned Room equipped with 3 large TVs on each side. Quite Chilly in here so remember to bring a jacket!</p>
-                    <Button class="w-40">
-                        Read more <ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
+                    <p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!</p>
+                    <Button class="w-51">
+                        Check Reservations <ArrowRightOutline class="ms-2 h-6 w-6 text-white" />
                     </Button>
                     </div>
                 </Card>
