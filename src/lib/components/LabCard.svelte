@@ -1,9 +1,8 @@
 <script>
-    import { Card, Button } from "flowbite-svelte";
+    import { Card, Button, clickOutside } from "flowbite-svelte";
     import { ArrowRightOutline } from "flowbite-svelte-icons";
 
     let { labName = "Lab Name", labDesc = "Lab Description", thumbnail = "src/assets/comlabs/comlab2.jpg" } = $props();
-
 </script>
 
 <div class="space-y-4">

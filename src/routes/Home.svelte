@@ -39,8 +39,6 @@
 </div>
 
     <div class="bg-primary-200 w-auto h-auto -z-10 p-auto">
-
-
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi laoreet augue id sem interdum, eu gravida est scelerisque. Pellentesque fringilla viverra eros, in cursus dui viverra non. Fusce turpis nunc, vestibulum eu cursus et, auctor eu lorem. Aliquam malesuada auctor ornare. Morbi ultricies congue augue, vel sodales erat rhoncus non. Etiam tempus, libero vel volutpat vestibulum, orci ante malesuada libero, a mattis quam ipsum a urna. Sed varius aliquet dui, a tempor nibh bibendum in. Vestibulum volutpat mauris tellus, feugiat iaculis neque tristique vitae. Cras vestibulum velit non suscipit tempor. Suspendisse sit amet elit fermentum, pretium velit id, volutpat sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras lobortis tellus augue, vel luctus nibh mollis luctus. Suspendisse eu nisi ut sapien pulvinar auctor. Phasellus ac mi ut nunc varius pellentesque. Etiam interdum odio eu molestie iaculis.
 
     In lobortis, metus quis scelerisque cursus, ipsum lorem bibendum urna, ac cursus ipsum magna ut arcu. Mauris commodo finibus dolor, ultricies malesuada orci vehicula in. Nunc hendrerit nulla massa, sit amet ullamcorper ante gravida eu. Donec euismod dui turpis, quis lobortis tellus consequat et. Sed sed dui massa. Nulla consequat condimentum malesuada. In a varius purus. Cras id porta lectus. Donec dictum sit amet urna a fermentum. Aenean id neque a quam dignissim sodales. Quisque fermentum dolor quis sem rhoncus iaculis.

@@ -3,6 +3,7 @@
     import { ArrowRightOutline } from "flowbite-svelte-icons";
     import LabCard from "../lib/components/LabCard.svelte";
     import { slide } from "svelte/transition";
+    import Particles from "../lib/components/Particles.svelte";
 
     let vCard = false;
     let labCardsData = [
@@ -27,8 +28,8 @@
     
 </script>
 
-<div class="flex flex-row min-h-screen justify-center items-center">
-    <div class="h-auto w-screen md:w-400">
+<div class="flex flex-row min-h-screen justify-center items-center bg-primary-200">
+    <div class="h-auto w-screen md:w-410 bg-offwhite z-10">
         <div class="mt-20"></div>
         <div class="">
             <h1 class="text-surface-500">Labs</h1>
@@ -40,4 +41,9 @@
         </div>
     
     </div>
+</div>
+
+
+<div class="-z-10">
+    <Particles className="absolute inset-0" refresh={true} color="#fcfcfc"/>
 </div>
