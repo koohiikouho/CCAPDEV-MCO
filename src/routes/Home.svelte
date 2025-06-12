@@ -4,7 +4,7 @@
 </script>
 
 <div class="flex flex-col">
-<div class="relative flex h-auto w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl pb-50">
+<div class="relative flex h-screen w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl pb-50">
 
     <img src="/src/assets/logo.png" alt="logo" class="w-auto h-75 mt-25 md:mt-50 mb-10 opacity-90">
     <span 
