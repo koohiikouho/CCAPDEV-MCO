@@ -3,10 +3,10 @@
     import { Button, GradientButton } from "flowbite-svelte";
 </script>
 
+<div class="flex flex-col">
+<div class="relative flex h-auto w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl pb-50">
 
-<div class="relative flex h-250 w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl">
-
-    <img src="/src/assets/logo.png" alt="logo" class="w-auto h-75 mt-50 mb-10 opacity-90">
+    <img src="/src/assets/logo.png" alt="logo" class="w-auto h-75 mt-25 md:mt-50 mb-10 opacity-90">
     <span 
     class="pointer-events-none whitespace-pre-wrap bg-linear-to-br from-primary-200 to-primary-600 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
     >
@@ -38,10 +38,20 @@
 
 </div>
 
-    <div class="bg-primary-200 w-screen h-100">
+    <div class="bg-primary-200 w-auto h-auto -z-10 p-auto">
 
+
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi laoreet augue id sem interdum, eu gravida est scelerisque. Pellentesque fringilla viverra eros, in cursus dui viverra non. Fusce turpis nunc, vestibulum eu cursus et, auctor eu lorem. Aliquam malesuada auctor ornare. Morbi ultricies congue augue, vel sodales erat rhoncus non. Etiam tempus, libero vel volutpat vestibulum, orci ante malesuada libero, a mattis quam ipsum a urna. Sed varius aliquet dui, a tempor nibh bibendum in. Vestibulum volutpat mauris tellus, feugiat iaculis neque tristique vitae. Cras vestibulum velit non suscipit tempor. Suspendisse sit amet elit fermentum, pretium velit id, volutpat sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras lobortis tellus augue, vel luctus nibh mollis luctus. Suspendisse eu nisi ut sapien pulvinar auctor. Phasellus ac mi ut nunc varius pellentesque. Etiam interdum odio eu molestie iaculis.
+
+    In lobortis, metus quis scelerisque cursus, ipsum lorem bibendum urna, ac cursus ipsum magna ut arcu. Mauris commodo finibus dolor, ultricies malesuada orci vehicula in. Nunc hendrerit nulla massa, sit amet ullamcorper ante gravida eu. Donec euismod dui turpis, quis lobortis tellus consequat et. Sed sed dui massa. Nulla consequat condimentum malesuada. In a varius purus. Cras id porta lectus. Donec dictum sit amet urna a fermentum. Aenean id neque a quam dignissim sodales. Quisque fermentum dolor quis sem rhoncus iaculis.
+
+    Donec vel dui felis. Proin et eros arcu. Nullam ut mauris tellus. Fusce eget urna mauris. Praesent at metus eu turpis facilisis tempus a nec libero. Mauris felis lorem, efficitur ut dui quis, efficitur vehicula neque. Morbi ornare efficitur viverra. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas sed lectus nibh.
+
+    Quisque accumsan accumsan mauris, non dignissim nibh pellentesque commodo. Duis rutrum tortor sapien, nec feugiat justo pellentesque eget. Cras aliquam placerat orci. In et ex scelerisque, sagittis nibh quis, maximus odio. Ut elementum euismod pharetra. Suspendisse ac tempor tortor. Aenean eu facilisis arcu. Phasellus posuere hendrerit interdum. Nullam tempus ipsum id velit faucibus aliquam. Nulla eu accumsan massa. Nam finibus aliquet risus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin dictum et sapien tincidunt lobortis. Vestibulum dictum tempus venenatis.
+
+    Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Integer a lectus sed leo convallis venenatis id vel tellus. Aenean dapibus rutrum felis. Praesent efficitur mattis placerat. Ut egestas, urna sit amet commodo dictum, mi augue aliquam metus, nec pulvinar orci lorem quis augue. Aenean sit amet dolor eu eros placerat placerat. Nunc accumsan felis ut mollis tincidunt. Proin suscipit rhoncus congue. Vestibulum massa diam, fermentum in risus eget, mattis pulvinar lacus. Duis a ipsum porttitor, feugiat neque et, sagittis risus. Quisque ut hendrerit dolor, eu tincidunt mi. Aenean ac ornare massa. 
     </div>
-
+</div>
 
 <style>
 	.animated-gradient {

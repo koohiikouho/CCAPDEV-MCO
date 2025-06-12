@@ -191,6 +191,9 @@
 
 }
 
+.fixcursor{
+	cursor:pointer;
+}
 @source "../node_modules/flowbite-svelte/dist";
 @source "../node_modules/flowbite-svelte-icons/dist";
 
@@ -200,6 +203,7 @@
     display: none;
   }
 }
+
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
