@@ -49,7 +49,7 @@
       </NavBrand>
       <NavHamburger />
       <NavUl transitionParams={{ y: -20, duration: 250 }}>
-          <NavLi href="#a" class="text-surface-400" onclick={viewLabs}>Labs</NavLi>
+          <NavLi href="#a" class="text-surface-400" onclick={viewLabs} >Labs</NavLi>
           <NavLi href="#a" class="text-surface-400">Users</NavLi>
           <NavLi href="#a" class="text-surface-400">About</NavLi>
           <NavLi href="#a" class="text-surface-400"></NavLi>
