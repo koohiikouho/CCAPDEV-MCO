@@ -55,7 +55,7 @@
           <NavLi href="#a" class="text-surface-400"></NavLi>
           <NavLi class="flex align-center">
             <Avatar id="user-drop" src="src/assets/profilepic.jpg" class="cursor-pointer"/>
-            <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-200" >
+            <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
               <DropdownHeader>
                 <span class="block text-sm text-white">{userName}</span>
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>

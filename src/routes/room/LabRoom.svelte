@@ -1,6 +1,6 @@
 <script lang="ts">
   import "../../app.css";
-  import { TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, TableSearch, Button, Checkbox, ButtonGroup, List, Li, Table } from 'flowbite-svelte';
+  import { TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, TableSearch, Button, Checkbox, ButtonGroup, List, Li, Table, Label } from 'flowbite-svelte';
 	import { Section } from 'flowbite-svelte-blocks';
 	import paginationData from './advancedTable.json';
 	import { PlusOutline, ChevronDownOutline, FilterSolid, ChevronRightOutline, ChevronLeftOutline } from 'flowbite-svelte-icons';
@@ -15,10 +15,11 @@
   import { Datepicker } from "flowbite-svelte";
 	let searchTerm = $state('');
 	let currentPosition = $state(0);
+  import { Range } from "flowbite-svelte";
   
 
   let activeClass = "inline-block text-md font-medium text-center disabled:cursor-not-allowed active rounded-t-lg dark:bg-gray-800 p-4 w-auto md:w-100 text-primary-600 border-x-2 border-t-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 bg-offwhite"
-  let inactiveClass = "inline-block text-sm font-medium text-center disabled:cursor-not-allowed rounded-t-lg hover:bg-gray-50 dark:hover:bg-gray-800 p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-offwhite dark:text-gray-400 bg-transparent bg-offwhite/50";
+  let inactiveClass = "inline-block text-sm font-medium text-center disabled:cursor-not-allowed rounded-t-lg hover:bg-gray-50 dark:hover:bg-gray-800 p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-surface-300 dark:text-gray-400 bg-transparent bg-offwhite/50";
 
 	const itemsPerPage = 10;
 	const showPage = 5;
@@ -130,6 +131,8 @@
   let navbar = null;
   let navbarText = null;
 
+  
+
   let viewportComponent = null;
   let currentView = 0;
   let userName = "Kasane Teto";
@@ -163,7 +166,8 @@
   let params = new URLSearchParams(location.search);
 
   let roomCode = params.get("labCode");
-
+   
+  let stepValue = $state("0730");
 </script>
 
 <header>
@@ -260,7 +264,8 @@
           <div class="grid grid-cols-2">
             <div class="">
               <Datepicker inline bind:value={selectedDate} class="h-100 w-150" classes={{grid: "h-80 w-140"}}/>
-              <P class="mt-4">Selected date: {selectedDate ? selectedDate.toLocaleDateString() : "None"}</P>
+              <Label>Time: {stepValue} </Label>
+              <Range id="range-steps" min="0730" max="1930" bind:value={stepValue} step="30" inputClass="w-fit"/>
             </div>
             <div>
               <Table striped={true}>
