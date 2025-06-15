@@ -39,17 +39,9 @@
   let searchTerm = "";
 </script>
 
-<div class="fixed inset-0 -z-10">
-  <Particles 
-    className="absolute inset-0" 
-    refresh={true} 
-    color="#ec8397" 
-    staticity={staticity} 
-    quantity={qty}
-    size={size} 
-    vx={vx} 
-    vy={vy}
-  />
+<div class="-z-10">
+  <Particles className="absolute inset-0" refresh={true} color="#ec8397" staticity={staticity} quantity={qty}
+  size={size} vx={vx} vy={vy}/>
 </div>
 
 <div class="flex flex-row min-h-screen justify-center items-center bg-offwhite">
@@ -80,3 +72,4 @@
     </div>
   </div>
 </div>
+

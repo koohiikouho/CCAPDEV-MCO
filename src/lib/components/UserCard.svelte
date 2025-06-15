@@ -3,11 +3,10 @@
   import { DotsHorizontalOutline } from "flowbite-svelte-icons";
 
 
-  let { name, email, avatar, open = $bindable(false) }: { name: string; email: string; avatar: string, open} = $props();
+  let { name, email, avatar }: { name: string; email: string; avatar: string} = $props();
 
   // Avatar URL fallback if no avatar provided
   let avatarSrc = $derived(avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`);
-
 
 </script>
 

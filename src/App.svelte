@@ -12,15 +12,27 @@
 
   const views = [Home, Lab, Users];
 
+  let params = new URLSearchParams(location.search);
+  let viewNumber = Number(params.get("view"));
+
   let navbar = null;
 
   let viewportComponent = null;
   let currentView = 0;
   let userName = "Kasane Teto";
   let userEmail = "kasaneteto@utau.com"
+
+  function changeViewOnLoad(){
+    if (viewNumber == 0){
+
+    }
+    else{
+      currentView = viewNumber;
+    }
+  }
+
   function viewHome(){
     currentView = 0;
-
     scrollTo(0, 0);
     navbar.add();
     updateViewportComponent();  
@@ -28,7 +40,6 @@
 
   function viewLabs(){
     currentView = 1;
-
     navbar.add();
     updateViewportComponent();  
   }
@@ -42,6 +53,9 @@
   function updateViewportComponent() {
     viewportComponent = views[currentView];
   }
+
+  changeViewOnLoad()
+
   updateViewportComponent();
   
 
@@ -87,3 +101,8 @@
 	  <svelte:component this={viewportComponent}></svelte:component>
 	</div>
 {/if}
+
+
+<footer>
+  Hello
+</footer>

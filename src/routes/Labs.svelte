@@ -78,7 +78,3 @@
     </div>
   </div>
 </div>
-
-<footer>
-    Hello
-</footer>

@@ -130,13 +130,8 @@
       </NavBrand>
       <NavHamburger />
       <NavUl>
-        <NavLi
-          href="#"
-          class="text-surface-400"
-          bind:this={navbarText}
-          onclick={viewLabs}>Labs</NavLi
-        >
-        <NavLi href="#" class="text-surface-400">Users</NavLi>
+        <NavLi href="../../../index.html?view=1" class="text-surface-400" bind:this={navbarText}>Labs</NavLi>
+        <NavLi href="../../../index.html?view=2" class="text-surface-400">Users</NavLi>
         <NavLi href="#" class="text-surface-400">About</NavLi>
         <Avatar id="user-drop" src={profilePic} class="cursor-pointer ml-5" />
         <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-200">
