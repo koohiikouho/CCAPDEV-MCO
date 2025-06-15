@@ -3,13 +3,14 @@
   import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, P } from "flowbite-svelte";
   import Home from './routes/Home.svelte';
   import Lab from './routes/Labs.svelte';
+  import Users from './routes/Users.svelte';
   // import Labs from './routs/Labs.svelte';
   import { fade, fly, slide } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import { scrollY } from 'svelte/reactivity/window';
 
-  const views = [Home, Lab];
+  const views = [Home, Lab, Users];
 
   let navbar = null;
 
@@ -32,6 +33,12 @@
     updateViewportComponent();  
   }
 
+  function viewUsers() {
+    currentView = 2;
+    navbar.add();
+    updateViewportComponent();
+  }
+
   function updateViewportComponent() {
     viewportComponent = views[currentView];
   }
@@ -50,7 +57,7 @@
       <NavHamburger class="bg-surface-400 hover:bg-surface-600"/>
       <NavUl ulClass="items-center align-middle p-1">
           <NavLi href="#a" class="text-surface-400" onclick={viewLabs}>Labs</NavLi>
-          <NavLi href="#a" class="text-surface-400">Users</NavLi>
+          <NavLi href="#a" class="text-surface-400" onclick={viewUsers}>Users</NavLi>
           <NavLi href="#a" class="text-surface-400">About</NavLi>
           <NavLi href="#a" class="text-surface-400"></NavLi>
           <NavLi class="flex align-center">
