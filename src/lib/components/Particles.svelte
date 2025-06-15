@@ -6,7 +6,7 @@
   export let staticity: number = 50;
   export let ease: number = 25;
   export let size: number = 1.5;
-  export let refresh: boolean = true;
+  export const refresh: boolean = true;
   export let color: string = "#e55d79";
   export let vx: number = 0.5;
   export let vy: number = 0.5;

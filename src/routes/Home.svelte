@@ -56,6 +56,7 @@
 		animation: move-bg 15s infinite linear;
 		color: transparent;
 		-webkit-background-clip: text;
+		background-clip: none;
 	}
 
 	.animated-gradient-svelte {
@@ -73,6 +74,7 @@
 		animation: move-bg 30s infinite linear;
 		color: transparent;
 		-webkit-background-clip: text;
+		background-clip: none;
 	}
 	.animated-gradient-elysiajs {
 		--bg-size: 400%;
@@ -89,6 +91,7 @@
 		animation: move-bg 45s infinite linear;
 		color: transparent;
 		-webkit-background-clip: text;
+        background-clip: none;
 	}
 
 	@keyframes move-bg {
