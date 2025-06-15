@@ -41,6 +41,9 @@ importers:
       typescript-eslint:
         specifier: ^8.34.0
         version: 8.34.0(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
+      wx-svelte-core:
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@sveltejs/enhanced-img':
         specifier: ^0.6.0
@@ -1740,6 +1743,18 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
+  wx-core-locales@2.1.1:
+    resolution: {integrity: sha512-BaRT677XHobYVYfEl/xKXKVeGTwNp9j+Xj25C/xnX6rS3Io2REJeU4qTTzaqBdd7i7BCPP2mAx9DnNYfpKmtyQ==}
+
+  wx-lib-dom@0.8.0:
+    resolution: {integrity: sha512-1jQFsoX8EiA/7D6IT8k8I52PlPFs850etY+k7jqww9CM5L3JEELprKuy422sUfXjnnpMoaVvUrmndWZVOldsAA==}
+
+  wx-lib-svelte@0.5.1:
+    resolution: {integrity: sha512-zYfkAv5r0zQ3KFyCPPusC8EkMXUC3I0L1QsK+An0rNlRkY/iocPTOcaouyycg48BdmsBK8fSL0vK0B4oZuujrQ==}
+
+  wx-svelte-core@2.1.1:
+    resolution: {integrity: sha512-Qxjd2S+77Nl99sNfxH1uQVtviAWoTCT2hXnQRj4jwcLFnUInh1QMDO8M/LJko5zIHXR8PQeTcyFtLet2mkzb+A==}
+
   yallist@5.0.0:
     resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
     engines: {node: '>=18'}
@@ -3389,6 +3404,18 @@ snapshots:
       isexe: 2.0.0
 
   word-wrap@1.2.5: {}
+
+  wx-core-locales@2.1.1: {}
+
+  wx-lib-dom@0.8.0: {}
+
+  wx-lib-svelte@0.5.1: {}
+
+  wx-svelte-core@2.1.1:
+    dependencies:
+      wx-core-locales: 2.1.1
+      wx-lib-dom: 0.8.0
+      wx-lib-svelte: 0.5.1
 
   yallist@5.0.0: {}
 
