@@ -21,8 +21,25 @@
 
 
 
-  let i: number = 0;
+  // svelte-ignore non_reactive_update
+    let i: number = 0;
+  // svelte-ignore non_reactive_update
   let j: number = 0;
+
+  function iAdd(){
+    i++;
+  }
+
+  function jAdd(){
+    j++;
+  }
+
+  function jClear(){
+    j = 0;
+  }
+  function iClear(){
+    i = 0
+  }
 
 	const updateDataAndPagination = () => {
 		let currentPageItems = paginationData.slice(currentPosition, currentPosition + itemsPerPage);
@@ -68,7 +85,7 @@
 	});
 
 	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
-	let filteredItems = $derived(paginationData.filter((item) => item.student_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
+	let filteredItems = $derived(paginationData.filter((item) => item.seat_col.concat(item.seat_row).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 
 
 </script>
@@ -79,22 +96,30 @@
       </TableHead>
       <TableBody class="divide-y divide=x">
         {#if searchTerm !== ''}
+        {iClear()}
+        {jClear()}
           {#each filteredItems as item (item.id)}
-            <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        {:else}
-            {#each currentPageItems as item (item.id)}
-            {i++} 
-
-            {j++}
-              <TableBodyCell>
-                <TableBodyRow class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
-              </TableBodyCell>
+            {iAdd()}
             {#if i % 5 === 0 && j != 0}
               <TableBodyRow/>
             {/if}
+            {jAdd()}
+            <TableBodyCell>
+              <TableBodyRow class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+            </TableBodyCell>
+          {/each}
+        {:else}
+        {iClear()}
+        {jClear()}
+            {#each currentPageItems as item (item.id)}
+              {iAdd()}
+              {#if i % 5 === 0 && j != 0}
+                <TableBodyRow/>
+              {/if}
+              {jAdd()}
+              <TableBodyCell>
+                <TableBodyRow class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+              </TableBodyCell>
             {/each}
         {/if}
       </TableBody>

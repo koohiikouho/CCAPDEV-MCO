@@ -20,9 +20,8 @@
 
 <div class="bg-offwhite rounded-xl p-10">
     <div class="grid grid-cols-1 grid-rows-2 md:grid-cols-2 md:grid-rows-1">
-      <div class="">
+      <div class="grow">
         <Datepicker inline bind:value={selectedDate} class="h-100 w-auto" classes={{grid: "h-80 w-auto"}}/>
-
         <Label class="my-3">Select Time Range:</Label>
           <Timepicker type="range" onselect={handleRangeChange} value={selectedTimeRange.time} endValue={selectedTimeRange.endTime} divClass="shadow-none"/>
       </div>
