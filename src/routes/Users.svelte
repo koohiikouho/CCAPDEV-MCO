@@ -10,24 +10,28 @@
       name: "Ron Alonzo",
       email: "ron_alonzo@dlsu.edu.ph",
       avatar: "src/assets/profilepic.jpg",
+      role: "Student"
     },
     {
       id: 2,
       name: "Joshua Gonzales",
       email: "joshua_gonzales@dlsu.edu.ph",
       avatar: "",
+      role: "Student"
     },
     {
       id: 3,
       name: "Nathaniel Reyes",
       email: "nathaniel_reyes@dlsu.edu.ph",
       avatar: "src/assets/Users/alden.jpeg",
+      role: "Student"
     },
     {
       id: 4,
       name: "Cochise King",
       email: "cochise_king@dlsu.edu.ph",
       avatar: "",
+      role: "Professor"
     },
   ];
 
@@ -65,6 +69,7 @@
               name={user.name}
               email={user.email}
               avatar={user.avatar}
+              role={user.role}
             />
           </div>
         {/each}
