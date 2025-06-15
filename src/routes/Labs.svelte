@@ -6,7 +6,6 @@
   import Particles from "../lib/components/Particles.svelte";
   import { flip } from "svelte/animate";
 
-  let vCard = false;
   let labCardsData = [
     {
         labName: "GK 211 Laboratory",

@@ -2,17 +2,14 @@
   import { Card, Dropdown, DropdownItem, Avatar, Button } from "flowbite-svelte";
   import { DotsHorizontalOutline } from "flowbite-svelte-icons";
 
-  export let name: string;
-  export let email: string;
-  export let avatar: string;
+  let { name, email, avatar }: { name: string; email: string; avatar: string } = $props();
 
   // Avatar URL fallback if no avatar provided
-  $: avatarSrc = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`;
+  let avatarSrc = $derived(avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`);
 </script>
 
 <Card class="p-4 sm:p-5 md:p-7">
   <div class="flex justify-end">
-    <DotsHorizontalOutline />
   </div>
   <div class="flex flex-col items-center pb-4">
     <Avatar size="lg" src={avatarSrc} />

@@ -1,10 +1,6 @@
 <script lang="ts">
-  import { Card, Dropdown, DropdownItem, Avatar, Button } from "flowbite-svelte";
-  import { DotsHorizontalOutline } from "flowbite-svelte-icons";
   import UserCard from "../lib/components/UserCard.svelte";
-  import { onMount } from "svelte";
   import Particles from "../lib/components/Particles.svelte";
-  import { Search } from "flowbite-svelte";
   import Searchbar from "../lib/components/Search.svelte";
   import { flip } from "svelte/animate";
 
