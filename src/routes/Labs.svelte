@@ -66,7 +66,7 @@
     <div class="mt-20 px-60"></div>
 
     <div class="py-10 bg-tertiary-50/50 backdrop-blur-xs rounded-md outline-2 outline-secondary-50/60 outline-dashed">
-      <h1 class="text-surface-600 font-bold md:text-start text-center pl-auto md:pl-9 flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between gap-5">
+      <h1 class="text-surface-600 font-bold md:text-start text-center pl-auto md:pl-9 flex flex-col md:flex-row items-center justify-center md:justify-between gap-5">
         <div class="flex items-end">
           <ComputerSpeakerOutline class="w-15 h-15 mr-5"/>Labs 
         </div> 

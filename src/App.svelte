@@ -79,7 +79,6 @@
           <NavLi href="#a" class="text-surface-400" onclick={viewLabs}>Labs</NavLi>
           <NavLi href="#a" class="text-surface-400" onclick={viewUsers}>Users</NavLi>
           <NavLi href="#a" class="text-surface-400">About</NavLi>
-          <NavLi href="#a" class="text-surface-400"></NavLi>
           <NavLi class="flex align-center">
             <Avatar id="user-drop" src="src/assets/profilepic.jpg" class="cursor-pointer"/>
             <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
@@ -88,17 +87,16 @@
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
               </DropdownHeader>
               <DropdownGroup class="text-white ">
-                <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
                 <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
-                <DropdownItem class="hover:text-surface-400" onclick={viewReservations}>Reservations</DropdownItem>
+                <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
               </DropdownGroup>
-              <DropdownGroup class="text-white hover:text-surface-400">
-                <DropdownItem>Sign out</DropdownItem>
+              <DropdownGroup class="text-white">
+                <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
+                <DropdownItem class="hover:text-surface-400">Sign out</DropdownItem>
               </DropdownGroup>
             </Dropdown>
           </NavLi>
       </NavUl>
-      
     </Navbar>
   </div>
 </header>
