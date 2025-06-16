@@ -92,9 +92,6 @@
               <UsersOutline class="w-4 h-4 text-surface-400" />
               <span class="text-sm text-surface-600">{reservation.duration}</span>
             </div>
-            <div class="text-sm text-surface-600">
-              <strong>Purpose:</strong> {reservation.purpose}
-            </div>
           </div>
 
           {#if reservation.equipmentRequested.length > 0}
@@ -102,7 +99,7 @@
               <p class="text-sm font-medium text-surface-700 mb-2 text-left">Equipment Requested:</p>
               <div class="flex flex-wrap gap-2">
                 {#each reservation.equipmentRequested as equipment}
-                  <Badge color="light" class="text-xs bg-surface-100 text-surface-600 border border-surface-300">{equipment}</Badge>
+                  <Badge class="text-xs bg-surface-100 text-surface-600 border border-surface-300">{equipment}</Badge>
                 {/each}
               </div>
             </div>
@@ -114,14 +111,14 @@
                 size="sm" 
                 color="alternative" 
                 class="bg-surface-100 text-surface-700 border-surface-300 hover:bg-surface-200"
-                on:click={() => editReservation(reservation.id)}
+                onclick={() => editReservation(reservation.id)}
               >
                 Edit
               </Button>
               <Button 
                 size="sm" 
                 color="red" 
-                on:click={() => cancelReservation(reservation.id)}
+                onclick={() => cancelReservation(reservation.id)}
               >
                 Cancel
               </Button>
