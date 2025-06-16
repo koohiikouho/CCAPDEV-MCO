@@ -10,24 +10,28 @@
       name: "Ron Alonzo",
       email: "ron_alonzo@dlsu.edu.ph",
       avatar: "src/assets/profilepic.jpg",
+      role: "Student"
     },
     {
       id: 2,
       name: "Joshua Gonzales",
       email: "joshua_gonzales@dlsu.edu.ph",
       avatar: "",
+      role: "Student"
     },
     {
       id: 3,
       name: "Nathaniel Reyes",
       email: "nathaniel_reyes@dlsu.edu.ph",
       avatar: "src/assets/Users/alden.jpeg",
+      role: "Student"
     },
     {
       id: 4,
       name: "Cochise King",
       email: "cochise_king@dlsu.edu.ph",
       avatar: "",
+      role: "Professor"
     },
   ];
 
@@ -45,7 +49,7 @@
 </div>
 
 <div class="flex flex-row min-h-screen justify-center items-center bg-offwhite">
-  <div class="h-auto w-screen max-w-4xl bg-opacity-0 z-10 p-4">
+  <div class="h-auto w-screen md:w-400 bg-opacity-0 z-10">
     
     <div class="py-10 bg-tertiary-50/50 backdrop-blur-sm rounded-md border-2 border-dashed border-secondary-50/60">
       <h1 class="text-surface-500 text-center text-2xl font-bold mb-4">Users</h1>
@@ -65,6 +69,7 @@
               name={user.name}
               email={user.email}
               avatar={user.avatar}
+              role={user.role}
             />
           </div>
         {/each}

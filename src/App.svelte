@@ -82,6 +82,7 @@
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
               </DropdownHeader>
               <DropdownGroup class="text-white ">
+                <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
                 <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400">Reservations</DropdownItem>
               </DropdownGroup>
