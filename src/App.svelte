@@ -5,13 +5,13 @@
   import Lab from './routes/Labs.svelte';
   import Users from './routes/Users.svelte';
   // import Labs from './routs/Labs.svelte';
-  //import Reservations from './routes/Reservations.svelte';
+  import Reservations from './routes/Reservations.svelte';
   import { fade, fly, slide } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import { scrollY } from 'svelte/reactivity/window';
 
-  const views = [Home, Lab, Users];
+  const views = [Home, Lab, Users, Reservations];
 
   let params = new URLSearchParams(location.search);
   let viewNumber = Number(params.get("view"));

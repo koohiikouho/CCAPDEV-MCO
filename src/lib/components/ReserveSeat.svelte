@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range } from "flowbite-svelte";
-    import { CalendarMonthSolid, ClockSolid, MapPinSolid } from "flowbite-svelte-icons";
+    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio } from "flowbite-svelte";
+    import { CalendarMonthSolid, ClockSolid, MapPinSolid, TheatreOutline, UserCircleOutline } from "flowbite-svelte-icons";
+
+    let {userName = "Username"} = $props();
   
     let selectedDate = $state(new Date("2024-06-30"));
-    let selectedInlineTime = $state({ time: "12:00" });
+    let selectedInlineTime = $state({ time: "" });
     let eventTitle = $state("Digital Transformation");
     let eventLocation = $state("California, USA");
     let eventDuration = $state("0.5");
@@ -14,8 +16,8 @@
       { img: "/images/profile-picture-3.webp", alt: "Participant 3" }
     ];
   
-    const timeIntervals = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30"];
-  
+    const timeIntervals = ["7:30", "8:00", "8:30", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30"];
+3
     function handleTimeSelect(data: { time: string; endTime: string; [key: string]: string }): void {
       if (data) {
         selectedInlineTime = {
@@ -66,8 +68,6 @@
             <Label class="mb-2">Select Time</Label>
             <Timepicker type="inline-buttons" value={selectedInlineTime.time} {timeIntervals} onselect={handleTimeSelect} />
           </div>
-
-
         </div>
       </div>
     </div>
@@ -82,7 +82,28 @@
                 <Label for="event-duration">Duration</Label>
                 <Range id="range-steps" min="0.5" max="12" bind:value={eventDuration} step="0.5" />
             </div>
-
+            <div>
+              <div class="grid w-full gap-6 md:grid-cols-2">
+                <Radio name="custom" custom>
+                  <div class="dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 inline-flex w-full cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-5 text-gray-500 hover:bg-gray-100 hover:text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                    <div>
+                      <div class="w-full text-lg font-semibold text-start">Anonymous</div>
+                      <div class="w-full">Your name will appear in the reservations list as Anonymous</div>
+                    </div>
+                    <TheatreOutline class="ms-3 h-10 w-10" />
+                  </div>
+                </Radio>
+                <Radio name="custom" custom>
+                  <div class="dark:peer-checked:text-primary-500 peer-checked:border-primary-600 peer-checked:text-primary-600 inline-flex w-full cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-5 text-gray-500 hover:bg-gray-100 hover:text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                    <div class="block">
+                      <div class="w-full text-lg font-semibold text-start">Name included</div>
+                      <div class="w-full">Your name will appear in the reservations list as {userName}</div>
+                    </div>
+                    <UserCircleOutline class="ms-3 h-10 w-10" />
+                  </div>
+                </Radio>
+              </div>
+            </div>
         </div>
     </div>
 

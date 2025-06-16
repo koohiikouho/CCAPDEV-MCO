@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Datepicker, Label, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Timepicker } from "flowbite-svelte";
+    import { Datepicker, Label, Radio, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Timepicker } from "flowbite-svelte";
   import SeatAvailabilityTable from "./SeatAvailabilityTable.svelte";
 
     let selectedDate = $state<Date | undefined>(undefined);
@@ -27,6 +27,10 @@
       </div>
       <div>
         <SeatAvailabilityTable/>
+      </div>
+      <div>
+
+        
       </div>
     </div>
   </div>

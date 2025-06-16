@@ -148,7 +148,7 @@
   </div>
 </header> -->
 
-<TempNavbar userEmail={userEmail} userName={userName}/>
+<TempNavbar userEmail={userEmail} userName={userName} profilePicture={profilePic}/>
 
 
 <div class="relative z-10 px-auto md:px-60 ">
@@ -159,29 +159,28 @@
 
 <div class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
 
-  <div class="flex items-center flex-col px-2 py-4 ">
+  <div class="flex items-center justify-center flex-col px-2 py-4 ">
     <Heading tag="h1" class="">GK210 Computer Lab</Heading>
     <div class="flex justify-center md:justify-start items-center px-5 pt-2">
       Labs <AngleRightOutline class="size-5"/> Gokongwei <AngleRightOutline class="size-5"/> 2nd Floor <AngleRightOutline class="size-5"/> Room 10
     </div>
-    <div class="flex justify-center md:justify-start items-center px-5 pt-5">
-      Short description goes here
+    <div class="flex justify-center md:justify-start text-start items-center px-13 md:px-20 py-5 ">
+      <div class="bg-secondary-50/30 px-3 md:px-3 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed text-surface-500">
+        "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!"
+      </div>
     </div>
     <div class="flex justify-center md:justify-start items-center px-5 pt-5 w-auto">
-      <DateAvailable/>
+      <div class="bg-secondary-50/30 md:px-7 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed">
+        <DateAvailable />
+      </div>
     </div>
 
   </div>
-  <div class="py-5 mx-2">
+  <div class="py-5 mx-2 order-first">
     <Carousel {images} duration={5000} class="w-auto" imgClass="rounded-xl">
-      <Indicators />
+      <Indicators/>
     </Carousel>
   </div>
-
-
-
-
-
 
   <div class=" mt-4"> </div>
 </div>
@@ -210,7 +209,7 @@
         {#snippet titleSlot()}
           <span>Reserve Seat</span>
         {/snippet}
-        <ReserveSeat/>
+        <ReserveSeat userName={userName}/>
       </TabItem>
 
 
