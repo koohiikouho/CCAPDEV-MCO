@@ -6,12 +6,6 @@
     NavLi,
     NavUl,
     NavHamburger,
-    P,
-    ControlButton,
-    Controls,
-    Hr,
-    Heading,
-    A,
     Avatar,
     Dropdown,
     DropdownHeader,
@@ -20,8 +14,6 @@
     Carousel, 
     Indicators
   } from "flowbite-svelte";
-
-  import { AngleRightOutline, ArrowLeftOutline } from "flowbite-svelte-icons";
 
   let profilePic =
     "/src/assets/users/alden.jpeg";
