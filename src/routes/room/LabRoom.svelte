@@ -44,6 +44,8 @@
 
   import { Carousel, Indicators } from "flowbite-svelte";
   import { AngleRightOutline, ArrowLeftOutline } from "flowbite-svelte-icons";
+  import ReserveSeat from "../../lib/components/ReserveSeat.svelte";
+  import DateAvailable from "../../lib/components/DateAvailable.svelte";
 
   export const images = [
     {
@@ -161,16 +163,18 @@
 
 <div class="mt-35"></div>
 
-<div class="grid grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
+<div class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
 
   <div class="flex items-center flex-col px-2 py-4 ">
     <Heading tag="h1" class="">GK210 Computer Lab</Heading>
     <div class="flex justify-center md:justify-start items-center px-5 pt-2">
       Labs <AngleRightOutline class="size-5"/> Gokongwei <AngleRightOutline class="size-5"/> 2nd Floor <AngleRightOutline class="size-5"/> Room 10
     </div>
-  
-    <div class="flex justify-center md:justify-start items-center px-5 pt-10">
-      Lipsum
+    <div class="flex justify-center md:justify-start items-center px-5 pt-5">
+      Short description goes here
+    </div>
+    <div class="flex justify-center md:justify-start items-center px-5 pt-5 w-auto">
+      <DateAvailable/>
     </div>
 
   </div>
@@ -212,10 +216,7 @@
         {#snippet titleSlot()}
           <span>Reserve Seat</span>
         {/snippet}
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          <b>Dashboard:</b>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </p>
+        <ReserveSeat/>
       </TabItem>
 
 

@@ -103,6 +103,3 @@
 {/if}
 
 
-<footer>
-  Hello
-</footer>

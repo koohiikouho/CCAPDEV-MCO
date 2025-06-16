@@ -19,13 +19,9 @@
     let searchTerm = $state('');
 	let currentPosition = $state(0);
 
-    let divider:boolean = false;
 
-    let qty:number = 50;
-    let vx:number = -0.2;
-    let vy:number = -0.3;
-    let size:number = 50;
-    let staticity:number = 100;
+
+
 
 	const updateDataAndPagination = () => {
 		let currentPageItems = paginationData.slice(currentPosition, currentPosition + itemsPerPage);

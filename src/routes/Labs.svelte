@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { Card, Button} from "flowbite-svelte";
-  import { ArrowRightOutline } from "flowbite-svelte-icons";
+  import { Card, Button, Input, Label, Hr} from "flowbite-svelte";
+  import { ArrowRightOutline, ComputerSpeakerOutline, SearchOutline } from "flowbite-svelte-icons";
   import LabCard from "../lib/components/LabCard.svelte";
   import { slide } from "svelte/transition";
   import Particles from "../lib/components/Particles.svelte";
   import { flip } from "svelte/animate";
+  import Search from "../lib/components/Search.svelte";
 
   let labCardsData = [
     {
@@ -60,13 +61,24 @@
 
 
 <div class="flex flex-row min-h-screen justify-center items-center bg-offwhite">
-  <div class="h-auto w-screen md:w-400 bg-opacity-0 z-10">
+  <div class="h-auto w-screen md:w-370 bg-opacity-0 z-10">
     
     <div class="mt-20 px-60"></div>
 
     <div class="py-10 bg-tertiary-50/50 backdrop-blur-xs rounded-md outline-2 outline-secondary-50/60 outline-dashed">
-      <h1 class="text-surface-500">Labs</h1>
-      <div class="flex justify-center pt-10 gap-2 flex-wrap">
+      <h1 class="text-surface-600 font-bold md:text-start text-center pl-auto md:pl-9 flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between gap-5">
+        <div class="flex items-end">
+          <ComputerSpeakerOutline class="w-15 h-15 mr-5"/>Labs 
+        </div> 
+        <Input id="default-input" placeholder="Search Lab" class="pl-8 h-12" divClass="px-9 w-100">
+        {#snippet left()}
+          <SearchOutline class="h-5 w-5 ml-8 text-gray-500 dark:text-gray-400" />
+        {/snippet}
+        </Input>
+      </h1>
+
+      <!-- <Hr class="bg-primary-300/70 " innerDivClass="bg-tertiary-50/50" divClass="px-10"> stuff goes here</Hr> -->
+      <div class="flex justify-center pt-10 gap-y-10 gap-x-7 flex-wrap">
         {#each labCardsData as labCardsData}
             <LabCard
             labName={labCardsData.labName}
