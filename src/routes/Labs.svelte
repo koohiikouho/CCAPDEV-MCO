@@ -25,7 +25,7 @@
         labName: "GK 403 Network Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail: "src/assets/comlabs/comlab1.jpg",
+        thumbnail: "/src/assets/comlabs/comlab1.jpg",
     },
 
     {

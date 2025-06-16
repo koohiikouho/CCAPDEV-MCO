@@ -46,6 +46,7 @@
   import { AngleRightOutline, ArrowLeftOutline } from "flowbite-svelte-icons";
   import ReserveSeat from "../../lib/components/ReserveSeat.svelte";
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
+  import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
   export const images = [
     {
@@ -113,10 +114,10 @@
 
 </script>
 
-<header>
+<!-- <header>
   <div id="navbar" class="text-white w-screen shadow-md">
     <Navbar class="p-0 fixed start-0 top-0 z-20 bg-white/30 hover:bg-white/60 transition backdrop-blur-xl">
-      <NavBrand href="#a" onclick={viewHome}>
+      <NavBrand href="../../">
         <img src="/src/assets/logolite.png" class="me-3 h-6 sm:h-9 text-surface-400 object-fill" alt="Lab Club Logo" />
         <span id="navbarText" class="self-center text-xl font-semibold whitespace-nowrap dark:text-white text-surface-400">Lab Club!</span>
       </NavBrand>
@@ -145,7 +146,9 @@
       </NavUl>
     </Navbar>
   </div>
-</header>
+</header> -->
+
+<TempNavbar userEmail={userEmail} userName={userName}/>
 
 
 <div class="relative z-10 px-auto md:px-60 ">

@@ -81,7 +81,7 @@
           <NavLi href="#a" class="text-surface-400" onclick={viewUsers}>Users</NavLi>
           <NavLi href="#a" class="text-surface-400">About</NavLi>
           <NavLi class="flex align-center">
-            <Avatar id="user-drop" src="src/assets/profilepic.jpg" class="cursor-pointer"/>
+            <Avatar id="user-drop" src="https://media.discordapp.net/attachments/1369208787042304020/1382885082166988963/profilepic.jpg?ex=685164d8&is=68501358&hm=dd17b84d99e98cf02b8aa8f65c66507b5e40440a84b3a07e13d21dcf5398ddcb&=&format=webp&width=1008&height=1008" class="cursor-pointer"/>
             <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
               <DropdownHeader>
                 <span class="block text-sm text-white">{userName}</span>
