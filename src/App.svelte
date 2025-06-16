@@ -4,13 +4,14 @@
   import Home from './routes/Home.svelte';
   import Lab from './routes/Labs.svelte';
   import Users from './routes/Users.svelte';
-  import Reservations from './routes/Reservations.svelte';
+  // import Labs from './routs/Labs.svelte';
+  //import Reservations from './routes/Reservations.svelte';
   import { fade, fly, slide } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import { scrollY } from 'svelte/reactivity/window';
 
-  const views = [Home, Lab, Users, Reservations];
+  const views = [Home, Lab, Users];
 
   let params = new URLSearchParams(location.search);
   let viewNumber = Number(params.get("view"));
@@ -87,7 +88,7 @@
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
               </DropdownHeader>
               <DropdownGroup class="text-white ">
-                <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
+                <DropdownItem class="hover:text-surface-400" href='/src/routes/profiles/viewProfile.html'>Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
               </DropdownGroup>
               <DropdownGroup class="text-white">
