@@ -1,15 +1,19 @@
 <script lang="ts">
   import "../../app.css";
-  import { TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, TableSearch, Button, Checkbox, ButtonGroup, List, Li, Table, Label } from 'flowbite-svelte';
-	import { Section } from 'flowbite-svelte-blocks';
-	import paginationData from './advancedTable.json';
-	import { ChevronRightOutline, ChevronLeftOutline } from 'flowbite-svelte-icons';
   import { Tabs, TabItem } from "flowbite-svelte";
-  import { Timepicker } from 'flowbite-svelte';
+
+  let params = new URLSearchParams(location.search);
+  let roomCode : string = params.get("labCode");
 
   import SeatAvailability from '../../lib/components/SeatAvailability.svelte';
   import Reservations from "../../lib/components/Reservations.svelte";
 
+
+
+  import jsonParser from "../../routes/room/advancedTableModified.json" ;
+
+
+  let labName = jsonParser.labName;
 
   let grid="w-full";
 
@@ -47,6 +51,7 @@
   import ReserveSeat from "../../lib/components/ReserveSeat.svelte";
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
+  import { getJSDocOverrideTagNoCache, type isJSDocNamepathType } from "typescript";
 
   export const images = [
     {
@@ -66,44 +71,18 @@
 
   const views = [];
 
-  let navbar = null;
-  let navbarText = null;
 
   
 
-  let viewportComponent = null;
-  let currentView = 0;
   let userName = "Kasane Teto";
   let userEmail = "kasaneteto@utau.com";
 
-  function viewHome() {
-    currentView = 0;
-
-    navbar.add();
-    updateViewportComponent();
-  }
-
-  function viewLabs() {
-    currentView = 1;
-
-    navbar.add();
-    updateViewportComponent();
-  }
-
-  function updateViewportComponent() {
-    viewportComponent = views[currentView];
-  }
-  updateViewportComponent();
-
-
-
   let selectedDate = $state<Date | undefined>(undefined);
 
-  // document.getElementById("homebutton").addEventListener("click", viewHome);
 
-  let params = new URLSearchParams(location.search);
+ 
 
-  let roomCode = params.get("labCode");
+  
 
   let qty:number = 50;
   let vx:number = -0.2;
@@ -113,40 +92,6 @@
   let divider:boolean = false;
 
 </script>
-
-<!-- <header>
-  <div id="navbar" class="text-white w-screen shadow-md">
-    <Navbar class="p-0 fixed start-0 top-0 z-20 bg-white/30 hover:bg-white/60 transition backdrop-blur-xl">
-      <NavBrand href="../../">
-        <img src="/src/assets/logolite.png" class="me-3 h-6 sm:h-9 text-surface-400 object-fill" alt="Lab Club Logo" />
-        <span id="navbarText" class="self-center text-xl font-semibold whitespace-nowrap dark:text-white text-surface-400">Lab Club!</span>
-      </NavBrand>
-      <NavHamburger class="bg-surface-400 hover:bg-surface-600"/>
-      <NavUl ulClass="items-center align-middle p-1">
-          <NavLi href="../../../index.html?view=1" class="text-surface-400" onclick={viewLabs}>Labs</NavLi>
-          <NavLi href="../../../index.html?view=2"class="text-surface-400" >Users</NavLi>
-          <NavLi href="#a" class="text-surface-400">About</NavLi>
-          <NavLi class="flex align-center">
-            <Avatar id="user-drop" src="src/assets/profilepic.jpg" class="cursor-pointer"/>
-            <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
-              <DropdownHeader>
-                <span class="block text-sm text-white">{userName}</span>
-                <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
-              </DropdownHeader>
-              <DropdownGroup class="text-white ">
-                <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
-                <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=5">Reservations</DropdownItem>
-              </DropdownGroup>
-              <DropdownGroup class="text-white">
-                <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
-                <DropdownItem class="hover:text-surface-400">Sign out</DropdownItem>
-              </DropdownGroup>
-            </Dropdown>
-          </NavLi>
-      </NavUl>
-    </Navbar>
-  </div>
-</header> -->
 
 <TempNavbar userEmail={userEmail} userName={userName} profilePicture={profilePic}/>
 
@@ -160,7 +105,7 @@
 <div class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
 
   <div class="flex items-center justify-center flex-col px-2 py-4 ">
-    <Heading tag="h1" class="">GK210 Computer Lab</Heading>
+    <Heading tag="h1" class="">{labName}</Heading>
     <div class="flex justify-center md:justify-start items-center px-5 pt-2">
       Labs <AngleRightOutline class="size-5"/> Gokongwei <AngleRightOutline class="size-5"/> 2nd Floor <AngleRightOutline class="size-5"/> Room 10
     </div>

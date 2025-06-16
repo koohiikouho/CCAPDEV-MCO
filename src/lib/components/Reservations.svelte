@@ -2,13 +2,19 @@
   import { TableSearch, ButtonGroup, Button, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell } from "flowbite-svelte";
   import { Section } from "flowbite-svelte-blocks";
   import { ChevronLeftOutline, ChevronRightOutline } from "flowbite-svelte-icons";
+
   import paginationData from '../../routes/room/advancedTable.json';
 
     let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
 	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
 	let searchClass = 'w-full relative';
 
-    const itemsPerPage = 10;
+  
+  import jsonParser from "../../routes/room/advancedTableModified.json";
+  console.log(jsonParser.labName);
+
+
+  const itemsPerPage = 10;
 	const showPage = 5;
 	let totalPages = $state(0);
 	let pagesToShow: number[] = $state([]);
