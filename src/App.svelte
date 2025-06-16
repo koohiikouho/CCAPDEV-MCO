@@ -4,6 +4,8 @@
   import Home from './routes/Home.svelte';
   import Lab from './routes/Labs.svelte';
   import Users from './routes/Users.svelte';
+  // import Labs from './routs/Labs.svelte';
+  //import Reservations from './routes/Reservations.svelte';
   import { fade, fly, slide } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
