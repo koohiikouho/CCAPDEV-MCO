@@ -4,13 +4,13 @@
   import Home from './routes/Home.svelte';
   import Lab from './routes/Labs.svelte';
   import Users from './routes/Users.svelte';
-  // import Labs from './routs/Labs.svelte';
+  import Reservations from './routes/Reservations.svelte';
   import { fade, fly, slide } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import { scrollY } from 'svelte/reactivity/window';
 
-  const views = [Home, Lab, Users];
+  const views = [Home, Lab, Users, Reservations];
 
   let params = new URLSearchParams(location.search);
   let viewNumber = Number(params.get("view"));
@@ -50,6 +50,12 @@
     updateViewportComponent();
   }
 
+  function viewReservations() {
+    currentView = 3;
+    navbar.add();
+    updateViewportComponent();
+  }
+
   function updateViewportComponent() {
     viewportComponent = views[currentView];
   }
@@ -84,7 +90,7 @@
               <DropdownGroup class="text-white ">
                 <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
                 <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
-                <DropdownItem class="hover:text-surface-400">Reservations</DropdownItem>
+                <DropdownItem class="hover:text-surface-400" onclick={viewReservations}>Reservations</DropdownItem>
               </DropdownGroup>
               <DropdownGroup class="text-white hover:text-surface-400">
                 <DropdownItem>Sign out</DropdownItem>
@@ -102,5 +108,3 @@
 	  <svelte:component this={viewportComponent}></svelte:component>
 	</div>
 {/if}
-
-
