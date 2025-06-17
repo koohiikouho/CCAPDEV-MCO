@@ -122,6 +122,14 @@
     console.log("Updated Profile:", currentUser);
     showEditModal = false;
     }
+
+    // Extract `profile` query param from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const profileParam = urlParams.get("profile");
+
+    // If profileParam is null or "0", show edit; if "1", it's another user's profile
+    let isOwnProfile = profileParam !== "1";
+    
 </script>
 
 <header>
@@ -142,7 +150,7 @@
           <span class="block truncate text-sm font-medium text-white">{currentUser.email}</span>
         </DropdownHeader>
         <DropdownGroup class="text-white">
-          <DropdownItem>Profile</DropdownItem>
+          <DropdownItem>Login</DropdownItem>
           <DropdownItem>Reservations</DropdownItem>
         </DropdownGroup>
         <DropdownGroup class="text-white">
@@ -179,9 +187,11 @@
       </div>
     </div>
 
-    <div class="flex gap-2 ml-27">
-      <Button color="primary" onclick={openEditModal}>Edit Profile</Button>
-    </div>
+    {#if isOwnProfile}
+      <div class="flex gap-2 ml-27">
+        <Button color="primary" onclick={openEditModal}>Edit Profile</Button>
+      </div>
+    {/if}
 
     <hr class="my-4 border-t border-gray-300" />
 
@@ -255,15 +265,6 @@
       <div>
         <Label for="email" class="block mb-1">Email</Label>
         <Input id="email" type="email" bind:value={currentUser.email} />
-      </div>
-
-      <div>
-        <Label for="role" class="block mb-1">Role</Label>
-        <Select id="role" bind:value={currentUser.role}>
-          <option>Student</option>
-          <option>Professor</option>
-          <option>Lab Assistant</option>
-        </Select>
       </div>
 
       <div>
