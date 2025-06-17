@@ -23,7 +23,7 @@
 
   } from "flowbite-svelte";
 
-  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline } from "flowbite-svelte-icons";
+  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
   // All users
@@ -58,7 +58,7 @@
     }
   ];
 
-    let reservations = [
+  let reservations = [
     {
       id: 1,
       labName: "GK 211 Laboratory",
@@ -67,7 +67,7 @@
       duration: "2 hours",
       purpose: "Web Development Project",
       status: "Confirmed",
-      equipmentRequested: ["Projector", "Whiteboard"]
+      seat: "C3"
     },
     {
       id: 2,
@@ -76,8 +76,8 @@
       time: "10:00 AM - 12:00 PM",
       duration: "2 hours",
       purpose: "LBYITN4 Networking Activity",
-      status: "Pending",
-      equipmentRequested: ["Crossover Cable", "Console Cable"]
+      status: "Ongoing",
+      seat: "C1"
     },
     {
       id: 3,
@@ -87,14 +87,25 @@
       duration: "2 hours",
       purpose: "CCAPDEV MC01 Presentation",
       status: "Completed",
-      equipmentRequested: ["Projector", "Laser Pointer"]
+      seat: "B5"
+    },
+    {
+      id: 4,
+      labName: "AG 1707 Laboratory",
+      date: "2024-06-18",
+      time: "3:00 PM - 8:30 PM",
+      duration: "5.5 hours",
+      purpose: "CCAPDEV MC01 Presentation",
+      status: "Cancelled",
+      seat: "A4"
     }
+
   ];
 
   function getStatusColor(status) {
     switch(status) {
       case 'Confirmed': return 'green';
-      case 'Pending': return 'yellow';
+      case 'Ongoing': return 'yellow';
       case 'Completed': return 'blue';
       case 'Cancelled': return 'red';
       default: return 'gray';
@@ -202,18 +213,12 @@
                   <UsersOutline class="w-4 h-4 text-surface-400" />
                   <span class="text-sm text-surface-600">{reservation.duration}</span>
                 </div>
+                <div class="flex items-center gap-2">
+                  <ComputerSpeakerOutline class="w-4 h-4 text-surface-400" />
+                  <span class="text-sm text-surface-600">{reservation.seat}</span>
+                </div>                
               </div>
 
-              {#if reservation.equipmentRequested.length > 0}
-              <div class="mb-4">
-              <p class="text-sm font-medium text-surface-700 mb-2 text-left">Equipment Requested:</p>
-              <div class="flex flex-wrap gap-2">
-                {#each reservation.equipmentRequested as equipment}
-                  <Badge class="text-xs bg-surface-100 text-surface-600 border border-surface-300">{equipment}</Badge>
-                {/each}
-              </div>
-            </div>
-              {/if}
             </Card>
           {/each}
         </div>

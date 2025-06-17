@@ -24,7 +24,7 @@
   import Particles from "../../lib/components/Particles.svelte";
   
 
-  let activeClass = "inline-block text-md font-medium text-center disabled:cursor-not-allowed active rounded-t-lg dark:bg-gray-800 p-4 w-auto md:w-100 text-primary-600 border-x-2 border-t-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 bg-offwhite"
+  let activeClass = "inline-block text-md font-medium text-center disabled:cursor-not-allowed active rounded-t-lg dark:bg-gray-800 p-4 w-auto md:w-70 text-primary-600 border-x-2 border-t-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 bg-offwhite"
   let inactiveClass = "inline-block text-sm font-medium text-center disabled:cursor-not-allowed rounded-t-lg hover:bg-gray-50 dark:hover:bg-gray-800 p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-surface-300 dark:text-gray-400 bg-transparent bg-offwhite/50";
 
 
@@ -39,6 +39,8 @@
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
   import BlockSeat from "../../lib/components/BlockSeat.svelte";
+  import RemoveReservationTable from "../../lib/components/RemoveReservationTable.svelte";
+  import ReservationsAdmin from "../../lib/components/ReservationsAdmin.svelte";
 
   let images = $state(
     [
@@ -128,8 +130,7 @@
         {#snippet titleSlot()}
           <span class="">Reservations</span>
         {/snippet}
-        <Reservations paginationData={labData.reservations}/>
-        
+        <ReservationsAdmin paginationData={labData.reservations}/>
       </TabItem>
     {#if userRole == "student"}
       <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
@@ -144,6 +145,12 @@
           <span>Block Seat for Student</span>
         {/snippet}
         <BlockSeat paginationData={labData.reservations}/>
+      </TabItem>
+      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
+        {#snippet titleSlot()}
+          <span>Remove Reservation</span>
+        {/snippet}
+        <RemoveReservationTable paginationData={labData.reservations}/>
       </TabItem>
 
     {/if}
