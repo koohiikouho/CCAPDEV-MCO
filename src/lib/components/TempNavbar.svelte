@@ -17,7 +17,7 @@
         <NavUl ulClass="items-center align-middle p-1">
             <NavLi href="../../../index.html?view=1" class="text-surface-400">Labs</NavLi>
             <NavLi href="../../../index.html?view=2"class="text-surface-400" >Users</NavLi>
-            <NavLi href="#a" class="text-surface-400">About</NavLi>
+            <NavLi href="../../../index.html?view=5" class="text-surface-400">Suggestions</NavLi>
             <NavLi class="flex align-center">
               <Avatar id="user-drop" src={profilePicture} class="cursor-pointer"/>
               <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
