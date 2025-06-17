@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import './app.css';
   import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, P } from "flowbite-svelte";
   import Home from './routes/Home.svelte';
@@ -7,10 +7,9 @@
   // import Labs from './routs/Labs.svelte';
   import Reservations from './routes/Reservations.svelte';
   import Profile from './routes/profiles/Profile.svelte';
-  import { fade, fly, slide } from 'svelte/transition';
+  import { fade } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
-  import { scrollY } from 'svelte/reactivity/window';
 
   const views = [Home, Lab, Users, Reservations, Profile];
 
@@ -72,6 +71,7 @@
 
   updateViewportComponent();
   
+  let isTech : number = 1;
 
 </script>
 
@@ -97,6 +97,9 @@
               <DropdownGroup class="text-white ">
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewProfile}>Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
+                {#if isTech == 1}
+                  <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="/src/routes/labTechPage/labtech.html">Lab Tech Page</DropdownItem>
+                {/if}
               </DropdownGroup>
               <DropdownGroup class="text-white">
                 <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>

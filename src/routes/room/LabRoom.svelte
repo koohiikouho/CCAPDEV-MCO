@@ -38,6 +38,7 @@
   import ReserveSeat from "../../lib/components/ReserveSeat.svelte";
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
+  import BlockSeat from "../../lib/components/BlockSeat.svelte";
 
   let images = $state(
     [
@@ -68,6 +69,8 @@
   let size:number = 50;
   let staticity:number = 100;
   let divider:boolean = false;
+
+  let userRole : string = "labTech";
 
 </script>
 
@@ -128,14 +131,22 @@
         <Reservations paginationData={labData.reservations}/>
         
       </TabItem>
-
+    {#if userRole == "student"}
       <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
         {#snippet titleSlot()}
           <span>Reserve Seat</span>
         {/snippet}
         <ReserveSeat userName={userName}/>
       </TabItem>
+    {:else if userRole == "labTech"}
+      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
+        {#snippet titleSlot()}
+          <span>Block Seat for Student</span>
+        {/snippet}
+        <BlockSeat paginationData={labData.reservations}/>
+      </TabItem>
 
+    {/if}
 
     
     </Tabs>
