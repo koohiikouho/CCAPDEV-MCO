@@ -10,7 +10,7 @@
 
 </script>
 
-<Card href="" class="min-w-60 bg-secondary-50/30 rounded-lg hover:opacity-80 hover:scale-110 hover:border-[0.5px] hover:border-secondary-600 transition-transform shadow-none duration-100 cursor-pointer hover:shadow-lg hover:shadow-secondary-200/50
+<Card href="/src/routes/profiles/viewProfile.html?profile=1" class="min-w-60 bg-secondary-50/30 rounded-lg hover:opacity-80 hover:scale-110 hover:border-[0.5px] hover:border-secondary-600 transition-transform shadow-none duration-100 cursor-pointer hover:shadow-lg hover:shadow-secondary-200/50
     backdrop-blur-md  text-start">
   <div class="flex justify-end">
   </div>
