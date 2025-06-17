@@ -17,10 +17,14 @@
     Select,
     Badge,
     Textarea,
-    Card
+    Card,
+
+    avatar
+
   } from "flowbite-svelte";
 
   import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline } from "flowbite-svelte-icons";
+  import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
   // All users
   const users = [
@@ -132,34 +136,7 @@
     
 </script>
 
-<header>
-  <Navbar class="p-0 fixed start-0 top-0 z-20 bg-white/30 hover:bg-surface-50/60 transition backdrop-blur-xl shadow-md">
-    <NavBrand href="/">
-      <img src="/src/assets/logolite.png" class="me-3 h-6 sm:h-9 object-fill" alt="Lab Club Logo" />
-      <span class="self-center text-xl font-semibold whitespace-nowrap text-surface-400">Lab Club!</span>
-    </NavBrand>
-    <NavHamburger />
-    <NavUl>
-      <NavLi href="/index.html?view=1" class="text-surface-400">Labs</NavLi>
-      <NavLi href="/index.html?view=2" class="text-surface-400">Users</NavLi>
-      <NavLi href="#" class="text-surface-400">About</NavLi>
-      <Avatar id="user-drop" src={getAvatar(currentUser.avatar)} class="cursor-pointer ml-5" />
-      <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-200">
-        <DropdownHeader>
-          <span class="block text-sm text-white">{currentUser.name}</span>
-          <span class="block truncate text-sm font-medium text-white">{currentUser.email}</span>
-        </DropdownHeader>
-        <DropdownGroup class="text-white">
-          <DropdownItem>Login</DropdownItem>
-          <DropdownItem>Reservations</DropdownItem>
-        </DropdownGroup>
-        <DropdownGroup class="text-white">
-          <DropdownItem>Sign out</DropdownItem>
-        </DropdownGroup>
-      </Dropdown>
-    </NavUl>
-  </Navbar>
-</header>
+<TempNavbar userName={currentUser.name} userEmail={currentUser.email} profilePicture={currentUser.avatar}/>
 
 <main class="mt-28 p-10 sm:p-20 bg-primary-50 min-h-screen text-surface-800">
   <div class="grid grid-cols-1 gap-10 max-w-6xl mx-auto bg-white p-10 rounded-xl shadow-2xl">
