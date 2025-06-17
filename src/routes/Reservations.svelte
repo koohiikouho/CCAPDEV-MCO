@@ -1,7 +1,7 @@
 <script>
   import { Card, Button, Badge, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
   // Using correct flowbite-svelte-icons imports
-  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline } from "flowbite-svelte-icons";
+  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
 
   // Sample reservation data - replace with actual data from your backend
   let reservations = [
@@ -13,7 +13,7 @@
       duration: "2 hours",
       purpose: "Web Development Project",
       status: "Confirmed",
-      equipmentRequested: ["Projector", "Whiteboard"]
+      seat: "C3"
     },
     {
       id: 2,
@@ -23,7 +23,7 @@
       duration: "2 hours",
       purpose: "LBYITN4 Networking Activity",
       status: "Ongoing",
-      equipmentRequested: ["Crossover Cable", "Console Cable"]
+      seat: "C1"
     },
     {
       id: 3,
@@ -33,7 +33,7 @@
       duration: "2 hours",
       purpose: "CCAPDEV MC01 Presentation",
       status: "Completed",
-      equipmentRequested: ["Projector", "Laser Pointer"]
+      seat: "B5"
     },
     {
       id: 4,
@@ -43,7 +43,7 @@
       duration: "5.5 hours",
       purpose: "CCAPDEV MC01 Presentation",
       status: "Cancelled",
-      equipmentRequested: ["Projector", "Laser Pointer"]
+      seat: "A4"
     }
 
   ];
@@ -102,6 +102,10 @@
             <div class="flex items-center gap-2">
               <UsersOutline class="w-4 h-4 text-surface-400" />
               <span class="text-sm text-surface-600">{reservation.duration}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ComputerSpeakerOutline class="w-4 h-4 text-surface-400" />
+              <span class="text-sm text-surface-600">{reservation.seat}</span>
             </div>
           </div>
 
