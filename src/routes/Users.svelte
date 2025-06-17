@@ -30,7 +30,7 @@
       name: "Cochise King",
       email: "cochise_king@dlsu.edu.ph",
       avatar: "",
-      role: "Professor"
+      role: "Student"
     },
     {
       id: 5,
