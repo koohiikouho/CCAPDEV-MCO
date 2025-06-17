@@ -130,9 +130,14 @@
         {#snippet titleSlot()}
           <span class="">Reservations</span>
         {/snippet}
-        <ReservationsAdmin paginationData={labData.reservations}/>
+        {#if userRole == "student"}
+          <Reservations paginationData={labData.reservations}/>
+        {:else if userRole == "labTech"}
+          <ReservationsAdmin paginationData={labData.reservations}/>
+        {/if}
+        
       </TabItem>
-    {#if userRole == "student"}
+      {#if userRole == "student"}
       <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
         {#snippet titleSlot()}
           <span>Reserve Seat</span>

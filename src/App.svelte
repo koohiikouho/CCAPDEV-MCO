@@ -142,5 +142,5 @@
 {/if}
 
 <Footer class="bg-primary-300/20 text-center">
-  <FooterCopyright href="/" by="" year="Made with ❤️ by Group 1" copyrightMessage=""/>
+  <FooterCopyright href="/" by="Made with ❤️ by Group 1" copyrightMessage=""/>
 </Footer>

@@ -2,10 +2,11 @@
   import { Card, Button, Input, Label, Hr} from "flowbite-svelte";
   import { ArrowRightOutline, ComputerSpeakerOutline, SearchOutline } from "flowbite-svelte-icons";
   import LabCard from "../lib/components/LabCard.svelte";
-  import { slide } from "svelte/transition";
+  import { fly, slide } from "svelte/transition";
   import Particles from "../lib/components/Particles.svelte";
   import { flip } from "svelte/animate";
   import Search from "../lib/components/Search.svelte";
+  import { cubicOut } from "svelte/easing";
 
   let labCardsData = [
     {
@@ -56,6 +57,10 @@
     let size:number = 100;
     let staticity:number = 100;
 
+    let value = $state("");
+    let currentPageItems = $derived(labCardsData);
+    let filteredItems = $derived(labCardsData.filter((item) => item.labName.concat(item.labName).toLowerCase().indexOf(value.toLowerCase()) !== -1));
+
 </script>
 
 <div class="-z-10">
@@ -75,7 +80,7 @@
         <div class="flex items-end">
           <ComputerSpeakerOutline class="w-15 h-15 mr-5"/>Labs 
         </div> 
-        <Input id="default-input" placeholder="Search Lab" class="pl-8 h-12" divClass="px-9 w-100">
+        <Input id="default-input" placeholder="Search Labs" class="pl-8 h-12" divClass="px-9 w-100" bind:value>
         {#snippet left()}
           <SearchOutline class="h-5 w-5 ml-8 text-gray-500 dark:text-gray-400" />
         {/snippet}
@@ -84,13 +89,15 @@
 
       <!-- <Hr class="bg-primary-300/70 " innerDivClass="bg-tertiary-50/50" divClass="px-10"> stuff goes here</Hr> -->
       <div class="flex justify-center pt-10 gap-y-10 gap-x-7 flex-wrap">
-        {#each labCardsData as labCardsData}
+        {#each filteredItems as labCardsData, index}
+          <div in:fly|global={{ y: 50, duration: index*100, delay: 100, easing: cubicOut }}>
             <LabCard
             labName={labCardsData.labName}
             labDesc={labCardsData.labDesc}
             thumbnail={labCardsData.thumbnail}
             labCode={labCardsData.labCode}
             />
+          </div>
         {/each}
       </div>
     </div>

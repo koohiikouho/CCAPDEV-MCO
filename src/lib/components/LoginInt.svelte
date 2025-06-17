@@ -2,12 +2,14 @@
 	import { Section, Register } from 'flowbite-svelte-blocks';
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
 
-	let result = $state(false);
-	let value : string = $state();
-	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
+
 
 	import {Modal, P } from "flowbite-svelte";
 	let defaultModal = $state(false);
+
+	let result = $state(false);
+	let value : string = $state();
+	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 
 	function dlsuCheck(){
 		result = regex.test(value);

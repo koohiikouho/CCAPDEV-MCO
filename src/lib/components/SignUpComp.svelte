@@ -1,6 +1,16 @@
 <script lang="ts">
 	import { Section, Register } from 'flowbite-svelte-blocks';
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
+
+	let result = $state(false);
+	let checked = $state(false);
+	let value : string = $state();
+	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
+
+	function dlsuCheck(){
+		result = regex.test(value);
+	}
+	
 </script>
 
 <Section name="register" class="pt-20">
@@ -13,7 +23,7 @@
 				</div>
 				<Label class="space-y-2">
 					<span>Your email</span>
-					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" required />
+					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" bind:value onInput={dlsuCheck} required />
 				</Label>
 				<Label class="space-y-2">
 					<span>Your password</span>
@@ -24,10 +34,15 @@
 					<Input type="password" name="confirm-password" placeholder="•••••" required />
 				</Label>
 				<div class="flex items-start">
-					<Checkbox>I accept the <a class="text-primary-600 dark:text-primary-500 font-medium hover:underline" href="/"> Terms and Conditions</a></Checkbox>
+					<Checkbox bind:checked>I accept the&nbsp;<a class="text-primary-600 dark:text-primary-500 font-medium hover:underline" href="/"> Terms and Conditions</a></Checkbox>
 				</div>
+				{#if result && checked}
 				<Button type="submit" class="text-white bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 hover:bg-gradient-to-br 
                 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor">Create an account</Button>
+				{:else}
+				<Button type="submit" class="text-white bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 hover:bg-gradient-to-br 
+                focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor" disabled>Create an account</Button>
+				{/if}
 				<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
 					Already have an account? <a href="/src/routes/login/login.html" class="text-primary-600 dark:text-primary-500 font-medium hover:underline">Login here</a>
 				</div>
