@@ -22,6 +22,7 @@
   let currentView = 0;
   let userName = "Kasane Teto";
   let userEmail = "kasaneteto@utau.com"
+  let profilePicture = "/src/assets/profilepic.jpg";
 
   function changeViewOnLoad(){
     if (viewNumber == 0){
@@ -73,6 +74,20 @@
   
   let isTech : number = 1;
 
+
+  let isLoggedIn: boolean = false;
+  isLoggedIn = Boolean(params.get("signedIn"));
+
+  function signOut(){
+    isLoggedIn = false;
+    userName = "Guest";
+    userEmail = "Sign in to reserve";
+    profilePicture= "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg";
+  }
+  
+  // if(isLoggedIn == false)
+  //   signOut();
+
 </script>
 
 <header>
@@ -88,7 +103,7 @@
           <NavLi href="#a" class="text-surface-400" onclick={viewUsers}>Users</NavLi>
           <NavLi href="#a" class="text-surface-400">About</NavLi>
           <NavLi class="flex align-center">
-            <Avatar id="user-drop" src="https://media.discordapp.net/attachments/1369208787042304020/1382885082166988963/profilepic.jpg?ex=685164d8&is=68501358&hm=dd17b84d99e98cf02b8aa8f65c66507b5e40440a84b3a07e13d21dcf5398ddcb&=&format=webp&width=1008&height=1008" class="cursor-pointer"/>
+            <Avatar id="user-drop" src={profilePicture} class="cursor-pointer"/>
             <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
               <DropdownHeader>
                 <span class="block text-sm text-white">{userName}</span>
@@ -99,8 +114,12 @@
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
               </DropdownGroup>
               <DropdownGroup class="text-white">
-                <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
-                <DropdownItem class="hover:text-surface-400">Sign out</DropdownItem>
+
+              {#if isLoggedIn}
+                <DropdownItem class="hover:text-surface-400 text-center w-full cursor-pointer" onclick={signOut}>Sign out</DropdownItem>
+              {:else}
+                <DropdownItem class="hover:text-surface-400 text-center w-full cursor-pointer" href='/src/routes/login/login.html'>Login</DropdownItem>
+              {/if}
               </DropdownGroup>
             </Dropdown>
           </NavLi>

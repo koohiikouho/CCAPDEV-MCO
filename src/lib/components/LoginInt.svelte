@@ -45,7 +45,7 @@
 				</Modal>
 
 				{#if result}
-				<Button type="submit" class="text-white bg-gradient-to-r from-success-500 via-success-600 to-success-700 hover:bg-gradient-to-br 
+				<Button type="submit" href="../../../index.html?signedIn=1"class="text-white bg-gradient-to-r from-success-500 via-success-600 to-success-700 hover:bg-gradient-to-br 
                 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor">Sign in</Button>
 				{:else}
 				<Button type="submit" class="text-white bg-gradient-to-r from-error-200 via-error-300 to-error-400 hover:bg-gradient-to-br 
