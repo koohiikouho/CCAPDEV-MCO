@@ -15,7 +15,11 @@
     return data;
   }
 
-
+  const getCarouselData = async () => {
+    const res = await fetch('./advancedTableModified'.concat(roomCode).concat('.json'));
+    const data = await res.json();
+    images = data.images;
+  }
   
   import Particles from "../../lib/components/Particles.svelte";
   
@@ -25,17 +29,7 @@
 
 
   import {
-    Navbar,
-    NavBrand,
-    NavLi,
-    NavUl,
-    NavHamburger,
-    P,
-    ControlButton,
-    Controls,
-    Hr,
     Heading,
-    A
   } from "flowbite-svelte";
   // import Labs from './routs/Labs.svelte';
 
@@ -45,7 +39,8 @@
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
-  const images = [
+  let images = $state(
+    [
     {
       alt: "image1",
       src: "https://www.dlsu.edu.ph/wp-content/uploads/2022/02/eml-1.jpg",
@@ -56,8 +51,9 @@
       src: "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-7.jpg",
       title: "comlab1",
     },
-  ];
+  ]);
 
+  getCarouselData();
   let profilePic =
     "https://media.discordapp.net/attachments/1369208787042304020/1382885082166988963/profilepic.jpg?ex=684cc798&is=684b7618&hm=f49d3cb733fa975b82484a2b7cf1f49308ad5db839b5439c8d00fa4a96ce8b4d&=&format=webp&width=792&height=792";
 
