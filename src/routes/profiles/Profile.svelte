@@ -289,9 +289,14 @@
       </div>
     </div>
 
-    <div class="flex justify-end gap-2 pt-4">
-      <Button color="gray" onclick={() => (showEditModal = false)}>Cancel</Button>
-      <Button color="primary" onclick={saveProfile}>Save</Button>
+    <div class="flex-row-reverse flex justify-between">
+      <div class="flex justify-end gap-2 pt-4">
+        <Button color="gray" onclick={() => (showEditModal = false)}>Cancel</Button>
+        <Button color="primary" onclick={saveProfile}>Save</Button>
+      </div>
+      <div class="flex justify-start gap-2 pt-4">
+        <Button color="red" onclick={saveProfile}>Delete Profile</Button>
+      </div>
     </div>
   </div>
 </Modal>
