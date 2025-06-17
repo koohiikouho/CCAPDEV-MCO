@@ -22,7 +22,7 @@
       time: "10:00 AM - 12:00 PM",
       duration: "2 hours",
       purpose: "LBYITN4 Networking Activity",
-      status: "Pending",
+      status: "Ongoing",
       equipmentRequested: ["Crossover Cable", "Console Cable"]
     },
     {
@@ -34,13 +34,24 @@
       purpose: "CCAPDEV MC01 Presentation",
       status: "Completed",
       equipmentRequested: ["Projector", "Laser Pointer"]
+    },
+    {
+      id: 4,
+      labName: "AG 1707 Laboratory",
+      date: "2024-06-18",
+      time: "3:00 PM - 8:30 PM",
+      duration: "5.5 hours",
+      purpose: "CCAPDEV MC01 Presentation",
+      status: "Cancelled",
+      equipmentRequested: ["Projector", "Laser Pointer"]
     }
+
   ];
 
   function getStatusColor(status) {
     switch(status) {
       case 'Confirmed': return 'green';
-      case 'Pending': return 'yellow';
+      case 'Ongoing': return 'yellow';
       case 'Completed': return 'blue';
       case 'Cancelled': return 'red';
       default: return 'gray';
@@ -138,9 +149,9 @@
       </Card>
       <Card class="text-center border border-surface-200 bg-warning-50">
         <h4 class="text-2xl font-bold text-warning-700">
-          {reservations.filter(r => r.status === 'Pending').length}
+          {reservations.filter(r => r.status === 'Ongoing').length}
         </h4>
-        <p class="text-sm text-warning-600">Pending</p>
+        <p class="text-sm text-warning-600">Current</p>
       </Card>
       <Card class="text-center border border-surface-200 bg-secondary-50">
         <h4 class="text-2xl font-bold text-secondary-700">

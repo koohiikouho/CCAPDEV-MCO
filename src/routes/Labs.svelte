@@ -9,13 +9,6 @@
 
   let labCardsData = [
     {
-        labName: "GK 211 Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        labCode: 2
-    },
-
-    {
         labName: "GK 210 Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
@@ -24,18 +17,27 @@
     },
 
     {
+        labName: "GK 211 Laboratory",
+        labDesc:
+            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
+        labCode: 2
+    },
+
+    {
         labName: "GK 403 Network Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
         thumbnail: "/src/assets/comlabs/comlab1.jpg",
+        labCode: 3
     },
 
     {
-        labName: "GK 210 Laboratory",
+        labName: "GK 301A Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
         thumbnail:
-            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-8.jpg"
+            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-8.jpg",
+        labCode: 4
     },
 
     {
@@ -43,7 +45,8 @@
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
         thumbnail:
-            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-2-1024x768.jpg"
+            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-2-1024x768.jpg",
+        labCode: 5
     },
   ];
 

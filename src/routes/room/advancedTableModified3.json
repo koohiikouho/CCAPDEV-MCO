@@ -1,0 +1,208 @@
+{
+  "labName": "GK 403 Network Laboratory",
+  "labLocation": {
+    "building": "Gokongwei",
+    "floor": "4th",
+    "room": 3
+  },
+  "labDescription": "A collaborative lab space featuring dual-monitor setups, version control integration, and agile development boards. Ideal for group software projects, code sprints, and continuous deployment pipelines.",
+  "images": [
+    {
+      "alt": "entrance",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgWBx5ofhOKhVNoQsCbCmLRoVCKPaIbZCrhA&s",
+      "title": "innovation-hub-entrance"
+    },
+    {
+      "alt": "entrance",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTECupuwK7mWNpp43UUqj419M4u5Gh4WTAdGQ&s",
+      "title": "innovation-hub-entrance"
+    },
+    {
+      "alt": "interior workspace",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSB_-nfHBrLiDOLeCNFGxkWqAW9AX3p2Rs7qenVh2Q5AgypxFooWp5PCPyWl0eiVKPJoeo&usqp=CAU",
+      "title": "innovation-hub-workstations"
+    }
+  ],
+  "reservations": [
+    {
+      "id": 1,
+      "student_name": "Tokino Sora",
+      "time_in": "0815",
+      "time_out": "1015",
+      "date": "2025-06-30",
+      "seat_col": "A",
+      "seat_row": "1"
+    },
+    {
+      "id": 2,
+      "student_name": "Shirakami Fubuki",
+      "time_in": "1030",
+      "time_out": "1230",
+      "date": "2025-06-30",
+      "seat_col": "B",
+      "seat_row": "2"
+    },
+    {
+      "id": 3,
+      "student_name": "Natsuiro Matsuri",
+      "time_in": "1330",
+      "time_out": "1530",
+      "date": "2025-07-01",
+      "seat_col": "C",
+      "seat_row": "3"
+    },
+    {
+      "id": 4,
+      "student_name": "Yozora Mel",
+      "time_in": "1430",
+      "time_out": "1630",
+      "date": "2025-07-01",
+      "seat_col": "D",
+      "seat_row": "4"
+    },
+    {
+      "id": 5,
+      "student_name": "Aki Rosenthal",
+      "time_in": "0900",
+      "time_out": "1100",
+      "date": "2025-07-02",
+      "seat_col": "E",
+      "seat_row": "2"
+    },
+    {
+      "id": 6,
+      "student_name": "Akai Haato",
+      "time_in": "1200",
+      "time_out": "1400",
+      "date": "2025-07-02",
+      "seat_col": "F",
+      "seat_row": "5"
+    },
+    {
+      "id": 7,
+      "student_name": "Yuzuki Choco",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-03",
+      "seat_col": "A",
+      "seat_row": "4"
+    },
+    {
+      "id": 8,
+      "student_name": "Murasaki Shion",
+      "time_in": "1300",
+      "time_out": "1500",
+      "date": "2025-07-03",
+      "seat_col": "B",
+      "seat_row": "3"
+    },
+    {
+      "id": 9,
+      "student_name": "Nakiri Ayame",
+      "time_in": "0830",
+      "time_out": "1030",
+      "date": "2025-07-04",
+      "seat_col": "C",
+      "seat_row": "1"
+    },
+    {
+      "id": 10,
+      "student_name": "Minato Aqua",
+      "time_in": "1130",
+      "time_out": "1330",
+      "date": "2025-07-04",
+      "seat_col": "D",
+      "seat_row": "2"
+    },
+    {
+      "id": 11,
+      "student_name": "Hoshimachi Suisei",
+      "time_in": "0900",
+      "time_out": "1100",
+      "date": "2025-07-05",
+      "seat_col": "E",
+      "seat_row": "4"
+    },
+    {
+      "id": 12,
+      "student_name": "Sakura Miko",
+      "time_in": "1430",
+      "time_out": "1630",
+      "date": "2025-07-05",
+      "seat_col": "F",
+      "seat_row": "1"
+    },
+    {
+      "id": 13,
+      "student_name": "Ookami Mio",
+      "time_in": "0730",
+      "time_out": "0930",
+      "date": "2025-07-06",
+      "seat_col": "A",
+      "seat_row": "5"
+    },
+    {
+      "id": 14,
+      "student_name": "Nekomata Okayu",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-06",
+      "seat_col": "B",
+      "seat_row": "4"
+    },
+    {
+      "id": 15,
+      "student_name": "Inugami Korone",
+      "time_in": "1230",
+      "time_out": "1430",
+      "date": "2025-07-07",
+      "seat_col": "C",
+      "seat_row": "2"
+    },
+    {
+      "id": 16,
+      "student_name": "Amane Kanata",
+      "time_in": "1330",
+      "time_out": "1530",
+      "date": "2025-07-07",
+      "seat_col": "D",
+      "seat_row": "5"
+    },
+    {
+      "id": 17,
+      "student_name": "Tsunomaki Watame",
+      "time_in": "0930",
+      "time_out": "1130",
+      "date": "2025-07-08",
+      "seat_col": "E",
+      "seat_row": "3"
+    },
+    {
+      "id": 18,
+      "student_name": "Kiryu Coco",
+      "time_in": "1100",
+      "time_out": "1300",
+      "date": "2025-07-08",
+      "seat_col": "F",
+      "seat_row": "2"
+    },
+    {
+      "id": 19,
+      "student_name": "Shiranui Flare",
+      "time_in": "0800",
+      "time_out": "1000",
+      "date": "2025-07-09",
+      "seat_col": "A",
+      "seat_row": "2"
+    },
+    {
+      "id": 20,
+      "student_name": "Shirogane Noel",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-09",
+      "seat_col": "B",
+      "seat_row": "1"
+    }
+  ]
+}

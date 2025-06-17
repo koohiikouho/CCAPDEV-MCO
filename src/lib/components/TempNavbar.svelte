@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Avatar, Dropdown, DropdownGroup, DropdownHeader, DropdownItem, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from "flowbite-svelte";
 
-    let {userName = "guest", userEmail = "", profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg"} = $props();
+    let {userName = "Guest", userEmail = "Log in to reserve", profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg"} = $props();
 </script>
 
 

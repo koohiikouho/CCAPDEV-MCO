@@ -138,7 +138,7 @@
 
 <TempNavbar userName={currentUser.name} userEmail={currentUser.email} profilePicture={currentUser.avatar}/>
 
-<main class="mt-28 p-10 sm:p-20 bg-primary-50 min-h-screen text-surface-800">
+<main class="mt-10 p-10 sm:p-20 bg-primary-50 min-h-screen text-surface-800">
   <div class="grid grid-cols-1 gap-10 max-w-6xl mx-auto bg-white p-10 rounded-xl shadow-2xl">
     
   <!-- Profile Section -->

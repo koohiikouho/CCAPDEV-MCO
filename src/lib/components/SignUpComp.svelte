@@ -3,12 +3,12 @@
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
 </script>
 
-<Section name="register" class="pt-40">
+<Section name="register" class="pt-20">
 	<Register class="max-w-md mx-auto">
-		<div class="space-y-4 p-6 sm:p-8 md:space-y-6">
+		<div class="space-y-4 p-6 sm:p-8 md:space-y-6 outline-2 rounded-2xl outline-secondary-700">
 			<form class="flex flex-col space-y-6" action="/">
-				<div class="flex items-center justify-center space-x-2">
-					<img class="h-8 w-8" src="/src/assets/logo.png" alt="logo" />
+				<div class="flex items-center flex-col justify-center space-x-2">
+					<img class="h-50 w-auto" src="/src/assets/logo.png" alt="logo" />
 					<h3 class="p-0 text-xl font-medium text-gray-900 dark:text-white">Create account</h3>
 				</div>
 				<Label class="space-y-2">

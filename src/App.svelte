@@ -97,9 +97,6 @@
               <DropdownGroup class="text-white ">
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewProfile}>Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
-                {#if isTech == 1}
-                  <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="/src/routes/labTechPage/labtech.html">Lab Tech Page</DropdownItem>
-                {/if}
               </DropdownGroup>
               <DropdownGroup class="text-white">
                 <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
