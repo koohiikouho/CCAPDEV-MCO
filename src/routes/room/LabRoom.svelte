@@ -9,14 +9,14 @@
   import Reservations from "../../lib/components/Reservations.svelte";
 
 
+  const getLabData = async () => {
+    const res = await fetch('./advancedTableModified'.concat(roomCode).concat('.json'));
+    const data = await res.json();
+    return data;
+  }
 
-  import jsonParser from "../../routes/room/advancedTableModified.json" ;
 
-
-  let labName = jsonParser.labName;
-
-  let grid="w-full";
-
+  
   import Particles from "../../lib/components/Particles.svelte";
   
 
@@ -38,22 +38,14 @@
     A
   } from "flowbite-svelte";
   // import Labs from './routs/Labs.svelte';
-  import {
-    Avatar,
-    Dropdown,
-    DropdownHeader,
-    DropdownItem,
-    DropdownGroup,
-  } from "flowbite-svelte";
 
   import { Carousel, Indicators } from "flowbite-svelte";
   import { AngleRightOutline, ArrowLeftOutline } from "flowbite-svelte-icons";
   import ReserveSeat from "../../lib/components/ReserveSeat.svelte";
   import DateAvailable from "../../lib/components/DateAvailable.svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
-  import { getJSDocOverrideTagNoCache, type isJSDocNamepathType } from "typescript";
 
-  export const images = [
+  const images = [
     {
       alt: "image1",
       src: "https://www.dlsu.edu.ph/wp-content/uploads/2022/02/eml-1.jpg",
@@ -69,20 +61,10 @@
   let profilePic =
     "https://media.discordapp.net/attachments/1369208787042304020/1382885082166988963/profilepic.jpg?ex=684cc798&is=684b7618&hm=f49d3cb733fa975b82484a2b7cf1f49308ad5db839b5439c8d00fa4a96ce8b4d&=&format=webp&width=792&height=792";
 
-  const views = [];
-
-
   
 
   let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@utau.com";
-
-  let selectedDate = $state<Date | undefined>(undefined);
-
-
- 
-
-  
+  let userEmail = "kasaneteto@utau.com";  
 
   let qty:number = 50;
   let vx:number = -0.2;
@@ -95,6 +77,7 @@
 
 <TempNavbar userEmail={userEmail} userName={userName} profilePicture={profilePic}/>
 
+{#await getLabData() then labData}
 
 <div class="relative z-10 px-auto md:px-60 ">
 
@@ -105,13 +88,14 @@
 <div class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
 
   <div class="flex items-center justify-center flex-col px-2 py-4 ">
-    <Heading tag="h1" class="">{labName}</Heading>
+
+    <Heading tag="h1" class="">{labData.labName}</Heading>
     <div class="flex justify-center md:justify-start items-center px-5 pt-2">
-      Labs <AngleRightOutline class="size-5"/> Gokongwei <AngleRightOutline class="size-5"/> 2nd Floor <AngleRightOutline class="size-5"/> Room 10
+      Labs <AngleRightOutline class="size-5"/> {labData.labLocation.building} <AngleRightOutline class="size-5"/> {labData.labLocation.floor} Floor <AngleRightOutline class="size-5"/> Room {labData.labLocation.room}
     </div>
     <div class="flex justify-center md:justify-start text-start items-center px-13 md:px-20 py-5 ">
       <div class="bg-secondary-50/30 px-3 md:px-3 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed text-surface-500">
-        "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!"
+        {labData.labDescription}
       </div>
     </div>
     <div class="flex justify-center md:justify-start items-center px-5 pt-5 w-auto">
@@ -119,7 +103,7 @@
         <DateAvailable />
       </div>
     </div>
-
+    
   </div>
   <div class="py-5 mx-2 order-first">
     <Carousel {images} duration={5000} class="w-auto" imgClass="rounded-xl">
@@ -145,8 +129,7 @@
         {#snippet titleSlot()}
           <span class="">Reservations</span>
         {/snippet}
-        
-        <Reservations/>
+        <Reservations paginationData={labData.reservations}/>
         
       </TabItem>
 
@@ -174,3 +157,4 @@
 <div class="mt-10"></div>
 
 <footer>Hello</footer>
+{/await}

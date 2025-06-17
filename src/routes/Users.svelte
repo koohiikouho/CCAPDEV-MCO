@@ -9,7 +9,6 @@
       id: 1,
       name: "Ron Alonzo",
       email: "ron_alonzo@dlsu.edu.ph",
-      avatar: "src/assets/profilepic.jpg",
       role: "Student"
     },
     {
@@ -33,25 +32,33 @@
       avatar: "",
       role: "Professor"
     },
+    {
+      id: 5,
+      name: "Kasane Teto",
+      email: "kasaneteto@utau.com",
+      avatar: "src/assets/profilepic.jpg",
+      role: "Lab Technician"
+    }
   ];
 
-  let qty: number = 10;
-  let vx: number = 0.1;
-  let vy: number = 0.2;
-  let size: number = 100;
-  let staticity: number = 100;
+  let qty: number = 35;
+  let vx: number = -1;
+  let vy: number = 1;
+  let size: number = 50;
+  let staticity: number = 20;
+  let color: string = "#bad6e9";  
   let searchTerm = "";
 </script>
 
 <div class="-z-10">
-  <Particles className="absolute inset-0" refresh={true} color="#ec8397" staticity={staticity} quantity={qty}
+  <Particles className="absolute inset-0" refresh={true} color={color} staticity={staticity} quantity={qty}
   size={size} vx={vx} vy={vy}/>
 </div>
 
 <div class="flex flex-row min-h-screen justify-center items-center bg-offwhite">
-  <div class="h-auto w-screen md:w-400 bg-opacity-0 z-10">
+  <div class="h-auto w-screen md:w-300 bg-opacity-0 z-10">
     
-    <div class="py-10 bg-tertiary-50/50 backdrop-blur-sm rounded-md border-2 border-dashed border-secondary-50/60">
+    <div class="py-10 bg-tertiary-50/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-secondary-50/60">
       <h1 class="text-surface-500 text-center text-2xl font-bold mb-4">Users</h1>
 
       <!-- Search Bar -->

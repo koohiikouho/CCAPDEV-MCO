@@ -12,13 +12,15 @@
         labName: "GK 211 Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
+        labCode: 2
     },
 
     {
         labName: "GK 210 Laboratory",
         labDesc:
             "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail: "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-16.jpg"
+        thumbnail: "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-16.jpg",
+        labCode: 1
     },
 
     {
@@ -84,6 +86,7 @@
             labName={labCardsData.labName}
             labDesc={labCardsData.labDesc}
             thumbnail={labCardsData.thumbnail}
+            labCode={labCardsData.labCode}
             />
         {/each}
       </div>

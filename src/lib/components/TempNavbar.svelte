@@ -27,7 +27,7 @@
                 </DropdownHeader>
                 <DropdownGroup class="text-white ">
                   <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
-                  <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=5">Reservations</DropdownItem>
+                  <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=3">Reservations</DropdownItem>
                 </DropdownGroup>
                 <DropdownGroup class="text-white">
                   <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>

@@ -94,7 +94,7 @@
             </div>
           </div>
 
-          {#if reservation.equipmentRequested.length > 0}
+          <!-- {#if reservation.equipmentRequested.length > 0}
             <div class="mb-4">
               <p class="text-sm font-medium text-surface-700 mb-2 text-left">Equipment Requested:</p>
               <div class="flex flex-wrap gap-2">
@@ -103,7 +103,7 @@
                 {/each}
               </div>
             </div>
-          {/if}
+          {/if} -->
 
           {#if reservation.status === 'Confirmed' || reservation.status === 'Pending'}
             <div class="flex gap-2 pt-2 border-t border-surface-200">

@@ -1,0 +1,203 @@
+{
+  "labName": "GK211",
+  "labLocation": {
+    "building": "Gokongwei",
+    "floor": "2",
+    "room": 11
+  },
+  "labDescription": "A newly renovated digital lab equipped with high-performance workstations, ergonomic chairs, and immersive sound. Ideal for creative and collaborative projects.",
+  "images": [
+    {
+      "alt": "entrance",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Contemporary_Computer_Lab.jpg",
+      "title": "lab-entrance"
+    },
+    {
+      "alt": "workstations",
+      "src": "https://www.iq.harvard.edu/sites/projects.iq.harvard.edu/files/styles/os_files_xlarge/public/harvard-iqss/files/img_0338_1.jpeg?m=1585925115&itok=VVBAgLJU",
+      "title": "lab-workstations"
+    }
+  ],
+  "reservations": [
+    {
+      "id": 1,
+      "student_name": "Chika Takami",
+      "time_in": "0815",
+      "time_out": "1015",
+      "date": "2025-06-30",
+      "seat_col": "A",
+      "seat_row": "1"
+    },
+    {
+      "id": 2,
+      "student_name": "You Watanabe",
+      "time_in": "1030",
+      "time_out": "1230",
+      "date": "2025-06-30",
+      "seat_col": "B",
+      "seat_row": "2"
+    },
+    {
+      "id": 3,
+      "student_name": "Riko Sakurauchi",
+      "time_in": "1330",
+      "time_out": "1530",
+      "date": "2025-07-01",
+      "seat_col": "C",
+      "seat_row": "3"
+    },
+    {
+      "id": 4,
+      "student_name": "Dia Kurosawa",
+      "time_in": "1430",
+      "time_out": "1630",
+      "date": "2025-07-01",
+      "seat_col": "D",
+      "seat_row": "4"
+    },
+    {
+      "id": 5,
+      "student_name": "Kanan Matsuura",
+      "time_in": "0900",
+      "time_out": "1100",
+      "date": "2025-07-02",
+      "seat_col": "E",
+      "seat_row": "2"
+    },
+    {
+      "id": 6,
+      "student_name": "Mari Ohara",
+      "time_in": "1200",
+      "time_out": "1400",
+      "date": "2025-07-02",
+      "seat_col": "F",
+      "seat_row": "5"
+    },
+    {
+      "id": 7,
+      "student_name": "Yoshiko Tsushima",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-03",
+      "seat_col": "A",
+      "seat_row": "4"
+    },
+    {
+      "id": 8,
+      "student_name": "Hanamaru Kunikida",
+      "time_in": "1300",
+      "time_out": "1500",
+      "date": "2025-07-03",
+      "seat_col": "B",
+      "seat_row": "3"
+    },
+    {
+      "id": 9,
+      "student_name": "Ruby Kurosawa",
+      "time_in": "0830",
+      "time_out": "1030",
+      "date": "2025-07-04",
+      "seat_col": "C",
+      "seat_row": "1"
+    },
+    {
+      "id": 10,
+      "student_name": "Shizuku Osaka",
+      "time_in": "1130",
+      "time_out": "1330",
+      "date": "2025-07-04",
+      "seat_col": "D",
+      "seat_row": "2"
+    },
+    {
+      "id": 11,
+      "student_name": "Karin Asaka",
+      "time_in": "0900",
+      "time_out": "1100",
+      "date": "2025-07-05",
+      "seat_col": "E",
+      "seat_row": "4"
+    },
+    {
+      "id": 12,
+      "student_name": "Ai Miyashita",
+      "time_in": "1430",
+      "time_out": "1630",
+      "date": "2025-07-05",
+      "seat_col": "F",
+      "seat_row": "1"
+    },
+    {
+      "id": 13,
+      "student_name": "Kanata Konoe",
+      "time_in": "0730",
+      "time_out": "0930",
+      "date": "2025-07-06",
+      "seat_col": "A",
+      "seat_row": "5"
+    },
+    {
+      "id": 14,
+      "student_name": "Rina Tennoji",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-06",
+      "seat_col": "B",
+      "seat_row": "4"
+    },
+    {
+      "id": 15,
+      "student_name": "Setsuna Yuki",
+      "time_in": "1230",
+      "time_out": "1430",
+      "date": "2025-07-07",
+      "seat_col": "C",
+      "seat_row": "2"
+    },
+    {
+      "id": 16,
+      "student_name": "Ayumu Uehara",
+      "time_in": "1330",
+      "time_out": "1530",
+      "date": "2025-07-07",
+      "seat_col": "D",
+      "seat_row": "5"
+    },
+    {
+      "id": 17,
+      "student_name": "Kasumi Nakasu",
+      "time_in": "0930",
+      "time_out": "1130",
+      "date": "2025-07-08",
+      "seat_col": "E",
+      "seat_row": "3"
+    },
+    {
+      "id": 18,
+      "student_name": "Emma Verde",
+      "time_in": "1100",
+      "time_out": "1300",
+      "date": "2025-07-08",
+      "seat_col": "F",
+      "seat_row": "2"
+    },
+    {
+      "id": 19,
+      "student_name": "Ren Hazuki",
+      "time_in": "0800",
+      "time_out": "1000",
+      "date": "2025-07-09",
+      "seat_col": "A",
+      "seat_row": "2"
+    },
+    {
+      "id": 20,
+      "student_name": "Kanon Shibuya",
+      "time_in": "1000",
+      "time_out": "1200",
+      "date": "2025-07-09",
+      "seat_col": "B",
+      "seat_row": "1"
+    }
+  ]
+}
