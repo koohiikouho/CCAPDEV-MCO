@@ -1,5 +1,5 @@
 <script lang="ts">
-    import LoginInt from "../../lib/components/LoginInt.svelte";
+    import SignUpComp from "../../lib/components/SignUpComp.svelte";
     import {
     Navbar,
     NavBrand,
@@ -38,7 +38,7 @@
   let vy: number = 1;
   let size: number = 50;
   let staticity: number = 20;
-  let color: string = "#3eb489";  
+  let color: string = "#bad6e9"; 
 
 </script>
 
@@ -49,4 +49,4 @@
 
 <TempNavbar/>
 
-<LoginInt />
+<SignUpComp/>
