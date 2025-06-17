@@ -1,6 +1,6 @@
 <script>
     import Particles from "../lib/components/Particles.svelte";
-    import { Button, GradientButton } from "flowbite-svelte";
+    import { Button, GradientButton, Heading, P, Span } from "flowbite-svelte";
 </script>
 
 <div class="flex flex-col">
@@ -18,27 +18,46 @@
         <Particles className="absolute inset-0" refresh={true} />
     </div>
     
-    <div class="gap-10 mt-10">
-        <button type="button" 
-        class="text-white bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 hover:bg-gradient-to-br 
-        focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor">
-            Get Started
-        </button>
+    <div class="gap-5 mt-10 flex">
+		<a href="../index.html?view=1">
+			<button type="button" 
+			class="text-white bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 hover:bg-gradient-to-br 
+			focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center ml-2 mb-2 pointer-events-auto fixcursor">
+				Get Started
+			</button>
+		</a>
+		<a href="https://github.com/koohiikouho/CCAPDEV-MCO">
+			<button type="button" 
+			class="text-white bg-gradient-to-r from-secondary-200/70 via-secondary-300/70 to-secondary-400/70 hover:bg-gradient-to-br outline-offset-2 outline-primary-200
+			focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center mb-2 pointer-events-auto fixcursor flex flex-row">
+				<img src="/src/assets/github-mark-white.svg" alt="Github Logo" class="w-7 h-7 mr-3 color-primary-900"/>Github Repo
+			</button>
+		</a>
 
-        <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-lg font-medium text-primary-900 rounded-full group bg-gradient-to-br from-primary-200 to-primary-300
-        group-hover:from-primary-600 group-hover:to-primary-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none 
-        focus:ring-primary-300 dark:focus:ring-primary-800 fixcursor">
-        <span class="relative px-5 py-2 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-full  group-hover:bg-transparent group-hover:dark:bg-transparent">
-            Learn More
-        </span>
-        </button>
     </div>
 
 
 </div>
-
-
+	<div class="text-justify mx-5 md:ml-130 md:mr-200 mt-20 mb-30"> 
+		<P class="text-justify text-surface-500">What is</P>
+		  <Heading tag="h1" class="mb-4 text-start"><Span highlight="red">Lab Club?</Span></Heading>
+		  <P class="text-surface-500 text-start">is a computer lab reservation system designed to streamline the booking process for academic institutions. 
+			<br><br>
+			It allows students, faculty, and staff to view real-time lab availability, reserve computer lab slots, and manage their bookings efficiently. 
+			With user-friendly scheduling features and administrative controls, Lab Club helps optimize lab usage and reduce conflicts in shared spaces.</P>
+	</div>
+	<div class="text-end mx-5 md:ml-200 md:mr-130 mt-20 mb-30"> 
+		<P class="text-end text-surface-500 mr-7">Why</P>
+		  <Heading tag="h1" class="mb-4"><Span highlight="green">Lab Club?</Span></Heading>
+		  <P class="text-surface-500 text-end">Lab Club addresses the common challenges of managing computer lab usage in schools and universities. 
+			<br><br>
+			It allows students, faculty, and staff to view real-time lab availability, reserve computer lab slots, and manage their bookings efficiently. 
+			With user-friendly scheduling features and administrative controls, Lab Club helps optimize lab usage and reduce conflicts in shared spaces.</P>
+	</div>
 </div>
+
+
+
 
 <style>
 	.animated-gradient {
