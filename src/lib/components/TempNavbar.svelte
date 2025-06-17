@@ -26,7 +26,7 @@
                   <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
                 </DropdownHeader>
                 <DropdownGroup class="text-white ">
-                  <DropdownItem class="hover:text-surface-400">Profile</DropdownItem>
+                  <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=4">Profile</DropdownItem>
                   <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=3">Reservations</DropdownItem>
                 </DropdownGroup>
                 <DropdownGroup class="text-white">
