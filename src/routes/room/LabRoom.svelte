@@ -3,34 +3,35 @@
   import { Tabs, TabItem } from "flowbite-svelte";
 
   let params = new URLSearchParams(location.search);
-  let roomCode : string = params.get("labCode");
+  let roomCode: string = params.get("labCode");
 
-  import SeatAvailability from '../../lib/components/SeatAvailability.svelte';
+  import SeatAvailability from "../../lib/components/SeatAvailability.svelte";
   import Reservations from "../../lib/components/Reservations.svelte";
 
-
   const getLabData = async () => {
-    const res = await fetch('./advancedTableModified'.concat(roomCode).concat('.json'));
+    const res = await fetch(
+      "./advancedTableModified".concat(roomCode).concat(".json")
+    );
     const data = await res.json();
     return data;
-  }
+  };
 
   const getCarouselData = async () => {
-    const res = await fetch('./advancedTableModified'.concat(roomCode).concat('.json'));
+    const res = await fetch(
+      "./advancedTableModified".concat(roomCode).concat(".json")
+    );
     const data = await res.json();
     images = data.images;
-  }
-  
+  };
+
   import Particles from "../../lib/components/Particles.svelte";
-  
 
-  let activeClass = "inline-block text-md font-medium text-center disabled:cursor-not-allowed active rounded-t-lg dark:bg-gray-800 p-4 w-auto md:w-70 text-primary-600 border-x-2 border-t-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 bg-offwhite"
-  let inactiveClass = "inline-block text-sm font-medium text-center disabled:cursor-not-allowed rounded-t-lg hover:bg-gray-50 dark:hover:bg-gray-800 p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-surface-300 dark:text-gray-400 bg-transparent bg-offwhite/50";
+  let activeClass =
+    "inline-block text-md font-medium text-center disabled:cursor-not-allowed active rounded-t-lg dark:bg-gray-800 p-4 w-auto md:w-70 text-primary-600 border-x-2 border-t-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 bg-offwhite";
+  let inactiveClass =
+    "inline-block text-sm font-medium text-center disabled:cursor-not-allowed rounded-t-lg hover:bg-gray-50 dark:hover:bg-gray-800 p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-surface-300 dark:text-gray-400 bg-transparent bg-offwhite/50";
 
-
-  import {
-    Heading,
-  } from "flowbite-svelte";
+  import { Heading } from "flowbite-svelte";
   // import Labs from './routs/Labs.svelte';
 
   import { Carousel, Indicators } from "flowbite-svelte";
@@ -42,8 +43,7 @@
   import RemoveReservationTable from "../../lib/components/RemoveReservationTable.svelte";
   import ReservationsAdmin from "../../lib/components/ReservationsAdmin.svelte";
 
-  let images = $state(
-    [
+  let images = $state([
     {
       alt: "image1",
       src: "https://www.dlsu.edu.ph/wp-content/uploads/2022/02/eml-1.jpg",
@@ -57,121 +57,133 @@
   ]);
 
   getCarouselData();
-  let profilePic =
-    "https://media.discordapp.net/attachments/1369208787042304020/1382885082166988963/profilepic.jpg?ex=684cc798&is=684b7618&hm=f49d3cb733fa975b82484a2b7cf1f49308ad5db839b5439c8d00fa4a96ce8b4d&=&format=webp&width=792&height=792";
-
-  
+  let profilePic = "/src/assets/profilepic.jpg";
 
   let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@dlsu.edu.ph";  
+  let userEmail = "kasaneteto@dlsu.edu.ph";
 
-  let qty:number = 50;
-  let vx:number = -0.2;
-  let vy:number = -0.3;
-  let size:number = 50;
-  let staticity:number = 100;
-  let divider:boolean = false;
+  let qty: number = 50;
+  let vx: number = -0.2;
+  let vy: number = -0.3;
+  let size: number = 50;
+  let staticity: number = 100;
+  let divider: boolean = false;
 
-  let userRole : string = "labTech";
-
+  let userRole: string = "student";
 </script>
 
-<TempNavbar userEmail={userEmail} userName={userName} profilePicture={profilePic}/>
+<TempNavbar {userEmail} {userName} profilePicture={profilePic} />
 
 {#await getLabData() then labData}
+  <div class="relative z-10 px-auto md:px-60">
+    <div class="mt-35"></div>
 
-<div class="relative z-10 px-auto md:px-60 ">
+    <div
+      class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed"
+    >
+      <div class="flex items-center justify-center flex-col px-2 py-4">
+        <Heading tag="h1" class="">{labData.labName}</Heading>
+        <div
+          class="flex justify-center md:justify-start items-center px-5 pt-2"
+        >
+          Labs <AngleRightOutline class="size-5" />
+          {labData.labLocation.building}
+          <AngleRightOutline class="size-5" />
+          {labData.labLocation.floor} Floor <AngleRightOutline class="size-5" />
+          Room {labData.labLocation.room}
+        </div>
+        <div
+          class="flex justify-center md:justify-start text-start items-center px-13 md:px-20 py-5"
+        >
+          <div
+            class="bg-secondary-50/30 px-3 md:px-3 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed text-surface-500"
+          >
+            {labData.labDescription}
+          </div>
+        </div>
+        <div
+          class="flex justify-center md:justify-start items-center px-5 pt-5 w-auto"
+        >
+          <div
+            class="bg-secondary-50/30 md:px-7 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed"
+          >
+            <DateAvailable />
+          </div>
+        </div>
+      </div>
+      <div class="py-5 mx-2 order-first">
+        <Carousel {images} duration={5000} class="w-auto" imgClass="rounded-xl">
+          <Indicators />
+        </Carousel>
+      </div>
 
-
-
-<div class="mt-35"></div>
-
-<div class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed">
-
-  <div class="flex items-center justify-center flex-col px-2 py-4 ">
-
-    <Heading tag="h1" class="">{labData.labName}</Heading>
-    <div class="flex justify-center md:justify-start items-center px-5 pt-2">
-      Labs <AngleRightOutline class="size-5"/> {labData.labLocation.building} <AngleRightOutline class="size-5"/> {labData.labLocation.floor} Floor <AngleRightOutline class="size-5"/> Room {labData.labLocation.room}
+      <div class=" mt-4"></div>
     </div>
-    <div class="flex justify-center md:justify-start text-start items-center px-13 md:px-20 py-5 ">
-      <div class="bg-secondary-50/30 px-3 md:px-3 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed text-surface-500">
-        {labData.labDescription}
+    <div
+      class="bg-tertiary-50/40 backdrop-blur-xs rounded-b-2xl p-2 outline-2 outline-secondary-50/60 outline-dashed"
+    >
+      <div class="bg-primary-200/50 rounded-3xl p-1">
+        <Tabs
+          tabStyle="none"
+          class="flex divide-x divide-gray-200 rounded-lg shadow-sm rtl:divide-x-reverse dark:divide-gray-700"
+          contentClass="bg-primary m-0 p-0 px-4 pb-4"
+          {divider}
+        >
+          <TabItem class="w-full" {activeClass} {inactiveClass} open>
+            {#snippet titleSlot()}
+              <span>Seat Availability</span>
+            {/snippet}
+            <SeatAvailability />
+          </TabItem>
+
+          <TabItem class="w-full" {activeClass} {inactiveClass}>
+            {#snippet titleSlot()}
+              <span class="">Reservations</span>
+            {/snippet}
+            {#if userRole == "student"}
+              <Reservations paginationData={labData.reservations} />
+            {:else if userRole == "labTech"}
+              <ReservationsAdmin paginationData={labData.reservations} />
+            {/if}
+          </TabItem>
+          {#if userRole == "student"}
+            <TabItem class="w-full" {activeClass} {inactiveClass}>
+              {#snippet titleSlot()}
+                <span>Reserve Seat</span>
+              {/snippet}
+              <ReserveSeat {userName} />
+            </TabItem>
+          {:else if userRole == "labTech"}
+            <TabItem class="w-full" {activeClass} {inactiveClass}>
+              {#snippet titleSlot()}
+                <span>Block Seat for Student</span>
+              {/snippet}
+              <BlockSeat paginationData={labData.reservations} />
+            </TabItem>
+            <TabItem class="w-full" {activeClass} {inactiveClass}>
+              {#snippet titleSlot()}
+                <span>Remove Reservation</span>
+              {/snippet}
+              <RemoveReservationTable paginationData={labData.reservations} />
+            </TabItem>
+          {/if}
+        </Tabs>
       </div>
     </div>
-    <div class="flex justify-center md:justify-start items-center px-5 pt-5 w-auto">
-      <div class="bg-secondary-50/30 md:px-7 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed">
-        <DateAvailable />
-      </div>
-    </div>
-    
-  </div>
-  <div class="py-5 mx-2 order-first">
-    <Carousel {images} duration={5000} class="w-auto" imgClass="rounded-xl">
-      <Indicators/>
-    </Carousel>
   </div>
 
-  <div class=" mt-4"> </div>
-</div>
-<div class ="bg-tertiary-50/40 backdrop-blur-xs rounded-b-2xl p-2 outline-2 outline-secondary-50/60 outline-dashed">
-  <div class="bg-primary-200/50 rounded-3xl p-1">
-    <Tabs tabStyle="none" class="flex divide-x divide-gray-200 rounded-lg shadow-sm rtl:divide-x-reverse dark:divide-gray-700" contentClass="bg-primary m-0 p-0 px-4 pb-4" 
-      divider={divider}>
-
-      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass} open>
-        {#snippet titleSlot()}
-          <span>Seat Availability</span>
-        {/snippet}
-        <SeatAvailability/>
-      </TabItem>
-
-      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
-        {#snippet titleSlot()}
-          <span class="">Reservations</span>
-        {/snippet}
-        {#if userRole == "student"}
-          <Reservations paginationData={labData.reservations}/>
-        {:else if userRole == "labTech"}
-          <ReservationsAdmin paginationData={labData.reservations}/>
-        {/if}
-        
-      </TabItem>
-      {#if userRole == "student"}
-      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
-        {#snippet titleSlot()}
-          <span>Reserve Seat</span>
-        {/snippet}
-        <ReserveSeat userName={userName}/>
-      </TabItem>
-    {:else if userRole == "labTech"}
-      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
-        {#snippet titleSlot()}
-          <span>Block Seat for Student</span>
-        {/snippet}
-        <BlockSeat paginationData={labData.reservations}/>
-      </TabItem>
-      <TabItem class="w-full" activeClass={activeClass} inactiveClass={inactiveClass}>
-        {#snippet titleSlot()}
-          <span>Remove Reservation</span>
-        {/snippet}
-        <RemoveReservationTable paginationData={labData.reservations}/>
-      </TabItem>
-
-    {/if}
-
-    
-    </Tabs>
-
-    </div>
-
+  <div class="-z-10">
+    <Particles
+      className="absolute z-0 inset-0"
+      refresh={true}
+      color="#ec8397"
+      {staticity}
+      quantity={qty}
+      {size}
+      {vx}
+      {vy}
+    />
   </div>
-</div>
 
-<div class="-z-10 ">
-  <Particles className="absolute z-0 inset-0" refresh={true} color="#ec8397" staticity={staticity} quantity={qty}
-  size={size} vx={vx} vy={vy}/>
-</div>
-
-<div class="mt-10"></div>
+  <div class="mt-10"></div>
 {/await}

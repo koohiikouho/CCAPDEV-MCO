@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Avatar, Dropdown, DropdownGroup, DropdownHeader, DropdownItem, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from "flowbite-svelte";
 
-    let {userName = "Guest", userEmail = "Log in to reserve", profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg"} = $props();
+    let {userName = "Guest", userEmail = "Log in to reserve", profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg", isLoggedIn = true} = $props();
 </script>
 
 
@@ -30,7 +30,9 @@
                   <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" href="../../../index.html?view=3">Reservations</DropdownItem>
                 </DropdownGroup>
                 <DropdownGroup class="text-white">
+                {#if isLoggedIn}
                   <DropdownItem class="hover:text-surface-400" href='/src/routes/login/login.html'>Login</DropdownItem>
+
                   <DropdownItem class="hover:text-surface-400">Sign out</DropdownItem>
                 </DropdownGroup>
               </Dropdown>

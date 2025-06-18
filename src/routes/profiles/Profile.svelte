@@ -9,11 +9,17 @@
     Card,
   } from "flowbite-svelte";
 
-  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
+  import {
+    CalendarMonthOutline,
+    ClockOutline,
+    UsersOutline,
+    FlaskOutline,
+    ComputerSpeakerOutline,
+  } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
   let params = new URLSearchParams(location.search);
-  let userCode : string = params.get("userCode");
+  let userCode: string = params.get("userCode");
 
   let reservations = [
     {
@@ -24,7 +30,7 @@
       duration: "2 hours",
       purpose: "Web Development Project",
       status: "Confirmed",
-      seat: "C3"
+      seat: "C3",
     },
     {
       id: 2,
@@ -34,7 +40,7 @@
       duration: "2 hours",
       purpose: "LBYITN4 Networking Activity",
       status: "Ongoing",
-      seat: "C1"
+      seat: "C1",
     },
     {
       id: 3,
@@ -44,7 +50,7 @@
       duration: "2 hours",
       purpose: "CCAPDEV MC01 Presentation",
       status: "Completed",
-      seat: "B5"
+      seat: "B5",
     },
     {
       id: 4,
@@ -54,100 +60,116 @@
       duration: "5.5 hours",
       purpose: "CCAPDEV MC01 Presentation",
       status: "Cancelled",
-      seat: "A4"
-    }
-
+      seat: "A4",
+    },
   ];
 
   function getStatusColor(status) {
-    switch(status) {
-      case 'Confirmed': return 'green';
-      case 'Ongoing': return 'yellow';
-      case 'Completed': return 'blue';
-      case 'Cancelled': return 'red';
-      default: return 'gray';
+    switch (status) {
+      case "Confirmed":
+        return "green";
+      case "Ongoing":
+        return "yellow";
+      case "Completed":
+        return "blue";
+      case "Cancelled":
+        return "red";
+      default:
+        return "gray";
     }
   }
 
   // Current user is Kasane Teto (custom)
   let currentUser = {
-  name: "Kasane Teto",
-  email: "kasaneteto@dlsu.edu.ph",
-  avatar: "/src/assets/profilepic.jpg",
-  role: "Lab Assistant",
-  description: "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab."
-};
+    name: "Kasane Teto",
+    email: "kasaneteto@dlsu.edu.ph",
+    avatar: "/src/assets/profilepic.jpg",
+    role: "Lab Assistant",
+    description:
+      "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab.",
+  };
 
-if (userCode === "1") {
-  currentUser = {
-    name: "Ron Alonzo",
-    email: "ron_alonzo@dlsu.edu.ph",
-    avatar: "/src/assets/Users/ronPfp.png",
-    role: "Student",
-    description: "I'm a student exploring different technologies and working on lab projects."
+  let constUser = {
+    name: "Kasane Teto",
+    email: "kasaneteto@dlsu.edu.ph",
+    avatar: "/src/assets/profilepic.jpg",
+    role: "Lab Assistant",
+    description:
+      "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab.",
   };
-}
-else if (userCode === "2") {
-  currentUser = {
-    name: "Joshua Gonzales",
-    email: "joshua_gonzales@dlsu.edu.ph",
-    avatar: "/src/assets/Users/joshuaPfp.png",
-    role: "Student",
-    description: "I enjoy learning about networks, systems, and how things connect behind the scenes."
-  };
-}
-else if (userCode === "3") {
-  currentUser = {
-    name: "Nathaniel Reyes",
-    email: "nathaniel_reyes@dlsu.edu.ph",
-    avatar: "/src/assets/Users/alden.jpeg",
-    role: "Student",
-    description: "Always curious about system performance and backend logic."
-  };
-}
-else if (userCode === "4") {
-  currentUser = {
-    name: "Cochise King",
-    email: "cochise_king@dlsu.edu.ph",
-    avatar: "/src/assets/Users/cochisePfp.png",
-    role: "Professor",
-    description: "I teach and guide students in the field of computer science and software engineering."
-  };
-}
-
+  if (userCode === "1") {
+    currentUser = {
+      name: "Ron Alonzo",
+      email: "ron_alonzo@dlsu.edu.ph",
+      avatar: "/src/assets/Users/ronPfp.png",
+      role: "Student",
+      description:
+        "I'm a student exploring different technologies and working on lab projects.",
+    };
+  } else if (userCode === "2") {
+    currentUser = {
+      name: "Joshua Gonzales",
+      email: "joshua_gonzales@dlsu.edu.ph",
+      avatar: "/src/assets/Users/joshuaPfp.png",
+      role: "Student",
+      description:
+        "I enjoy learning about networks, systems, and how things connect behind the scenes.",
+    };
+  } else if (userCode === "3") {
+    currentUser = {
+      name: "Nathaniel Reyes",
+      email: "nathaniel_reyes@dlsu.edu.ph",
+      avatar: "/src/assets/Users/alden.jpeg",
+      role: "Student",
+      description: "Always curious about system performance and backend logic.",
+    };
+  } else if (userCode === "4") {
+    currentUser = {
+      name: "Cochise King",
+      email: "cochise_king@dlsu.edu.ph",
+      avatar: "/src/assets/Users/cochisePfp.png",
+      role: "Professor",
+      description:
+        "I teach and guide students in the field of computer science and software engineering.",
+    };
+  }
 
   // fallback avatar
   function getAvatar(avatar: string): string {
     return avatar && avatar !== "" ? avatar : "/default-avatar.png";
   }
 
-    let showEditModal = false;
+  let showEditModal = false;
 
-    function openEditModal() {
+  function openEditModal() {
     showEditModal = true;
-    }
+  }
 
-    function saveProfile() {
+  function saveProfile() {
     // For now, just log the updated values (you can connect this to a backend or store)
     console.log("Updated Profile:", currentUser);
     showEditModal = false;
-    }
+  }
 
-    // Extract `profile` query param from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const profileParam = urlParams.get("profile");
+  // Extract `profile` query param from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const profileParam = urlParams.get("profile");
 
-    // If profileParam is null or "0", show edit; if "1", it's another user's profile
-    let isOwnProfile = profileParam !== "1";
-    
+  // If profileParam is null or "0", show edit; if "1", it's another user's profile
+  let isOwnProfile = profileParam !== "1";
 </script>
 
-<TempNavbar userName={currentUser.name} userEmail={currentUser.email} profilePicture={currentUser.avatar}/>
+<TempNavbar
+  userName={constUser.name}
+  userEmail={constUser.email}
+  profilePicture={constUser.avatar}
+/>
 
 <main class="mt-10 p-10 sm:p-20 bg-primary-50 min-h-screen text-surface-800">
-  <div class="grid grid-cols-1 gap-10 max-w-6xl mx-auto bg-white p-10 rounded-xl shadow-2xl">
-    
-  <!-- Profile Section -->
+  <div
+    class="grid grid-cols-1 gap-10 max-w-6xl mx-auto bg-white p-10 rounded-xl shadow-2xl"
+  >
+    <!-- Profile Section -->
     <div class="grid md:grid-cols-3 gap-10">
       <!-- Avatar -->
       <div class="flex flex-col items-center">
@@ -185,10 +207,14 @@ else if (userCode === "4") {
         <div class="grid gap-6">
           {#each reservations as reservation (reservation.id)}
             <Card class="max-w-full border border-surface-200 shadow-md p-6">
-              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+              <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4"
+              >
                 <div class="flex items-center gap-3 mb-2 sm:mb-0">
                   <FlaskOutline class="w-6 h-6 text-primary-600" />
-                  <h3 class="text-xl font-semibold text-surface-800">{reservation.labName}</h3>
+                  <h3 class="text-xl font-semibold text-surface-800">
+                    {reservation.labName}
+                  </h3>
                 </div>
                 <Badge color={getStatusColor(reservation.status)} class="w-fit">
                   {reservation.status}
@@ -198,42 +224,57 @@ else if (userCode === "4") {
               <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
                 <div class="flex items-center gap-2">
                   <CalendarMonthOutline class="w-4 h-4 text-surface-400" />
-                  <span class="text-sm text-surface-600">{reservation.date}</span>
+                  <span class="text-sm text-surface-600"
+                    >{reservation.date}</span
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <ClockOutline class="w-4 h-4 text-surface-400" />
-                  <span class="text-sm text-surface-600">{reservation.time}</span>
+                  <span class="text-sm text-surface-600"
+                    >{reservation.time}</span
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <UsersOutline class="w-4 h-4 text-surface-400" />
-                  <span class="text-sm text-surface-600">{reservation.duration}</span>
+                  <span class="text-sm text-surface-600"
+                    >{reservation.duration}</span
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <ComputerSpeakerOutline class="w-4 h-4 text-surface-400" />
-                  <span class="text-sm text-surface-600">{reservation.seat}</span>
-                </div>                
+                  <span class="text-sm text-surface-600"
+                    >{reservation.seat}</span
+                  >
+                </div>
               </div>
-
             </Card>
           {/each}
         </div>
       {:else}
-        <Card class="text-center py-12 border border-surface-200 bg-surface-50 mt-10">
+        <Card
+          class="text-center py-12 border border-surface-200 bg-surface-50 mt-10"
+        >
           <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
-          <p class="text-surface-500">This user hasn't made any lab reservations yet.</p>
+          <h3 class="text-xl font-semibold text-surface-700 mb-2">
+            No Reservations Found
+          </h3>
+          <p class="text-surface-500">
+            This user hasn't made any lab reservations yet.
+          </p>
         </Card>
       {/if}
     </div>
   </div>
 </main>
 
-
-<Modal open={showEditModal} onclose={() => (showEditModal = false)} class="z-50">
+<Modal
+  open={showEditModal}
+  onclose={() => (showEditModal = false)}
+  class="z-50"
+>
   <div class="p-6 space-y-6">
     <h3 class="text-xl font-medium text-surface-800">Edit Profile</h3>
     <div class="space-y-4">
-      
       <div>
         <Label for="name" class="block mb-1">Name</Label>
         <Input id="name" type="text" bind:value={currentUser.name} />
@@ -258,21 +299,21 @@ else if (userCode === "4") {
         <Label for="avatar" class="block mb-1">Profile Picture</Label>
 
         <Input
-        id="avatar"
-        type="file"
-        accept="image/*"
-        class="block mb-1 pl-8"
-        onchange={(e) => {
+          id="avatar"
+          type="file"
+          accept="image/*"
+          class="block mb-1 pl-8"
+          onchange={(e) => {
             const input = e.target as HTMLInputElement;
             const file = input?.files?.[0];
             if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
                 currentUser.avatar = event.target?.result as string;
-            };
-            reader.readAsDataURL(file);
+              };
+              reader.readAsDataURL(file);
             }
-        }}
+          }}
         />
 
         <p class="text-sm text-gray-500 mt-1">Preview:</p>
@@ -286,7 +327,9 @@ else if (userCode === "4") {
 
     <div class="flex-row-reverse flex justify-between">
       <div class="flex justify-end gap-2 pt-4">
-        <Button color="gray" onclick={() => (showEditModal = false)}>Cancel</Button>
+        <Button color="gray" onclick={() => (showEditModal = false)}
+          >Cancel</Button
+        >
         <Button color="primary" onclick={saveProfile}>Save</Button>
       </div>
       <div class="flex justify-start gap-2 pt-4">
