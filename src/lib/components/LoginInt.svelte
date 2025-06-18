@@ -2,8 +2,6 @@
 	import { Section, Register } from 'flowbite-svelte-blocks';
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
 
-
-
 	import {Modal, P } from "flowbite-svelte";
 	let defaultModal = $state(false);
 
