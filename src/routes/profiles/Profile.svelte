@@ -286,8 +286,9 @@
 
       <div>
         <Label for="email" class="block mb-1">Email</Label>
-        <Input id="email" type="email" bind:value={currentUser.email} />
+        <Input id="email" type="email" bind:value={currentUser.email} disabled />
       </div>
+
 
       <div>
         <Label for="description" class="block mb-1">Description</Label>
