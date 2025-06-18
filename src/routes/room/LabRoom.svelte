@@ -69,7 +69,7 @@
   let staticity: number = 100;
   let divider: boolean = false;
 
-  let userRole: string = "student";
+  let userRole: string = "labTech";
 </script>
 
 <TempNavbar {userEmail} {userName} profilePicture={profilePic} />

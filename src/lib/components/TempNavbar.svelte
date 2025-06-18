@@ -69,14 +69,14 @@
             </DropdownGroup>
             <DropdownGroup class="text-white">
               {#if isLoggedIn}
-                <DropdownItem
-                  class="hover:text-surface-400"
-                  href="/src/routes/login/login.html">Login</DropdownItem
-                >
-              {:else}
                 <DropdownItem class="hover:text-surface-400"
-                  >Sign out</DropdownItem
-                >
+                >Sign out</DropdownItem
+              >
+              {:else}
+                <DropdownItem
+                class="hover:text-surface-400"
+                href="/src/routes/login/login.html">Login</DropdownItem
+              >
               {/if}
             </DropdownGroup>
           </Dropdown>
