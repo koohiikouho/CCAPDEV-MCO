@@ -5,7 +5,7 @@
     let {userName = "Username"} = $props();
   
     let selectedDate = $state(new Date("2024-06-30"));
-    let selectedInlineTime = $state({ time: "" });
+    let selectedInlineTime = $state({ time: "7:30" });
     let eventTitle = $state("Digital Transformation");
     let eventLocation = $state("California, USA");
     let eventDuration = $state("0.5");

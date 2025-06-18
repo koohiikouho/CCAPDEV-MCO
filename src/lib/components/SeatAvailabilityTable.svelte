@@ -94,7 +94,7 @@
 
 
 </script>
-<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-2xl" >
+<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-2xl" divClass="px-0">
     <TableSearch placeholder="Input to Search Seat" hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
       <TableHead>
         <TableHeadCell colspan={5} class="text-center">Available Seats</TableHeadCell>
@@ -110,7 +110,7 @@
             {/if}
             {jAdd()}
             <TableBodyCell>
-              <TableBodyRow class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+              <TableBodyRow class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
             </TableBodyCell>
           {/each}
         {:else}
@@ -123,7 +123,7 @@
               {/if}
               {jAdd()}
               <TableBodyCell>
-                <TableBodyRow class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+                <TableBodyRow class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
               </TableBodyCell>
             {/each}
         {/if}
