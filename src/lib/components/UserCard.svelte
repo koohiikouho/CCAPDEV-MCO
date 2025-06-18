@@ -31,7 +31,7 @@
 >
   <div class="flex justify-end"></div>
   <div class="flex flex-col items-center pb-4 pt-2">
-    <Avatar size="lg" src={avatarSrc} />
+    <Avatar size="lg" src={avatarSrc} class="object-cover"/>
     <h5
       class="mb-2 text-2xl tracking-tight text-surface-500 dark:text-white font-medium"
     >

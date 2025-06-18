@@ -177,7 +177,7 @@
       <div class="flex flex-col items-center">
         <Avatar
           src={getAvatar(currentUser.avatar)}
-          class="w-70 h-70 rounded-full ring-4 ring-primary-500 shadow-lg"
+          class="w-70 h-70 rounded-full ring-4 ring-primary-500 shadow-lg object-cover"
         />
       </div>
 

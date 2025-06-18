@@ -116,10 +116,12 @@
                 <span class="block text-sm text-white">{userName}</span>
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
               </DropdownHeader>
+              {#if isLoggedIn}
               <DropdownGroup class="text-white ">
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewProfile}>Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>
               </DropdownGroup>
+              {/if}
               <DropdownGroup class="text-white">
 
               {#if isLoggedIn}

@@ -4,7 +4,7 @@
   import Searchbar from "../lib/components/Search.svelte";
   import { flip } from "svelte/animate";
   import { Input } from "flowbite-svelte";
-  import { ComputerSpeakerOutline, SearchOutline } from "flowbite-svelte-icons";
+  import { ComputerSpeakerOutline, SearchOutline, UserCircleOutline } from "flowbite-svelte-icons";
   import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
 
@@ -68,7 +68,7 @@
     <div class="py-10 bg-tertiary-50/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-secondary-50/60">
       <h1 class="text-surface-600 font-bold md:text-start text-center pl-auto md:pl-9 flex flex-col md:flex-row items-center justify-center md:justify-between gap-5">
         <div class="flex items-end">
-          <ComputerSpeakerOutline class="w-15 h-15 mr-5"/>Users 
+          <UserCircleOutline class="w-15 h-15 mr-5"/>Users 
         </div> 
         <Input id="default-input" placeholder="Search Users" class="pl-8 h-12" divClass="px-9 w-100" bind:value>
         {#snippet left()}
