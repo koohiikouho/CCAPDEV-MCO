@@ -2,6 +2,8 @@
   import { Card, Button, Badge, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
   // Using correct flowbite-svelte-icons imports
   import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
+  import { cubicOut } from "svelte/easing";
+  import { fly } from "svelte/transition";
 
   // Sample reservation data - replace with actual data from your backend
   let reservations = [
@@ -78,7 +80,8 @@
 
   {#if reservations.length > 0}
     <div class="grid gap-6">
-      {#each reservations as reservation (reservation.id)}
+      {#each reservations as reservation, index}
+      <div in:fly|global={{ y: 50, duration: 1+index*100, delay: 200, easing: cubicOut }}>
         <Card class="max-w-full border border-surface-200 shadow-md hover:shadow-lg transition-shadow p-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
             <div class="flex items-center gap-3 mb-2 sm:mb-0">
@@ -140,6 +143,7 @@
             </div>
           {/if}
         </Card>
+        </div>
       {/each}
     </div>
 

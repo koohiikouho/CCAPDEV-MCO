@@ -17,6 +17,8 @@
     ComputerSpeakerOutline,
   } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
+  import { cubicOut } from "svelte/easing";
+  import { fly } from "svelte/transition";
 
   let params = new URLSearchParams(location.search);
   let userCode: string = params.get("userCode");
@@ -205,7 +207,8 @@
 
       {#if reservations.length > 0}
         <div class="grid gap-6">
-          {#each reservations as reservation (reservation.id)}
+          {#each reservations as reservation,index}
+          <div in:fly|global={{ y: 50, duration: 1+index*100, delay: 300, easing: cubicOut }}>
             <Card class="max-w-full border border-surface-200 shadow-md p-6">
               <div
                 class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4"
@@ -248,6 +251,7 @@
                 </div>
               </div>
             </Card>
+          </div>
           {/each}
         </div>
       {:else}

@@ -86,7 +86,7 @@
   }
 
 </script>
-<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-xl" >
+<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg" >
     <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
       <TableHead>
         <TableHeadCell class="px-4 py-3" scope="col">User ID</TableHeadCell>

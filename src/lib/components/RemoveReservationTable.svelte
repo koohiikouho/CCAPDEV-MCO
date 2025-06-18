@@ -78,30 +78,30 @@
 
 
 </script>
-<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-xl" >
+<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg" >
     <Table>
       <TableHead>
-        <TableHeadCell class="px-4 py-3" scope="col">Seat</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Time Start</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Student</TableHeadCell>
-        <TableBodyCell class="px-4 py-3"></TableBodyCell>    
+        <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Seat</TableHeadCell>
+        <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Time Start</TableHeadCell>
+        <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Student</TableHeadCell>
+        <TableBodyCell class="px-1 md:px-4 py-3"></TableBodyCell>    
       </TableHead>
       <TableBody class="divide-y">
         {#if searchTerm !== ''}
           {#each filteredItems as item (item.id)}
             <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_in}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.student_name}</TableBodyCell>
             </TableBodyRow>
           {/each}
         {:else}
           {#each currentPageItems as item (item.id)}
             <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_in}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer">Delete Reservation</Button></TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.student_name}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer">Delete Reservation</Button></TableBodyCell>
             </TableBodyRow>
           {/each}
         {/if}

@@ -76,8 +76,8 @@
   let isTech : number = 1;
 
 
-  let isLoggedIn: boolean = false;
-  isLoggedIn = Boolean(params.get("signedIn"));
+  let isLoggedIn: boolean = true;
+  // isLoggedIn = Boolean(params.get("signedIn"));
 
   function signOut(){
     isLoggedIn = false;
@@ -93,7 +93,7 @@
     updateViewportComponent();  
   }
   // if(isLoggedIn == false)
-  //   signOut();
+  //    signOut();
 
 </script>
 

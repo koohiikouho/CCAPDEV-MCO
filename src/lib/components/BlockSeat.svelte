@@ -76,15 +76,15 @@
       </div>
     </div>
 
-    <div class="px-6">
+    <div class="md:px-6">
         <div class="space-y-4 border-t border-gray-200 py-6 ">
             <div>
                 <Label for="event-location" class="mb-2">Seat</Label>
-                <MultiSelect items={countries} bind:value={eventType}  size="md"/>
+                <MultiSelect items={countries} bind:value={eventType}  size="md" class="mx-4"/>
             </div>
             <div>
-                <Label for="event-duration">Duration</Label>
-                <Range id="range-steps" min="0.5" max="12" bind:value={eventDuration} step="0.5" />
+                <Label for="event-duration">Duration: {eventDuration} hr/s</Label>
+                <Range id="range-steps" min="0.5" max="12" bind:value={eventDuration} step="0.5" inputClass="w-90 md:w-full mb-5" />
             </div>
             <div>
               <div class="grid w-full gap-6">

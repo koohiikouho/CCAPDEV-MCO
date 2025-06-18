@@ -80,40 +80,60 @@
 
 
 </script>
-<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-xl" >
+<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg" >
     <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
       <TableHead>
-        <TableHeadCell class="px-4 py-3" scope="col">Student</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Time In</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Time Out</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Date</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Column</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Row</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col"></TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Student</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Time In</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Time Out</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Date</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Col</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Row</TableHeadCell>
+        <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col"></TableHeadCell>
       </TableHead>
       <TableBody class="divide-y">
         {#if searchTerm !== ''}
           {#each filteredItems as item (item.id)}
             <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_in}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_out}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.date}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.seat_col}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer bg-tertiary-400">Edit</Button></TableBodyCell>
+              {#if item.student_name != "Anonymous"}
+              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+                ><TableBodyCell class="px-0.5 md:px-4 py-3"
+                  >{item.student_name}</TableBodyCell
+                ></a
+              >
+            {:else}
+              <TableBodyCell class="px-0.5 md:px-4 py-3"
+                >{item.student_name}</TableBodyCell
+              >
+            {/if}
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_out}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.date}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.seat_col}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.seat_row}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer bg-tertiary-400">Edit</Button></TableBodyCell>
             </TableBodyRow>
           {/each}
         {:else}
           {#each currentPageItems as item (item.id)}
-            <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_in}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.time_out}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.date}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.seat_col}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer bg-tertiary-400">Edit</Button></TableBodyCell>
+              <TableBodyRow>
+                {#if item.student_name != "Anonymous"}
+                <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+                  ><TableBodyCell class="px-0.5 md:px-4 py-3"
+                    >{item.student_name}</TableBodyCell
+                  ></a
+                >
+              {:else}
+                <TableBodyCell class="px-0.5 md:px-4 py-3"
+                  >{item.student_name}</TableBodyCell
+                >
+              {/if}
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_out}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.date}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.seat_col}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3">{item.seat_row}</TableBodyCell>
+              <TableBodyCell class="px-0.5 md:px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer bg-tertiary-400">Edit</Button></TableBodyCell>
             </TableBodyRow>
           {/each}
         {/if}

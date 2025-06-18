@@ -94,7 +94,7 @@
 
 
 </script>
-<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-xl" >
+<Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-2xl" >
     <TableSearch placeholder="Input to Search Seat" hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
       <TableHead>
         <TableHeadCell colspan={5} class="text-center">Available Seats</TableHeadCell>

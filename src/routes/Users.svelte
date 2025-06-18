@@ -5,6 +5,8 @@
   import { flip } from "svelte/animate";
   import { Input } from "flowbite-svelte";
   import { ComputerSpeakerOutline, SearchOutline } from "flowbite-svelte-icons";
+  import { cubicOut } from "svelte/easing";
+  import { fly } from "svelte/transition";
 
   const users = [
     {
@@ -77,8 +79,8 @@
 
       
       <div class="flex justify-center pt-6 gap-4 flex-wrap px-4">
-        {#each filteredItems as user (user.id)}
-          <div animate:flip={{ duration: 300 }}>
+        {#each filteredItems as user, index}
+          <div in:fly|global={{ y: 50, duration: index*100, delay: 100, easing: cubicOut }}>
             <UserCard
               name={user.name}
               email={user.email}

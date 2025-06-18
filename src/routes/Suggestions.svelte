@@ -24,12 +24,12 @@
   <div class="flex flex-row min-h-screen justify-center items-center bg-offwhite">
     <div class="h-auto w-screen md:w-370 bg-opacity-0 z-10">
       
-      <div class="mt-10 px-60">
+      <div class="mt-10 px-0 md:px-60">
   
       <div class="py-5 bg-primary-50/50 backdrop-blur-xs rounded-md outline-2 outline-tertiary-50/60 outline-dashed w-auto">
   <Section name="contact">
     <Contact h2Class="text-surface-700 flex content-center items-center justify-center" pClass="text-surface-500">
-      {#snippet h2()}Send us your suggestions! <img src="/src/assets/teto love.png" class="w-20 rounded-full ml-5" alt="teto">{/snippet}
+      {#snippet h2()}Send us your suggestions! <img src="/src/assets/teto love.png" class="w-20 rounded-full ml-2 md:ml-5" alt="teto">{/snippet}
       {#snippet paragraph()}We highly appreciate any form of feedback{/snippet}
       <form class="space-y-8">
         <div>
