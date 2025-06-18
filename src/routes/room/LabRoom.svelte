@@ -63,7 +63,7 @@
   
 
   let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@utau.com";  
+  let userEmail = "kasaneteto@dlsu.edu.ph";  
 
   let qty:number = 50;
   let vx:number = -0.2;

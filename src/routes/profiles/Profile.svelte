@@ -1,62 +1,19 @@
 <script lang="ts">
   import {
-    Navbar,
-    NavBrand,
-    NavLi,
-    NavUl,
-    NavHamburger,
     Avatar,
-    Dropdown,
-    DropdownHeader,
-    DropdownItem,
-    DropdownGroup,
     Button,
     Modal,
     Input,
     Label,
-    Select,
     Badge,
-    Textarea,
     Card,
-
-    avatar
-
   } from "flowbite-svelte";
 
   import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
 
-  // All users
-  const users = [
-    {
-      id: 1,
-      name: "Ron Alonzo",
-      email: "ron_alonzo@dlsu.edu.ph",
-      avatar: "/profilepic.jpg", // should be in /static
-      role: "Student"
-    },
-    {
-      id: 2,
-      name: "Joshua Gonzales",
-      email: "joshua_gonzales@dlsu.edu.ph",
-      avatar: "",
-      role: "Student"
-    },
-    {
-      id: 3,
-      name: "Nathaniel Reyes",
-      email: "nathaniel_reyes@dlsu.edu.ph",
-      avatar: "/Users/alden.jpeg", // static path
-      role: "Student"
-    },
-    {
-      id: 4,
-      name: "Cochise King",
-      email: "cochise_king@dlsu.edu.ph",
-      avatar: "",
-      role: "Professor"
-    }
-  ];
+  let params = new URLSearchParams(location.search);
+  let userCode : string = params.get("userCode");
 
   let reservations = [
     {
@@ -114,12 +71,50 @@
 
   // Current user is Kasane Teto (custom)
   let currentUser = {
-    name: "Kasane Teto",
-    email: "kasaneteto@utau.com",
-    avatar: "/src/assets/profilepic.jpg", // using Ron Alonzo's image
-    role: "Lab Assistant",
-    description: "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab."
+  name: "Kasane Teto",
+  email: "kasaneteto@dlsu.edu.ph",
+  avatar: "/src/assets/profilepic.jpg",
+  role: "Lab Assistant",
+  description: "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab."
+};
+
+if (userCode === "1") {
+  currentUser = {
+    name: "Ron Alonzo",
+    email: "ron_alonzo@dlsu.edu.ph",
+    avatar: "/src/assets/Users/ronPfp.png",
+    role: "Student",
+    description: "I'm a student exploring different technologies and working on lab projects."
   };
+}
+else if (userCode === "2") {
+  currentUser = {
+    name: "Joshua Gonzales",
+    email: "joshua_gonzales@dlsu.edu.ph",
+    avatar: "/src/assets/Users/joshuaPfp.png",
+    role: "Student",
+    description: "I enjoy learning about networks, systems, and how things connect behind the scenes."
+  };
+}
+else if (userCode === "3") {
+  currentUser = {
+    name: "Nathaniel Reyes",
+    email: "nathaniel_reyes@dlsu.edu.ph",
+    avatar: "/src/assets/Users/alden.jpeg",
+    role: "Student",
+    description: "Always curious about system performance and backend logic."
+  };
+}
+else if (userCode === "4") {
+  currentUser = {
+    name: "Cochise King",
+    email: "cochise_king@dlsu.edu.ph",
+    avatar: "/src/assets/Users/cochisePfp.png",
+    role: "Professor",
+    description: "I teach and guide students in the field of computer science and software engineering."
+  };
+}
+
 
   // fallback avatar
   function getAvatar(avatar: string): string {

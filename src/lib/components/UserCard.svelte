@@ -3,14 +3,14 @@
   import { DotsHorizontalOutline } from "flowbite-svelte-icons";
 
 
-  let { name, email, avatar, role }: { name: string; email: string; avatar: string; role: string;} = $props();
+  let { name, email, avatar, role, usercode}: { name: string; email: string; avatar: string; role: string; usercode} = $props();
 
   // Avatar URL fallback if no avatar provided
   let avatarSrc = $derived(avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`);
 
 </script>
 
-<Card href="/src/routes/profiles/viewProfile.html?profile=1" class="min-w-60 bg-secondary-50/30 rounded-lg hover:opacity-80 hover:scale-110 hover:border-[0.5px] hover:border-secondary-600 transition-transform shadow-none duration-100 cursor-pointer hover:shadow-lg hover:shadow-secondary-200/50
+<Card href="/src/routes/profiles/viewProfile.html?userCode={usercode}" class="min-w-60 bg-secondary-50/30 rounded-lg hover:opacity-80 hover:scale-110 hover:border-[0.5px] hover:border-secondary-600 transition-transform shadow-none duration-100 cursor-pointer hover:shadow-lg hover:shadow-secondary-200/50
     backdrop-blur-md  text-start">
   <div class="flex justify-end">
   </div>

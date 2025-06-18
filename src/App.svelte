@@ -22,7 +22,7 @@
   let viewportComponent = null;
   let currentView = 0;
   let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@utau.com"
+  let userEmail = "kasaneteto@dlsu.edu.ph"
   let profilePicture = "/src/assets/profilepic.jpg";
 
   function changeViewOnLoad(){

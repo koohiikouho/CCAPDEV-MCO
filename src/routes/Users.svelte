@@ -11,13 +11,14 @@
       id: 1,
       name: "Ron Alonzo",
       email: "ron_alonzo@dlsu.edu.ph",
+      avatar: "/src/assets/Users/ronPfp.png",
       role: "Student"
     },
     {
       id: 2,
       name: "Joshua Gonzales",
       email: "joshua_gonzales@dlsu.edu.ph",
-      avatar: "",
+      avatar: "/src/assets/Users/joshuaPfp.png",
       role: "Student"
     },
     {
@@ -31,13 +32,13 @@
       id: 4,
       name: "Cochise King",
       email: "cochise_king@dlsu.edu.ph",
-      avatar: "",
+      avatar: "/src/assets/Users/cochisePfp.png",
       role: "Student"
     },
     {
       id: 5,
       name: "Kasane Teto",
-      email: "kasaneteto@utau.com",
+      email: "kasaneteto@dlsu.edu.ph",
       avatar: "src/assets/profilepic.jpg",
       role: "Lab Technician"
     }
@@ -83,6 +84,7 @@
               email={user.email}
               avatar={user.avatar}
               role={user.role}
+              usercode={user.id}
             />
           </div>
         {/each}

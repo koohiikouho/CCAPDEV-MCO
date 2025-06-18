@@ -1,0 +1,50 @@
+{
+  "id": 1,
+  "name": "Ron Alonzo",
+  "email": "ron_alonzo@dlsu.edu.ph",
+  "avatar": "/profilepic.jpg",
+  "role": "Student",
+  "description": "Computer Science student passionate about web development and software engineering.",
+  "reservations": [
+    {
+      "id": 1,
+      "labName": "GK 211 Laboratory",
+      "date": "2024-06-20",
+      "time": "2:00 PM - 4:00 PM",
+      "duration": "2 hours",
+      "purpose": "Web Development Project",
+      "status": "Confirmed",
+      "seat": "C3"
+    },
+    {
+      "id": 2,
+      "labName": "GK 403 Network Laboratory",
+      "date": "2024-06-22",
+      "time": "10:00 AM - 12:00 PM",
+      "duration": "2 hours",
+      "purpose": "LBYITN4 Networking Activity",
+      "status": "Ongoing",
+      "seat": "C1"
+    },
+    {
+      "id": 3,
+      "labName": "AG 1703 Laboratory",
+      "date": "2024-06-18",
+      "time": "3:00 PM - 5:00 PM",
+      "duration": "2 hours",
+      "purpose": "CCAPDEV MC01 Presentation",
+      "status": "Completed",
+      "seat": "B5"
+    },
+    {
+      "id": 4,
+      "labName": "AG 1707 Laboratory",
+      "date": "2024-06-18",
+      "time": "3:00 PM - 8:30 PM",
+      "duration": "5.5 hours",
+      "purpose": "CCAPDEV MC01 Presentation",
+      "status": "Cancelled",
+      "seat": "A4"
+    }
+  ]
+}
