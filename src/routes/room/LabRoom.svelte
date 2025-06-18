@@ -174,6 +174,4 @@
 </div>
 
 <div class="mt-10"></div>
-
-<footer>Hello</footer>
 {/await}
