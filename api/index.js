@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Labs from "./models/labs.js";
+import Users from "./models/users.js";
 
 const app = express();
 const port = 3000;
@@ -28,6 +29,24 @@ app.get("/labs", async (req, res) => {
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
     res.status(500).send("Error fetching labs");
+  }
+});
+
+app.get("/users", async (req, res) => {
+  console.log("---"); // Separator for requests
+  console.log(
+    `[${new Date().toLocaleTimeString()}] Received a request for /users`
+  );
+  try {
+    console.log("Querying the database with Users.find()...");
+    const users = await Users.find().exec();
+    console.log(`Database query finished. Found ${users.length} documents.`); // This tells us if the query worked and how much data it found.
+
+    res.status(200).json(users);
+    console.log("Successfully sent JSON response.");
+  } catch (err) {
+    console.error("!!! AN ERROR OCCURRED while fetching users:", err); // This will print the full error object
+    res.status(500).send("Error fetching users");
   }
 });
 
