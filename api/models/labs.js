@@ -75,4 +75,4 @@ const labSchema = new mongoose.Schema(
 
 labSchema.index({ "seats.col": 1, "seats.row": 1 }, { unique: true });
 
-export default mongoose.model("lab", labSchema);
+export default mongoose.model("Labs", labSchema);

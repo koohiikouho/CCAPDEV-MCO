@@ -4,7 +4,6 @@ import cors from "cors";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
-import createError from "http-errors";
 
 const app = express();
 const port = 3000;
@@ -108,32 +107,16 @@ app.get("/reservations", async (req, res) => {
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
   );
+
   try {
-    console.log("Querying the database with Reservations.find()...");
+    console.log(
+      "Querying the database with Reservations.find() and populating..."
+    );
+
     const reservations = await Reservations.find().exec();
-    console.log(
-      `Database query finished. Found ${reservations.length} documents.`
-    );
-    console.log("---");
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
-    );
+    console.log(`Found ${reservations.length} reservations.`);
 
-    try {
-      console.log(
-        "Querying the database with Reservations.find() and populating..."
-      );
-
-      const reservations = await Reservations.find()
-        .populate("lab_id", "labName labLocation labDescription image seats")
-        .populate("user_id", "email");
-
-      console.log(`Found ${reservations.length} reservations.`);
-      res.status(200).json(reservations);
-    } catch (err) {
-      console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
-      res.status(500).send("Error fetching reservations");
-    }
+    res.status(200).json(reservations);
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
