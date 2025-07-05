@@ -15,12 +15,22 @@
     ChevronRightOutline,
   } from "flowbite-svelte-icons";
 
-  // import paginationData from '../../routes/room/advancedTable.json';
 
   interface Props {
-    paginationData: any;
+    seatData: any;
   }
-  let { paginationData }: Props = $props();
+  let { seatData }: Props = $props();
+
+
+  let paginationData = [    {
+      "id": 30,
+      "student_name": "Ruby",
+      "time_in": "0830",
+      "time_out": "1030",
+      "date": "2025-06-29",
+      "seat_col": "B",
+      "seat_row": "2"
+    }]
 
   let divClass =
     "bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden";

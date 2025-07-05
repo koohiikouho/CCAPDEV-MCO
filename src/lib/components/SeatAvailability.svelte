@@ -15,6 +15,27 @@
         }
     }
 
+    //for GET shenanigans
+    let params = new URLSearchParams(location.search);
+    let roomCode: string = params.get("labCode");
+    let getLabURL = "http://localhost:3000/labs/".concat(roomCode);
+    const getLabData = async () => {
+      const res = await fetch(getLabURL);
+      const data = await res.json();
+      return data[0];
+    };
+
+    let labData = getLabData();
+
+
+    const getReservations = async () => {
+      const res = await fetch(getLabURL);
+      const data = await res.json();
+      return data[0];      
+    }
+
+    
+    
 </script>
 
 

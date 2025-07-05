@@ -8,49 +8,21 @@
   import Search from "../lib/components/Search.svelte";
   import { cubicOut } from "svelte/easing";
 
-  let labCardsData = [
-    {
-        labName: "GK 210 Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail: "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-16.jpg",
-        labCode: 1
-    },
 
-    {
-        labName: "GK 211 Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        labCode: 2
-    },
+  const getLabs = async () => {
+    const res = await fetch(
+      "http://localhost:3000/labs"
+    );
+    const data = await res.json();
+    labCardsData = data;
+  };
 
-    {
-        labName: "GK 403 Network Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail: "/src/assets/comlabs/comlab1.jpg",
-        labCode: 3
-    },
 
-    {
-        labName: "GK 301A Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail:
-            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-8.jpg",
-        labCode: 4
-    },
+  let testing = $state();
+  let labCardsData = $state([
+  ]);
 
-    {
-        labName: "AG 1703 Laboratory",
-        labDesc:
-            "Air-Conditioned Room equipped with 3 large TVs on each side. It's quite chilly in here so remember to bring a jacket!",
-        thumbnail:
-            "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-2-1024x768.jpg",
-        labCode: 5
-    },
-  ];
-
+    
     let qty:number = 10;
     let vx:number = 0.1;
     let vy:number = 0.2;
@@ -60,7 +32,7 @@
     let value = $state("");
     let currentPageItems = $derived(labCardsData);
     let filteredItems = $derived(labCardsData.filter((item) => item.labName.concat(item.labName).toLowerCase().indexOf(value.toLowerCase()) !== -1));
-
+    getLabs();
 </script>
 
 <div class="-z-10">
@@ -79,6 +51,7 @@
       <h1 class="text-surface-600 font-bold md:text-start text-center pl-auto md:pl-9 flex flex-col md:flex-row items-center justify-center md:justify-between gap-5">
         <div class="flex items-end">
           <ComputerSpeakerOutline class="w-15 h-15 mr-5"/>Labs 
+          <p>{testing}</p>
         </div> 
         <Input id="default-input" placeholder="Search Labs" class="pl-8 h-12" divClass="px-9 w-100" bind:value>
         {#snippet left()}
@@ -95,7 +68,7 @@
             labName={labCardsData.labName}
             labDesc={labCardsData.labDesc}
             thumbnail={labCardsData.thumbnail}
-            labCode={labCardsData.labCode}
+            labCode={labCardsData._id}
             />
           </div>
         {/each}

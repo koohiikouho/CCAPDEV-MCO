@@ -5,10 +5,6 @@
 
   import paginationData from "../../routes/room/advancedTable.json";
 
-
-  console.log(paginationData);
-
-
   let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
 	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
 	let searchClass = 'w-full relative';

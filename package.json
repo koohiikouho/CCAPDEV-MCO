@@ -32,6 +32,7 @@
     "eslint": "^9.29.0",
     "express": "^5.1.0",
     "flowbite-svelte": "^1.6.8",
+    "http-errors": "^2.0.0",
     "mini-svg-data-uri": "^1.4.4",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",

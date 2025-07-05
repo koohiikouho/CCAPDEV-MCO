@@ -8,21 +8,23 @@
   import SeatAvailability from "../../lib/components/SeatAvailability.svelte";
   import Reservations from "../../lib/components/Reservations.svelte";
 
-  const getLabData = async () => {
-    const res = await fetch(
-      "./advancedTableModified".concat(roomCode).concat(".json")
-    );
-    const data = await res.json();
-    return data;
-  };
+  let getLabURL = "http://localhost:3000/labs/".concat(roomCode);
 
-  const getCarouselData = async () => {
-    const res = await fetch(
-      "./advancedTableModified".concat(roomCode).concat(".json")
-    );
+  const getLabData = async () => {
+    const res = await fetch(getLabURL);
     const data = await res.json();
-    images = data.images;
+    console.log(data[0].seats)
+    return data[0];
   };
+  
+  // const getCarouselData = async () => {
+  //   const res = await fetch(
+  //     "./advancedTableModified".concat(roomCode).concat(".json")
+  //   );
+  //   const data = await res.json();
+  //   images = data.images;
+  // };
+
 
   import Particles from "../../lib/components/Particles.svelte";
 
@@ -56,7 +58,7 @@
     },
   ]);
 
-  getCarouselData();
+  // getCarouselData();
   let profilePic = "/src/assets/profilepic.jpg";
 
   let userName = "Kasane Teto";
@@ -69,7 +71,7 @@
   let staticity: number = 100;
   let divider: boolean = false;
 
-  let userRole: string = "labTech";
+  let userRole: string = "student";
 </script>
 
 <TempNavbar {userEmail} {userName} profilePicture={profilePic} />
@@ -141,9 +143,9 @@
               <span class="">Reservations</span>
             {/snippet}
             {#if userRole == "student"}
-              <Reservations paginationData={labData.reservations} />
+              <Reservations seatData={labData.seats}/>
             {:else if userRole == "labTech"}
-              <ReservationsAdmin paginationData={labData.reservations} />
+              <ReservationsAdmin paginationData={labData.seats} />
             {/if}
           </TabItem>
           {#if userRole == "student"}

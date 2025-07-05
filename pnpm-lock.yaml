@@ -23,6 +23,9 @@ importers:
       flowbite-svelte:
         specifier: ^1.6.8
         version: 1.6.8(rollup@4.42.0)(svelte@5.33.19)(tailwindcss@4.1.8)
+      http-errors:
+        specifier: ^2.0.0
+        version: 2.0.0
       mini-svg-data-uri:
         specifier: ^1.4.4
         version: 1.4.4

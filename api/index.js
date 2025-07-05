@@ -4,6 +4,7 @@ import cors from "cors";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
+import createError from "http-errors";
 
 const app = express();
 const port = 3000;
@@ -26,6 +27,54 @@ app.get("/labs", async (req, res) => {
   try {
     console.log("Querying the database with Labs.find()...");
     const labs = await Labs.find().exec();
+    console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
+
+    res.status(200).json(labs);
+    console.log("Successfully sent JSON response.");
+  } catch (err) {
+    console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
+    res.status(500).send("Error fetching labs");
+  }
+});
+
+app.get("/labs/:id", async (req, res) => {
+  console.log("---"); // Separator for requests
+  console.log(
+    `[${new Date().toLocaleTimeString()}] Received a request for /labs/`
+  );
+  try {
+    console.log("Querying the database with Labs.find()...");
+    let labID = req.params.id;
+    const labs = await Labs.find({
+      _id: labID,
+    }).exec();
+    console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
+
+    res.status(200).json(labs);
+    console.log("Successfully sent JSON response.");
+  } catch (err) {
+    console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
+    res.status(500).send("Error fetching labs");
+  }
+});
+
+/* simple error handler */
+app.use((err, req, res, _next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message });
+});
+
+app.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
+  console.log("---"); // Separator for requests
+  console.log(
+    `[${new Date().toLocaleTimeString()}] Received a request for /labs/:id/:date/:timein/:timeout`
+  );
+  try {
+    console.log("Querying the database with Labs.find()...");
+    let labID = req.params.id;
+    const labs = await Labs.find({
+      _id: labID,
+    }).exec();
     console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
 
     res.status(200).json(labs);
@@ -62,7 +111,9 @@ app.get("/reservations", async (req, res) => {
   try {
     console.log("Querying the database with Reservations.find()...");
     const reservations = await Reservations.find().exec();
-    console.log(`Database query finished. Found ${reservations.length} documents.`);
+    console.log(
+      `Database query finished. Found ${reservations.length} documents.`
+    );
 
     res.status(200).json(reservations);
     console.log("Successfully sent JSON response.");
