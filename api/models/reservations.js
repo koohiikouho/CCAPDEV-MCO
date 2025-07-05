@@ -1,27 +1,41 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema({
-  user_id: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    required: true
+    ref: "users",
+    required: true,
   },
-  lab_id: {
+  labId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'labs',
-    required: true
+    ref: "labs",
+    required: true,
   },
-  time_in: {
+  timeIn: {
     type: Date,
     required: true,
   },
-  time_out: {
+  timeOut: {
     type: Date,
   },
   date: {
     type: Date,
     required: true,
-  }
-}, { timestamps: true });
+  },
+  seat: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ["pending", "approved", "rejected"],
+  },
+}, {
+  timestamps: true,
+  collection: "Reservations",
+});
 
-module.exports = mongoose.model('reservation', reservationSchema);
+reservationSchema.index({ userId: 1, labId: 1, date: 1, timeIn: 1 }, { unique: true });
+
+export default mongoose.model("reservation", reservationSchema);
