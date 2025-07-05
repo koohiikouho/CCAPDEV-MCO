@@ -1,11 +1,14 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 
 const app = express();
 const port = 3000;
+
+app.use(cors());
 
 const mongoURI =
   "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
