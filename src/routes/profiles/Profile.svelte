@@ -1,145 +1,32 @@
 <script lang="ts">
   import {
-    Avatar,
-    Button,
-    Modal,
-    Input,
-    Label,
-    Badge,
-    Card,
+    Avatar, Button, Modal, Input, Label, Badge, Card
   } from "flowbite-svelte";
-
   import {
-    CalendarMonthOutline,
-    ClockOutline,
-    UsersOutline,
-    FlaskOutline,
-    ComputerSpeakerOutline,
+    CalendarMonthOutline, ClockOutline, UsersOutline,
+    FlaskOutline, ComputerSpeakerOutline
   } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
-  import { cubicOut } from "svelte/easing";
+  import { getUserData, getLabReservations } from "../../../api/api.js";
+  import { onMount } from "svelte";
   import { fly } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
 
   let params = new URLSearchParams(location.search);
-  let userCode: string = params.get("userCode");
+  let userCode = parseInt(params.get("userCode"));
+  let profileParam = params.get("profile");
+  let isOwnProfile = profileParam !== "1";
 
-  let reservations = [
-    {
-      id: 1,
-      labName: "GK 211 Laboratory",
-      date: "2024-06-20",
-      time: "2:00 PM - 4:00 PM",
-      duration: "2 hours",
-      purpose: "Web Development Project",
-      status: "Confirmed",
-      seat: "C3",
-    },
-    {
-      id: 2,
-      labName: "GK 403 Network Laboratory",
-      date: "2024-06-22",
-      time: "10:00 AM - 12:00 PM",
-      duration: "2 hours",
-      purpose: "LBYITN4 Networking Activity",
-      status: "Ongoing",
-      seat: "C1",
-    },
-    {
-      id: 3,
-      labName: "AG 1703 Laboratory",
-      date: "2024-06-18",
-      time: "3:00 PM - 5:00 PM",
-      duration: "2 hours",
-      purpose: "CCAPDEV MC01 Presentation",
-      status: "Completed",
-      seat: "B5",
-    },
-    {
-      id: 4,
-      labName: "AG 1707 Laboratory",
-      date: "2024-06-18",
-      time: "3:00 PM - 8:30 PM",
-      duration: "5.5 hours",
-      purpose: "CCAPDEV MC01 Presentation",
-      status: "Cancelled",
-      seat: "A4",
-    },
-  ];
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "Confirmed":
-        return "green";
-      case "Ongoing":
-        return "yellow";
-      case "Completed":
-        return "blue";
-      case "Cancelled":
-        return "red";
-      default:
-        return "gray";
-    }
-  }
-
-  // Current user is Kasane Teto (custom)
-  let currentUser = {
-    name: "Kasane Teto",
-    email: "kasaneteto@dlsu.edu.ph",
-    avatar: "/src/assets/profilepic.jpg",
-    role: "Lab Assistant",
-    description:
-      "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab.",
-  };
-
+  let users = [];
+  let currentUser = null;
   let constUser = {
     name: "Kasane Teto",
     email: "kasaneteto@dlsu.edu.ph",
     avatar: "/src/assets/profilepic.jpg",
     role: "Lab Assistant",
-    description:
+    bio:
       "I'm passionate about technology and creative research. I assist with lab experiments, manage reservations, and support members in the lab.",
   };
-  if (userCode === "1") {
-    currentUser = {
-      name: "Ron Alonzo",
-      email: "ron_alonzo@dlsu.edu.ph",
-      avatar: "/src/assets/Users/ronPfp.png",
-      role: "Student",
-      description:
-        "I'm a student exploring different technologies and working on lab projects.",
-    };
-  } else if (userCode === "2") {
-    currentUser = {
-      name: "Joshua Gonzales",
-      email: "joshua_gonzales@dlsu.edu.ph",
-      avatar: "/src/assets/Users/joshuaPfp.png",
-      role: "Student",
-      description:
-        "I enjoy learning about networks, systems, and how things connect behind the scenes.",
-    };
-  } else if (userCode === "3") {
-    currentUser = {
-      name: "Nathaniel Reyes",
-      email: "nathaniel_reyes@dlsu.edu.ph",
-      avatar: "/src/assets/Users/alden.jpeg",
-      role: "Student",
-      description: "Always curious about system performance and backend logic.",
-    };
-  } else if (userCode === "4") {
-    currentUser = {
-      name: "Cochise King",
-      email: "cochise_king@dlsu.edu.ph",
-      avatar: "/src/assets/Users/cochisePfp.png",
-      role: "Professor",
-      description:
-        "I teach and guide students in the field of computer science and software engineering.",
-    };
-  }
-
-  // fallback avatar
-  function getAvatar(avatar: string): string {
-    return avatar && avatar !== "" ? avatar : "/default-avatar.png";
-  }
 
   let showEditModal = false;
 
@@ -148,18 +35,88 @@
   }
 
   function saveProfile() {
-    // For now, just log the updated values (you can connect this to a backend or store)
     console.log("Updated Profile:", currentUser);
     showEditModal = false;
   }
 
-  // Extract `profile` query param from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const profileParam = urlParams.get("profile");
+  function getAvatar(avatar: string): string {
+    return avatar && avatar !== "" ? avatar : "/src/assets/default_avatar.png";
+  }
 
-  // If profileParam is null or "0", show edit; if "1", it's another user's profile
-  let isOwnProfile = profileParam !== "1";
+  function getStatusColor(status) {
+    switch (status) {
+      case "Confirmed": return "green";
+      case "Ongoing": return "yellow";
+      case "Completed": return "blue";
+      case "Cancelled": return "red";
+      default: return "gray";
+    }
+  }
+
+  function formatTime(timeStr: string): string {
+  // Input like "0830" or "1430"
+  const hours = parseInt(timeStr.slice(0, 2), 10);
+  const minutes = parseInt(timeStr.slice(2), 10);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+  function calculateDuration(start: string, end: string): number {
+    const startHour = parseInt(start.slice(0, 2), 10);
+    const startMin = parseInt(start.slice(2), 10);
+    const endHour = parseInt(end.slice(0, 2), 10);
+    const endMin = parseInt(end.slice(2), 10);
+
+    const startTotal = startHour * 60 + startMin;
+    const endTotal = endHour * 60 + endMin;
+    return endTotal - startTotal;
+  }
+
+
+  let reservations = []; // Optionally filter reservations based on currentUser.email later
+
+  onMount(async () => {
+    try {
+      const data = await getUserData();
+      users = data.map((user, index) => {
+        const rawRole = user?.role ?? "unknown";
+        const formattedRole =
+          typeof rawRole === "string"
+            ? rawRole.charAt(0).toUpperCase() + rawRole.slice(1)
+            : "Unknown";
+
+        return {
+          id: index + 1,
+          _id: user._id,
+          name: `${user?.name?.first_name || "Unnamed"} ${user?.name?.last_name || ""}`,
+          email: user?.email || "noemail@domain.com",
+          avatar: user?.avatar || "/src/assets/default_avatar.png",
+          role: formattedRole,
+          bio: user?.bio || "No description provided.",
+        };
+      });
+      currentUser = users.find(u => u.id === userCode);
+          // 🔽 Fetch reservations after users are loaded
+    const reservationData = await getLabReservations();
+    reservations = reservationData
+      .filter(r => String(r.user_id?._id || r.user_id) === String(currentUser._id))
+      .map((r, index) => ({
+        labName: r.lab_id?.labName || "Unknown Lab",
+        date: new Date(r.date).toLocaleDateString(),
+        time: formatTime(r.time_in),
+        duration: r.time_out
+          ? `${calculateDuration(r.time_in, r.time_out)} mins`
+          : "N/A",
+        seat: r.seat,
+        status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
+      }));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+
+    
+  });
 </script>
+
 
 <TempNavbar
   userName={constUser.name}
@@ -167,6 +124,7 @@
   profilePicture={constUser.avatar}
 />
 
+{#if currentUser}
 <main class="mt-10 p-10 sm:p-20 bg-primary-50 min-h-screen text-surface-800">
   <div
     class="grid grid-cols-1 gap-10 max-w-6xl mx-auto bg-white p-10 rounded-xl shadow-2xl"
@@ -189,7 +147,7 @@
 
         <div class="mt-6">
           <h2 class="text-xl font-semibold text-surface-700 mb-2">About</h2>
-          <p class="text-surface-600">{currentUser.description}</p>
+          <p class="text-surface-600">{currentUser.bio}</p>
         </div>
       </div>
     </div>
@@ -255,9 +213,9 @@
           {/each}
         </div>
       {:else}
-        <Card
-          class="text-center py-12 border border-surface-200 bg-surface-50 mt-10"
-        >
+          <Card
+            class="text-center py-12 border border-surface-200 bg-surface-50 mt-10 mx-auto"
+          >
           <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
           <h3 class="text-xl font-semibold text-surface-700 mb-2">
             No Reservations Found
@@ -270,6 +228,12 @@
     </div>
   </div>
 </main>
+
+{:else}
+  <main class="min-h-screen flex items-center justify-center bg-primary-50">
+    <p class="text-lg text-gray-500">Loading profile...</p>
+  </main>
+{/if}
 
 <Modal
   open={showEditModal}
@@ -291,11 +255,11 @@
 
 
       <div>
-        <Label for="description" class="block mb-1">Description</Label>
+        <Label for="bio" class="block mb-1">Description</Label>
         <textarea
-          id="description"
+          id="bio"
           rows="3"
-          bind:value={currentUser.description}
+          bind:value={currentUser.bio}
           class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500"
         ></textarea>
       </div>

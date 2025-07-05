@@ -114,9 +114,26 @@ app.get("/reservations", async (req, res) => {
     console.log(
       `Database query finished. Found ${reservations.length} documents.`
     );
+    console.log("---");
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
+    );
 
-    res.status(200).json(reservations);
-    console.log("Successfully sent JSON response.");
+    try {
+      console.log(
+        "Querying the database with Reservations.find() and populating..."
+      );
+
+      const reservations = await Reservations.find()
+        .populate("lab_id", "labName labLocation labDescription image seats")
+        .populate("user_id", "email");
+
+      console.log(`Found ${reservations.length} reservations.`);
+      res.status(200).json(reservations);
+    } catch (err) {
+      console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
+      res.status(500).send("Error fetching reservations");
+    }
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
