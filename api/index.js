@@ -62,8 +62,8 @@ app.get("/reservations", async (req, res) => {
     console.log("Querying the database with Reservations.find() and populating...");
 
     const reservations = await Reservations.find()
-      .populate("lab_id", "name")     // ✅ match DB field name
-      .populate("user_id", "email");  // ✅ match DB field name
+      .populate("lab_id", "labName labLocation labDescription image seats")
+      .populate("user_id", "email"); 
 
 
     console.log(`Found ${reservations.length} reservations.`);
