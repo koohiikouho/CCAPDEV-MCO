@@ -69,7 +69,7 @@ const labSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "LabReservation",
+    collection: "Labs",
   }
 );
 
