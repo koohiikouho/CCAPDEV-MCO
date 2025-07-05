@@ -55,22 +55,25 @@ app.get("/users", async (req, res) => {
 });
 
 app.get("/reservations", async (req, res) => {
-  console.log("---"); // Separator for requests
-  console.log(
-    `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
-  );
-  try {
-    console.log("Querying the database with Reservations.find()...");
-    const reservations = await Reservations.find().exec();
-    console.log(`Database query finished. Found ${reservations.length} documents.`);
+  console.log("---");
+  console.log(`[${new Date().toLocaleTimeString()}] Received a request for /reservations`);
 
+  try {
+    console.log("Querying the database with Reservations.find() and populating...");
+
+    const reservations = await Reservations.find()
+      .populate("lab_id", "name")     // ✅ match DB field name
+      .populate("user_id", "email");  // ✅ match DB field name
+
+
+    console.log(`Found ${reservations.length} reservations.`);
     res.status(200).json(reservations);
-    console.log("Successfully sent JSON response.");
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
   }
 });
+
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
