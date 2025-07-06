@@ -18,13 +18,6 @@ const reservationSchema = new mongoose.Schema(
     },
     time_out: {
       type: Date,
-    },
-    date: {
-      type: Date,
-      required: true,
-    },
-    seat: {
-      type: String,
       required: true,
     },
     status: {
