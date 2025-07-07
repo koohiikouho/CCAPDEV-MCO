@@ -103,19 +103,16 @@ app.get("/users", async (req, res) => {
 });
 
 app.get("/reservations", async (req, res) => {
-  console.log("---"); // Separator for requests
-  console.log(
-    `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
-  );
+  console.log("---");
+  console.log(`[${new Date().toLocaleTimeString()}] Received a request for /reservations`);
 
   try {
-    console.log(
-      "Querying the database with Reservations.find() and populating..."
-    );
+    console.log("Querying the database with Reservations.find() and populating...");
+    const reservations = await Reservations.find()
+      .populate("lab_id", "lab_name lab_location lab_description image seats")
+      .populate("user_id", "email name avatar role");
 
-    const reservations = await Reservations.find().exec();
     console.log(`Found ${reservations.length} reservations.`);
-
     res.status(200).json(reservations);
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);

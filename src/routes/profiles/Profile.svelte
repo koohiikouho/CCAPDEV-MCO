@@ -7,7 +7,7 @@
     FlaskOutline, ComputerSpeakerOutline
   } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
-  import { getUserData, getLabReservations } from "../../../api/api.js";
+  import { getUserData, getLabReservations, getLabData } from "../../../api/api.js";
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
@@ -53,23 +53,15 @@
     }
   }
 
-  function formatTime(timeStr: string): string {
-  // Input like "0830" or "1430"
-  const hours = parseInt(timeStr.slice(0, 2), 10);
-  const minutes = parseInt(timeStr.slice(2), 10);
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  function formatDuration(ms: number): string {
+  const totalMinutes = Math.round(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
 }
-
-  function calculateDuration(start: string, end: string): number {
-    const startHour = parseInt(start.slice(0, 2), 10);
-    const startMin = parseInt(start.slice(2), 10);
-    const endHour = parseInt(end.slice(0, 2), 10);
-    const endMin = parseInt(end.slice(2), 10);
-
-    const startTotal = startHour * 60 + startMin;
-    const endTotal = endHour * 60 + endMin;
-    return endTotal - startTotal;
-  }
 
 
   let reservations = []; // Optionally filter reservations based on currentUser.email later
@@ -100,15 +92,17 @@
     reservations = reservationData
       .filter(r => String(r.user_id?._id || r.user_id) === String(currentUser._id))
       .map((r, index) => ({
-        labName: r.lab_id?.labName || "Unknown Lab",
-        date: new Date(r.date).toLocaleDateString(),
-        time: formatTime(r.time_in),
-        duration: r.time_out
-          ? `${calculateDuration(r.time_in, r.time_out)} mins`
-          : "N/A",
-        seat: r.seat,
+        labName: r.lab_id?.lab_name || "Unknown Lab",
+        date: new Date(r.time_in).toLocaleDateString(),
+        time: new Date(r.time_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration:
+          r.time_in && r.time_out &&
+          new Date(r.time_out).getTime() > new Date(r.time_in).getTime()
+            ? formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime())
+            : "Invalid time",
+        seat: r.seat || "N/A",
         status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
-      }));
+      }))
     } catch (error) {
       console.error("Error fetching users:", error);
     }

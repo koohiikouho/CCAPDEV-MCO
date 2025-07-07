@@ -23,12 +23,12 @@ const seatSchema = new mongoose.Schema({
 
 const labSchema = new mongoose.Schema(
   {
-    labName: {
+    lab_name: {
       type: String,
       required: true,
       trim: true,
     },
-    labLocation: {
+    lab_location: {
       building: {
         type: String,
         required: true,
@@ -44,7 +44,7 @@ const labSchema = new mongoose.Schema(
         required: true,
       },
     },
-    labDescription: {
+    lab_description: {
       type: String,
       trim: true,
     },
@@ -72,6 +72,7 @@ const labSchema = new mongoose.Schema(
     collection: "Labs",
   }
 );
+
 
 labSchema.index({ "seats.col": 1, "seats.row": 1 }, { unique: true });
 

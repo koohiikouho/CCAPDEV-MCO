@@ -4,12 +4,12 @@ const reservationSchema = new mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
       required: true,
     },
     lab_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "labs",
+      ref: "Labs",
       required: true,
     },
     time_in: {
