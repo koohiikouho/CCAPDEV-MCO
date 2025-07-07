@@ -109,16 +109,40 @@ app.get("/reservations", async (req, res) => {
   try {
     console.log("Querying the database with Reservations.find() and populating...");
     const reservations = await Reservations.find()
-      .populate("lab_id", "lab_name lab_location lab_description image seats")
+      .populate("lab_id", "lab_name seats") // make sure seats are populated
       .populate("user_id", "email name avatar role");
 
-    console.log(`Found ${reservations.length} reservations.`);
-    res.status(200).json(reservations);
+    const formatted = reservations.map((r) => {
+      let seat = "N/A";
+
+      if (r.lab_id && r.lab_id.seats) {
+        const matchedSeat = r.lab_id.seats.find((s) =>
+          s.reservations.some(resId => resId.toString() === r._id.toString())
+        );
+
+        if (matchedSeat) {
+          seat = `${matchedSeat.col}${matchedSeat.row}`;
+        }
+      }
+
+      return {
+        _id: r._id,
+        lab_id: r.lab_id,
+        user_id: r.user_id,
+        time_in: r.time_in,
+        time_out: r.time_out,
+        status: r.status,
+        seat: seat,
+      };
+    });
+
+    res.status(200).json(formatted);
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
   }
 });
+
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
