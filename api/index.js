@@ -4,6 +4,7 @@ import cors from "cors";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
+import { idText } from "typescript";
 
 const app = express();
 const port = 3000;
@@ -39,21 +40,93 @@ app.get("/labs", async (req, res) => {
 app.get("/labs/:id", async (req, res) => {
   console.log("---"); // Separator for requests
   console.log(
-    `[${new Date().toLocaleTimeString()}] Received a request for /labs/`
+    `[${new Date().toLocaleTimeString()}] Received a request for /labs/${req.params.id}`
   );
-  try {
-    console.log("Querying the database with Labs.find()...");
-    let labID = req.params.id;
-    const labs = await Labs.find({
-      _id: labID,
-    }).exec();
-    console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
 
-    res.status(200).json(labs);
+  try {
+    const id = req.params.id;
+
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid lab ID format" });
+    }
+
+    console.log("Querying the database with Labs.findById()...");
+    const lab = await Labs.findById(id).exec();
+
+    if (!lab) {
+      console.log("No lab found with that ID");
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    console.log("Database query finished. Lab found:", lab.lab_name);
+    res.status(200).json(lab);
     console.log("Successfully sent JSON response.");
   } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
-    res.status(500).send("Error fetching labs");
+    console.error("!!! AN ERROR OCCURRED while fetching lab:", err);
+    res.status(500).json({
+      error: "Error fetching lab",
+      details: err.message,
+    });
+  }
+});
+
+app.get("/reservations/:labId", async (req, res) => {
+  try {
+    const labId = req.params.labId;
+
+    // First get the lab with all seats and their reservations populated
+    const lab = await Labs.findById(labId).populate({
+      path: "seats.reservations",
+      populate: [
+        { path: "user_id", select: "name email" },
+        { path: "lab_id", select: "lab_name" },
+      ],
+    });
+
+    if (!lab) {
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    // Extract all reservations from all seats
+    const allReservations = [];
+
+    lab.seats.forEach((seat) => {
+      seat.reservations.forEach((reservation) => {
+        allReservations.push({
+          ...reservation.toObject(),
+          seat: {
+            col: seat.col,
+            row: seat.row,
+          },
+        });
+      });
+    });
+
+    // Format the response
+    const formattedReservations = allReservations.map((reservation) => ({
+      student: {
+        name: reservation.user_id?.name
+          ? `${reservation.user_id.name.first_name} ${reservation.user_id.name.last_name}`
+          : "Unknown",
+        email: reservation.user_id?.email || "N/A",
+      },
+      timeIn: reservation.time_in,
+      timeOut: reservation.time_out,
+      date: reservation.time_in.toISOString().split("T")[0],
+      column: reservation.seat.col,
+      row: reservation.seat.row,
+      labName: reservation.lab_id?.lab_name || "N/A",
+      status: reservation.status,
+    }));
+
+    res.status(200).json(formattedReservations);
+  } catch (err) {
+    console.error("Error fetching lab reservations:", err);
+    res.status(500).json({
+      error: "Error fetching lab reservations",
+      details: err.message,
+    });
   }
 });
 
@@ -104,10 +177,14 @@ app.get("/users", async (req, res) => {
 
 app.get("/reservations", async (req, res) => {
   console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] Received a request for /reservations`);
+  console.log(
+    `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
+  );
 
   try {
-    console.log("Querying the database with Reservations.find() and populating...");
+    console.log(
+      "Querying the database with Reservations.find() and populating..."
+    );
     const reservations = await Reservations.find()
       .populate("lab_id", "lab_name seats") // make sure seats are populated
       .populate("user_id", "email name avatar role");
@@ -117,7 +194,7 @@ app.get("/reservations", async (req, res) => {
 
       if (r.lab_id && r.lab_id.seats) {
         const matchedSeat = r.lab_id.seats.find((s) =>
-          s.reservations.some(resId => resId.toString() === r._id.toString())
+          s.reservations.some((resId) => resId.toString() === r._id.toString())
         );
 
         if (matchedSeat) {
@@ -142,7 +219,6 @@ app.get("/reservations", async (req, res) => {
     res.status(500).send("Error fetching reservations");
   }
 });
-
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

@@ -7,16 +7,33 @@
   import { flip } from "svelte/animate";
   import Search from "../lib/components/Search.svelte";
   import { cubicOut } from "svelte/easing";
+  import { onMount } from "svelte";
 
+onMount( async () => {
+  try {
 
-  const getLabs = async () => {
     const res = await fetch(
       "http://localhost:3000/labs"
     );
     const data = await res.json();
+    console.log(data[0].lab_name);
     labCardsData = data;
-  };
+  }catch (err) {
+      console.error("Failed to fetch labs:", err);
+    }
+});
 
+  // const getLabs = async () => {
+  //   const res = await fetch(
+  //     "http://localhost:3000/labs"
+  //   );
+  //   const data = await res.json();
+  //   console.log(data[0].lab_name);
+  //   labCardsData = data;
+
+  //   return true;
+  // };
+  
 
   let testing = $state();
   let labCardsData = $state([
@@ -29,10 +46,10 @@
     let size:number = 100;
     let staticity:number = 100;
 
-    let value = $state("");
+    let value = $state("") ;
     let currentPageItems = $derived(labCardsData);
-    let filteredItems = $derived(labCardsData.filter((item) => item.labName.concat(item.labName).toLowerCase().indexOf(value.toLowerCase()) !== -1));
-    getLabs();
+    let filteredItems = $derived(labCardsData.filter((item) => item.lab_name.concat(item.lab_name).toLowerCase().indexOf(value.toLowerCase()) !== -1));
+    
 </script>
 
 <div class="-z-10">
@@ -65,9 +82,8 @@
         {#each filteredItems as labCardsData, index}
           <div in:fly|global={{ y: 50, duration: index*100, delay: 100, easing: cubicOut }}>
             <LabCard
-            labName={labCardsData.labName}
-            labDesc={labCardsData.labDesc}
-            thumbnail={labCardsData.thumbnail}
+            labName={labCardsData.lab_name}
+            thumbnail={labCardsData.image.src}
             labCode={labCardsData._id}
             />
           </div>

@@ -15,7 +15,7 @@ const seatSchema = new mongoose.Schema({
   reservations: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "reservations",
+      ref: "Reservations",
       default: [],
     },
   ],
@@ -72,7 +72,6 @@ const labSchema = new mongoose.Schema(
     collection: "Labs",
   }
 );
-
 
 labSchema.index({ "seats.col": 1, "seats.row": 1 }, { unique: true });
 
