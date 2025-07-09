@@ -9,14 +9,22 @@
   import Reservations from "../../lib/components/Reservations.svelte";
 
   let getLabURL = "http://localhost:3000/labs/".concat(roomCode);
+  let getLabSeatsURL = "http://localhost:3000/reservations/".concat(roomCode);
 
   const getLabData = async () => {
     const res = await fetch(getLabURL);
     const data = await res.json();
-    console.log(data[0].seats)
-    return data[0];
+    return data;
   };
-  
+
+
+  const getLabSeats = async () => {
+    const res = await fetch(getLabSeatsURL);
+    const data = await res.json();
+    return data;
+  };
+
+  // getLabSeats();
   // const getCarouselData = async () => {
   //   const res = await fetch(
   //     "./advancedTableModified".concat(roomCode).concat(".json")
@@ -84,15 +92,15 @@
       class="grid md:grid-cols-2 h-auto w-auto pt-4 bg-tertiary-50/40 backdrop-blur-xs rounded-t-2xl outline-2 outline-secondary-50/60 outline-dashed"
     >
       <div class="flex items-center justify-center flex-col px-2 py-4">
-        <Heading tag="h1" class="">{labData.labName}</Heading>
+        <Heading tag="h1" class="">{labData.lab_name}</Heading>
         <div
           class="flex justify-center md:justify-start items-center px-5 pt-2"
         >
           Labs <AngleRightOutline class="size-5" />
-          {labData.labLocation.building}
+          {labData.lab_location.building}
           <AngleRightOutline class="size-5" />
-          {labData.labLocation.floor} Floor <AngleRightOutline class="size-5" />
-          Room {labData.labLocation.room}
+          {labData.lab_location.floor} Floor <AngleRightOutline class="size-5" />
+          Room {labData.lab_location.room}
         </div>
         <div
           class="flex justify-center md:justify-start text-start items-center px-13 md:px-20 py-5"
@@ -138,16 +146,18 @@
             <SeatAvailability />
           </TabItem>
 
-          <TabItem class="w-full" {activeClass} {inactiveClass}>
-            {#snippet titleSlot()}
-              <span class="">Reservations</span>
-            {/snippet}
-            {#if userRole == "student"}
-              <Reservations seatData={labData.seats}/>
-            {:else if userRole == "labTech"}
-              <ReservationsAdmin paginationData={labData.seats} />
-            {/if}
-          </TabItem>
+          {#await getLabSeats() then seatdata}
+            <TabItem class="w-full" {activeClass} {inactiveClass}>
+              {#snippet titleSlot()}
+                <span class="">Reservations</span>
+              {/snippet}
+              {#if userRole == "student"}
+                <Reservations seatData={seatdata}/>
+              {:else if userRole == "labTech"}
+                <ReservationsAdmin paginationData={seatdata} />
+              {/if}
+            </TabItem>
+          {/await}
           {#if userRole == "student"}
             <TabItem class="w-full" {activeClass} {inactiveClass}>
               {#snippet titleSlot()}

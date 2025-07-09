@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { Card, ImagePlaceholder } from "flowbite-svelte";
 
     let { labName = "Lab Name", labDesc = "Lab Description", thumbnail = "/src/assets/comlabs/comlab2.jpg", labCode} = $props();
