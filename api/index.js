@@ -220,7 +220,6 @@ app.get("/reservations", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 app.post("/login", async (req, res) => {
   console.log("---");
   console.log(`[${new Date().toLocaleTimeString()}] Received login request`);
@@ -274,8 +273,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-=======
->>>>>>> 02fcaf2c3d6796a6c66f93f81c0238f7566187a4
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
