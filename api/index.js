@@ -175,6 +175,43 @@ app.get("/users", async (req, res) => {
   }
 });
 
+// Used to verify login credentials w/ db
+app.post("/users", async (req, res) => {
+  console.log("---");
+  console.log(`[${new Date().toLocaleTimeString()}] POST /users (Login attempt)`);
+
+  const { email, password } = req.body;
+
+  try {
+    console.log(`Looking up user with email: ${email}`);
+    const user = await Users.findOne({ email }).exec();
+
+    if (!user) {
+      console.log("User not found.");
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const isMatch = password === user.password; // Plain text for now
+
+    if (!isMatch) {
+      console.log("Password mismatch.");
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    console.log("Login successful.");
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      _id: user._id
+    });
+  } catch (err) {
+    console.error("!!! AN ERROR OCCURRED during login:", err);
+    res.status(500).send("Server error during login");
+  }
+});
+
 app.get("/reservations", async (req, res) => {
   console.log("---");
   console.log(
@@ -217,59 +254,6 @@ app.get("/reservations", async (req, res) => {
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
-  }
-});
-
-app.post("/login", async (req, res) => {
-  console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] Received login request`);
-
-  try {
-    const { email, password } = req.body;
-
-    // Input validation
-    if (!email || !password) {
-      console.log("Login failed - missing credentials");
-      return res.status(400).json({ message: "Please provide both email and password" });
-    }
-
-    console.log(`Attempting to find user with email: ${email}`);
-    const currentUser = await user.findOne({ email }).select("+password");
-
-    // Verify username
-    if (!currentUser) {
-      console.log("Login failed - user not found");
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Verify password
-    console.log("Verifying user matches password");
-    const isMatch = await currentUser.comparePassword(password);
-    
-    if (!isMatch) {
-      console.log("Login failed - password mismatch");
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Create JWT token
-    const token = currentUser.generateAuthToken();
-
-    // Return user data (except password!!)
-    const userData = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      role: user.role,
-      token
-    };
-
-    console.log(`User ${email} successfully authenticated`);
-    res.status(200).json(userData);
-
-  } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
-    res.status(500).json({ message: "Server error during authentication" });
   }
 });
 
