@@ -133,6 +133,10 @@ app.get("/reservations/:labId", async (req, res) => {
   }
 });
 
+app.post("/login"){
+
+}
+
 /* simple error handler */
 app.use((err, req, res, _next) => {
   console.error(err);
@@ -184,7 +188,7 @@ app.post('/users', async (req, res) => {
   console.log(`[${new Date().toLocaleTimeString()}] POST /users (Login attempt)`);
 
   try {
-    console.log(`Looking up user with email: ${email}`);
+    console.log(`Looking up user with email: ${req.body.email}`);
     const user = await Users.findOne({ email: req.body.email }).exec();
 
     if (!user) {
@@ -193,11 +197,14 @@ app.post('/users', async (req, res) => {
     }
 
     if (req.body.password === user.password) {
-      res.json('Success');
+      res.json(user);
+      
+
+
     } else {
       res.status(403).json('Not Allowed');
     }
-  } catch (error) {
+  } catch (err) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
     res.status(500).json("Server error during login");
   }

@@ -30,9 +30,6 @@
 		e.preventDefault();
 
 		try {
-			// TESTING !!!
-			alert(emailInput + " " + passwordInput);
-
 			// Call backend to verify login
 			const data = await verifyLogin(emailInput, passwordInput);
 
