@@ -203,6 +203,25 @@ app.post('/users', async (req, res) => {
   }
 });
 
+// Sign in function
+app.post('/users', async (req, res) => {
+  try {
+    const user = { 
+      name: {
+        first_name: req.body.firstName,
+        last_name: req.body.lastName
+      },
+      password: req.body.password,
+      email: req.body.email,
+      bio: ""
+    }
+    Users.push(user);
+    res.status(201).send();
+  } catch {
+    res.status(500).send();
+  }
+})
+
 app.get("/reservations", async (req, res) => {
   console.log("---");
   console.log(

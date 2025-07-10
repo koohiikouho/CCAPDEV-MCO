@@ -3,19 +3,44 @@
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
 	import { Modal, P } from "flowbite-svelte";
 
+	import { verifySignUp } from '../../../api/api.js';
+
 	let result = $state(false);
 	let checked = $state(false);
 	let value : string = $state();
 	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 	let defaultModal = $state(false);
 
+	let firstNameInput = "";
+	let lastNameInput = "";
+	let emailInput = "";
+	let passwordInput = "";
+	let passwordConfirmInput = "";
+	let errorMessage = "";
+
 	function dlsuCheck(){
 		result = regex.test(value);
+	}
+
+	async function handleSignUp(e: Event) {
+		e.preventDefault();
+
+		try {
+			const data = await verifySignUp(firstNameInput, lastNameInput, emailInput, passwordInput);
+			if (data.error) {
+				errorMessage = data.error;
+				return;
+			}
+		} catch(err) {
+			console.error("Sign Up failed:", err);
+			errorMessage = "An error occurred during sign up. Please try again.";
+			alert(errorMessage);
+		}
 	}
 	
 </script>
 
-<Section name="register" class="pt-20">
+<Section name="register" class="pt-10">
 	<Register class="max-w-md mx-auto">
 		<div class="space-y-4 p-6 sm:p-8 md:space-y-6 outline-2 rounded-2xl outline-secondary-700">
 			<form class="flex flex-col space-y-6" action="/">
@@ -24,16 +49,24 @@
 					<h3 class="p-0 text-xl font-medium text-gray-900 dark:text-white">Create account</h3>
 				</div>
 				<Label class="space-y-2">
+					<span>Your first name</span>
+					<Input type="firstName" name="firstName" placeholder="e.g. John" bind:value={firstNameInput} required />
+				</Label>
+				<Label class="space-y-2">
+					<span>Your last name</span>
+					<Input type="lastName" name="lastName" placeholder="e.g. Doe" bind:value={lastNameInput} required />
+				</Label>
+				<Label class="space-y-2">
 					<span>Your email</span>
-					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" bind:value onInput={dlsuCheck} required />
+					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" bind:value={emailInput} onInput={dlsuCheck} required />
 				</Label>
 				<Label class="space-y-2">
 					<span>Your password</span>
-					<Input type="password" name="password" placeholder="•••••" required />
+					<Input type="password" name="password" placeholder="•••••" bind:value={passwordInput} required />
 				</Label>
 				<Label class="space-y-2">
 					<span>Confirm password</span>
-					<Input type="password" name="confirm-password" placeholder="•••••" required />
+					<Input type="password" name="confirm-password" placeholder="•••••" bind:value={passwordConfirmInput} required />
 				</Label>
 				<div class="flex items-start">
 					<Checkbox class="accent-primary-200 text-primary-200 focus:ring-primary-200 focus:ring-2" bind:checked>I accept the&nbsp;<a href="#a" class="text-primary-200 dark:text-primary-500 font-medium hover:underline" onclick={() => (defaultModal = true)}> Terms and Conditions</a></Checkbox>

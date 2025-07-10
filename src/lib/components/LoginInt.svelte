@@ -49,9 +49,8 @@
 				avatar: data.avatar || "/src/assets/default_avatar.png",
 				role: data.role.charAt(0).toUpperCase() + data.role.slice(1)
 			};
-			alert(currentUser.name);
 
-			// localStorage.setItem('user', JSON.stringify(currentUser));
+			// Token here
 
 			console.log('Login successful:', currentUser);
 
