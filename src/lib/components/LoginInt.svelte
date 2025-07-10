@@ -39,7 +39,6 @@
 			// If the backend sent an error, handle it
 			if (data.error) {
 				errorMessage = data.error;
-				alert(errorMessage + "hi");
 				return;
 			}
 

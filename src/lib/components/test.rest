@@ -1,0 +1,10 @@
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+    "email": "alice.garcia@dlsu.edu.ph", 
+    "password": "alicePass123"
+}
+
+###
+GET http://localhost:3000/users

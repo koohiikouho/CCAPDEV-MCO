@@ -9,7 +9,10 @@ import { idText } from "typescript";
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
 
 const mongoURI =
   "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
@@ -176,39 +179,27 @@ app.get("/users", async (req, res) => {
 });
 
 // Used to verify login credentials w/ db
-app.post("/users", async (req, res) => {
+app.post('/users', async (req, res) => {
   console.log("---");
   console.log(`[${new Date().toLocaleTimeString()}] POST /users (Login attempt)`);
 
-  const { email, password } = req.body;
-
   try {
     console.log(`Looking up user with email: ${email}`);
-    const user = await Users.findOne({ email }).exec();
+    const user = await Users.findOne({ email: req.body.email }).exec();
 
     if (!user) {
       console.log("User not found.");
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(400).json('Cannot find user');
     }
 
-    const isMatch = password === user.password; // Plain text for now
-
-    if (!isMatch) {
-      console.log("Password mismatch.");
-      return res.status(401).json({ error: "Invalid email or password" });
+    if (req.body.password === user.password) {
+      res.json('Success');
+    } else {
+      res.status(403).json('Not Allowed');
     }
-
-    console.log("Login successful.");
-    res.status(200).json({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      _id: user._id
-    });
-  } catch (err) {
+  } catch (error) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
-    res.status(500).send("Server error during login");
+    res.status(500).json("Server error during login");
   }
 });
 
