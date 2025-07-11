@@ -133,10 +133,6 @@ app.get("/reservations/:labId", async (req, res) => {
   }
 });
 
-app.post("/login"){
-
-}
-
 /* simple error handler */
 app.use((err, req, res, _next) => {
   console.error(err);
