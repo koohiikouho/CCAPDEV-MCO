@@ -183,7 +183,7 @@ app.get("/users", async (req, res) => {
 });
 
 // Used to verify login credentials w/ db
-app.post('/users', async (req, res) => {
+app.post('/users/login', async (req, res) => {
   console.log("---");
   console.log(`[${new Date().toLocaleTimeString()}] POST /users (Login attempt)`);
 

@@ -18,7 +18,7 @@ export async function getLabData() {
 }
 
 export async function verifyLogin(email, password) {
-  const response = await fetch('http://localhost:3000/users', {
+  const response = await fetch('http://localhost:3000/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
