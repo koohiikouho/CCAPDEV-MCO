@@ -1,10 +1,14 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import { idText } from "typescript";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const port = 3000;
@@ -193,10 +197,20 @@ app.post('/users/login', async (req, res) => {
     }
 
     if (req.body.password === user.password) {
-      res.json(user);
-      
+      console.log("Password matched");
+      console.log("Successfully logged in.");
 
-
+      // No expiration yet
+      const accessToken = jwt.sign({
+        id: user.id_number,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        email: user.email,
+        bio: user.bio
+      }, process.env.ACCESS_TOKEN_SECRET);
+      res.json({accessToken: accessToken});
+      //  res.json(user);
     } else {
       res.status(403).json('Not Allowed');
     }
