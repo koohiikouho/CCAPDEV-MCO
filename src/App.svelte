@@ -21,9 +21,9 @@
 
   let viewportComponent = null;
   let currentView = 0;
-  let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@dlsu.edu.ph"
-  let profilePicture = "/src/assets/profilepic.jpg";
+  let userName = "";
+  let userEmail = ""
+  let profilePicture = "";
 
   function changeViewOnLoad(){
     if (viewNumber == 0){

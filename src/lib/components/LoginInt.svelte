@@ -39,17 +39,10 @@
 				return;
 			}
 
-			// Success in verification
-			const currentUser = {
-				name: `${data.name.first_name} ${data.name.last_name}`,
-				email: data.email,
-				avatar: data.avatar || "/src/assets/default_avatar.png",
-				role: data.role.charAt(0).toUpperCase() + data.role.slice(1)
-			};
-
-			// Token here
-
-			console.log('Login successful:', currentUser);
+			
+			// Login successful - store the token and user data
+			localStorage.setItem('accessToken', data.accessToken);
+			console.log('Login successful:', data.user);
 
 			// Redirect to homepage w/ modal
 			window.location.href = "../../../index.html?signedIn=1";

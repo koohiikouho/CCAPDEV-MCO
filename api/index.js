@@ -193,7 +193,7 @@ app.post('/users/login', async (req, res) => {
 
     if (!user) {
       console.log("User not found.");
-      return res.status(400).json('Cannot find user');
+      return res.status(400).json({error: 'Cannot find user'});
     }
 
     if (req.body.password === user.password) {
@@ -202,21 +202,22 @@ app.post('/users/login', async (req, res) => {
 
       // No expiration yet
       const accessToken = jwt.sign({
-        id: user.id_number,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        role: user.role,
-        email: user.email,
-        bio: user.bio
+        id: user._id.toString(), // User OID to convert to string
       }, process.env.ACCESS_TOKEN_SECRET);
-      res.json({accessToken: accessToken});
-      //  res.json(user);
+     res.json({
+      accessToken: accessToken,
+      user: {
+        first_name: user.name.first_name,
+        last_name: user.name.last_name,
+        role: user.role
+      }
+    });
     } else {
-      res.status(403).json('Not Allowed');
+      res.status(403).json({error: 'Not Allowed'});
     }
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
-    res.status(500).json("Server error during login");
+    res.status(500).json({error: "Server error during login"});
   }
 });
 
