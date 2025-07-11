@@ -11,6 +11,7 @@
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import Suggestions from './routes/Suggestions.svelte';
+  import { onMount } from 'svelte';
 
   const views = [Home, Lab, Users, Reservations, Profile, Suggestions];
 
@@ -24,6 +25,36 @@
   let userName = "";
   let userEmail = ""
   let profilePicture = "";
+
+   onMount(async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      console.log('Token found:', token);
+
+      try {
+        const response = await fetch('http://localhost:3000/users/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user info");
+        }
+
+        const user = await response.json();
+        userName = `${user.first_name} ${user.last_name}`;
+        userEmail = user.email;
+        profilePicture = user.avatar || "/src/assets/default_avatar.png";
+
+        console.log("User loaded:", user);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    }
+  });
 
   function changeViewOnLoad(){
     if (viewNumber == 0){
@@ -76,7 +107,7 @@
   let isTech : number = 1;
 
 
-  let isLoggedIn: boolean = true;
+  let isLoggedIn: boolean = false;
   // isLoggedIn = Boolean(params.get("signedIn"));
 
   function signOut(){

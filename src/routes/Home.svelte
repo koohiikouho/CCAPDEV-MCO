@@ -1,7 +1,47 @@
 <script>
+	import { onMount } from 'svelte';
     import Particles from "../lib/components/Particles.svelte";
     import { Button, GradientButton, Heading, P, Span } from "flowbite-svelte";
+	import { Modal } from "flowbite-svelte";
+
+	let defaultModal = false;
+
+	let user = {
+		first_name: '',
+		last_name: '',
+		email: '',
+		role: '',
+		avatar: ''
+	};
+
+	onMount(async () => {
+		const token = localStorage.getItem('accessToken');
+		if (token) {
+			console.log('Token found:', token);
+			try {
+				const response = await fetch('http://localhost:3000/users/me', {
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch user info");
+				}
+
+				const userData = await response.json();
+				user = userData;
+				defaultModal = true;
+			} catch (err) {
+				console.error("Error fetching user:", err);
+			}
+		}
+	});
 </script>
+
+<Modal bind:open={defaultModal}>
+	<h1>Welcome {user.first_name}!</h1>
+</Modal>
 
 <div class="flex flex-col">
 <div class="relative flex h-screen w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl pb-50">

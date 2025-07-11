@@ -240,6 +240,38 @@ app.post('/users', async (req, res) => {
   }
 })
 
+// Used to fetch user info of current user
+app.get('/users/me', async (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await Users.findById(decoded.id).exec();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      id: user._id.toString(),
+      id_number: user.id_number,
+      first_name: user.name.first_name,
+      last_name: user.name.last_name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role
+    });
+  } catch (err) {
+    console.error("Token verification failed:", err);
+    res.status(403).json({ error: 'Invalid token' });
+  }
+});
+
 app.get("/reservations", async (req, res) => {
   console.log("---");
   console.log(
