@@ -185,7 +185,7 @@ app.get("/users", async (req, res) => {
 // Used to verify login credentials w/ db
 app.post('/users/login', async (req, res) => {
   console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] POST /users (Login attempt)`);
+  console.log(`[${new Date().toLocaleTimeString()}] POST /users/login (Login attempt)`);
 
   try {
     console.log(`Looking up user with email: ${req.body.email}`);
@@ -221,22 +221,33 @@ app.post('/users/login', async (req, res) => {
   }
 });
 
-// Sign in function
-app.post('/users', async (req, res) => {
+// Sign up function
+app.post('/users/signup', async (req, res) => {
+  console.log("---");
+  console.log(`[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`);
+
+  const existingUser = await Users.findOne({ email: req.body.email });
+    if (existingUser) {
+      return res.status(409).json({ error: "Email already in use." });
+    }
   try {
-    const user = { 
+    const newUser = await Users.create({
+      id_number: req.body.idNumber,
       name: {
         first_name: req.body.firstName,
         last_name: req.body.lastName
       },
-      password: req.body.password,
+      role: req.body.role,
       email: req.body.email,
+      password: req.body.password,
       bio: ""
-    }
-    Users.push(user);
-    res.status(201).send();
-  } catch {
-    res.status(500).send();
+    });
+    
+    console.log("New user created:", newUser.email);
+    res.status(201).json({ message: "User created successfully." });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ message: "Internal server error." });
   }
 })
 

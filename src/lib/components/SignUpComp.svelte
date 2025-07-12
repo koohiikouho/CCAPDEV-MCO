@@ -7,33 +7,71 @@
 
 	let result = $state(false);
 	let checked = $state(false);
-	let value : string = $state();
 	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 	let defaultModal = $state(false);
 
-	let firstNameInput = "";
-	let lastNameInput = "";
-	let emailInput = "";
-	let passwordInput = "";
-	let passwordConfirmInput = "";
-	let errorMessage = "";
+	let firstNameInput = $state("");
+	let lastNameInput = $state("");
+	let idNumberInput = $state("");
+	let emailInput = $state("");
+	let passwordInput = $state("");
+	let passwordConfirmInput = $state("");
+	let errorMessage = $state("");
 
-	function dlsuCheck(){
-		result = regex.test(value);
+	function dlsuCheck(value){
+		return result = regex.test(value);
 	}
 
-	async function handleSignUp(e: Event) {
+async function handleSignUp(e: Event) {
 		e.preventDefault();
 
+		if (dlsuCheck(emailInput)) {
+			errorMessage = "Invalid email";
+			console.log(errorMessage);
+			return;
+		}
+		
+		if (idNumberInput.length < 8) {
+			errorMessage = "Invalid ID number";
+			console.log(errorMessage);
+			return;
+		}
+
+		if (passwordInput.length < 8) {
+			errorMessage = "Password must be at least 8 characters.";
+			console.log(errorMessage);
+			return;
+		}
+
+		if (passwordInput !== passwordConfirmInput) {
+			errorMessage = "Password invalid.";
+			console.log(errorMessage);
+			return;
+		}
+
+		result = true;
+		checked = true;
+
 		try {
-			const data = await verifySignUp(firstNameInput, lastNameInput, emailInput, passwordInput);
+
+			// Call backend to verify signup
+			const data = await verifySignUp(firstNameInput, lastNameInput, idNumberInput, emailInput, passwordInput);
+
+			// If the backend sent an error, handle it
 			if (data.error) {
 				errorMessage = data.error;
 				return;
 			}
-		} catch(err) {
-			console.error("Sign Up failed:", err);
-			errorMessage = "An error occurred during sign up. Please try again.";
+
+			// Signup successful - store the token and user data
+			localStorage.setItem('accessToken', data.accessToken);
+			console.log('Login successful:', data.user);
+
+			// Redirect to homepage w/ modal
+			window.location.href = "../../../index.html?signedIn=1";
+		} catch (err) {
+			console.error("Login failed:", err);
+			errorMessage = "An error occurred during login. Please try again.";
 			alert(errorMessage);
 		}
 	}
@@ -43,7 +81,7 @@
 <Section name="register" class="pt-10">
 	<Register class="max-w-md mx-auto">
 		<div class="space-y-4 p-6 sm:p-8 md:space-y-6 outline-2 rounded-2xl outline-secondary-700">
-			<form class="flex flex-col space-y-6" action="/">
+			<form class="flex flex-col space-y-6" onsubmit={handleSignUp}>
 				<div class="flex items-center flex-col justify-center space-x-2">
 					<img class="h-50 w-auto" src="/src/assets/logo.png" alt="logo" />
 					<h3 class="p-0 text-xl font-medium text-gray-900 dark:text-white">Create account</h3>
@@ -55,6 +93,10 @@
 				<Label class="space-y-2">
 					<span>Your last name</span>
 					<Input type="lastName" name="lastName" placeholder="e.g. Doe" bind:value={lastNameInput} required />
+				</Label>
+				<Label class="space-y-2">
+					<span>Your ID number</span>
+					<Input type="idNumber" name="firstName" placeholder="e.g. 12345678" bind:value={idNumberInput} required />
 				</Label>
 				<Label class="space-y-2">
 					<span>Your email</span>

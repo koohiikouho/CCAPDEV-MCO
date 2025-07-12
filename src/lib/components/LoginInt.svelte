@@ -20,11 +20,10 @@
 		result = regex.test(resetEmail);
 	}
 
-	let users = [];
-	let emailInput = "";
-	let passwordInput = "";
-	let resetEmail = "";
-	let errorMessage = "";
+	let emailInput = $state("");
+	let passwordInput = $state("");
+	let resetEmail = $state("");
+	let errorMessage = $state("");
 
     async function handleLogin(e: Event) {
 		e.preventDefault();
@@ -38,7 +37,6 @@
 				errorMessage = data.error;
 				return;
 			}
-
 			
 			// Login successful - store the token and user data
 			localStorage.setItem('accessToken', data.accessToken);

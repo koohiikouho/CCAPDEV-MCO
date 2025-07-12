@@ -22,14 +22,15 @@
 
   let viewportComponent = null;
   let currentView = 0;
-  let userName = "";
-  let userEmail = ""
-  let profilePicture = "";
+  let userName = "Guest";
+  let userEmail = "Sign in to reserve"
+  let profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg";
+  let isLoggedIn: boolean = false;
 
-   onMount(async () => {
+  onMount(async () => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      console.log('Token found:', token);
+      console.log('Token found');
 
       try {
         const response = await fetch('http://localhost:3000/users/me', {
@@ -47,7 +48,8 @@
         const user = await response.json();
         userName = `${user.first_name} ${user.last_name}`;
         userEmail = user.email;
-        profilePicture = user.avatar || "/src/assets/default_avatar.png";
+        profilePicture = user.avatar;
+        isLoggedIn = true;
 
         console.log("User loaded:", user);
       } catch (err) {
@@ -106,8 +108,6 @@
   
   let isTech : number = 1;
 
-
-  let isLoggedIn: boolean = false;
   // isLoggedIn = Boolean(params.get("signedIn"));
 
   function signOut(){

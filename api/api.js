@@ -28,11 +28,11 @@ export async function verifyLogin(email, password) {
   return data;
 }
 
-export async function verifySignUp(firstNameInput, lastNameInput, emailInput, passwordInput) {
-  const response = await fetch('http://localhost:3000/users', {
+export async function verifySignUp(firstName, lastName, idNumber, email, password) {
+  const response = await fetch('http://localhost:3000/users/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firstNameInput, lastNameInput, emailInput, passwordInput })
+    body: JSON.stringify({ firstName, lastName, idNumber, email, password })
   });
 
   const data = await response.json();
