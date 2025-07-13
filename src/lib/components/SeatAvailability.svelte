@@ -14,7 +14,6 @@
             endTime: data.endTime
         };
         }
-        console.log(availableSeatQuery);
     }
 
     function formatDate(date) {

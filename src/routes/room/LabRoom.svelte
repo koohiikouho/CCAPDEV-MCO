@@ -62,6 +62,7 @@
     let profilePicture = $state("https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg");
     let isLoggedIn: boolean = false;
     let userRole: string = $state("guest");
+    let id = $state("");
 
     onMount(async () => {
     const token = localStorage.getItem('accessToken');
@@ -87,6 +88,7 @@
         profilePicture = user.avatar;
         isLoggedIn = true;
         userRole = user.role;
+        id = user.id;
 
         console.log("User loaded:", user);
       } catch (err) {
@@ -116,7 +118,7 @@
   let size: number = 50;
   let staticity: number = 100;
   let divider: boolean = false;
-
+  
 
 </script>
 
@@ -155,7 +157,7 @@
           <div
             class="bg-secondary-50/30 md:px-7 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed"
           >
-            <DateAvailable />
+            <DateAvailable labDays={labData.schedule}/>
           </div>
         </div>
       </div>
@@ -201,7 +203,7 @@
               {#snippet titleSlot()}
                 <span>Reserve Seat</span>
               {/snippet}
-              <ReserveSeat {userName} />
+              <ReserveSeat userName={userName} id={id} />
             </TabItem>
           {:else if userRole == "Admin"}
             <TabItem class="w-full" {activeClass} {inactiveClass}>

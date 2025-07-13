@@ -16,7 +16,6 @@
 
   
   let paginationData = seatData;
-  console.log(paginationData);
   const itemsPerPage = 50;
 	const showPage = 5;
 	let totalPages = $state(0);

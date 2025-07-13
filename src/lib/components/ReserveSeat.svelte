@@ -1,9 +1,11 @@
 <script lang="ts">
     import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio, Modal } from "flowbite-svelte";
     import { CalendarMonthSolid, ClockSolid, MapPinSolid, TheatreOutline, UserCircleOutline } from "flowbite-svelte-icons";
+    import axios from 'axios';
+    let {userName = "Unknown", id = "Unknown"} = $props();
 
-    let {userName = "Username"} = $props();
-  
+    console.log(userName);
+    console.log(id);
     let selectedDate = $state(new Date("2024-06-30"));
     let selectedInlineTime = $state({ time: "7:30" });
     let eventTitle = $state("Digital Transformation");
@@ -50,10 +52,42 @@
 
     }
 
+
+    const createReservation = async (reservationData) => {
+      try {
+        const response = await axios.post('/api/reservations', reservationData, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        return {
+          success: true,
+          data: response.data,
+          message: 'Reservation created successfully!'
+        };
+      } catch (error) {
+        console.error('Reservation error:', error.response?.data || error.message);
+        
+        return {
+          success: false,
+          error: error.response?.data?.error || 'Failed to create reservation',
+          details: error.response?.data?.details || error.message
+        };
+      }
+    };
+
     function postReservation(){
+      defaultModal = true;
+      
+
+
 
     }
-      let defaultModal = $state(false);
+    
+    let defaultModal = $state(false);
+
   </script>
   
   <div class="mx-auto rounded-lg bg-white shadow-md dark:bg-gray-800">
@@ -132,8 +166,8 @@
     </div>
   </div>
 
-<Modal title="Terms of Service" form bind:open={defaultModal} onaction={({ action }) => alert(`Handle "${action}"`)}>
-  bro
+<Modal title="Reservation Failed" bind:open={defaultModal} autoclose>
+  
   {#snippet footer()}
     <Button type="submit" value="success">I accept</Button>
     <Button type="submit" value="decline" color="alternative">Decline</Button>
