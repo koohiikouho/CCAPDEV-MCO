@@ -652,3 +652,88 @@ app.put("/users/me", async (req, res) => {
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/users", userUploadRoutes);
+
+app.get("/admin/reservations", async (req, res) => {
+  try {
+    const reservations = await Reservations.find()
+      .populate({
+        path: "user_id",
+        select: "name.first_name name.last_name",
+      })
+      .populate({
+        path: "lab_id",
+        select: "seats lab_name",
+        populate: {
+          path: "seats.reservations",
+          model: "Reservations",
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    const formattedReservations = reservations.map((reservation) => {
+      let seatInfo = { col: "N/A", row: "N/A" };
+
+      if (reservation.lab_id?.seats) {
+        for (const seat of reservation.lab_id.seats) {
+          if (
+            seat.reservations.some((resId) => resId.equals(reservation._id))
+          ) {
+            seatInfo = { col: seat.col, row: seat.row };
+            break;
+          }
+        }
+      }
+
+      return {
+        reservation_id: reservation._id,
+        student_name: reservation.isAnonymous
+          ? "Anonymous"
+          : `${reservation.user_id?.name?.first_name || ""} ${reservation.user_id?.name?.last_name || ""}`.trim() ||
+            "Unknown",
+        lab_name: reservation.lab_id?.lab_name || "Unknown Lab",
+        time_in: reservation.time_in,
+        time_out: reservation.time_out,
+        created_at: reservation.createdAt,
+        column: seatInfo.col,
+        row: seatInfo.row,
+        status: reservation.status,
+        is_anonymous: reservation.isAnonymous,
+      };
+    });
+
+    res.status(200).json(formattedReservations);
+  } catch (err) {
+    console.error("Error fetching reservations:", err);
+    res.status(500).json({
+      error: "Error fetching reservations",
+      details: err.message,
+    });
+  }
+});
+
+app.get("/admin/students", async (req, res) => {
+  try {
+    const students = await Users.find(
+      { role: "student" }, // Only get students
+      {
+        id_number: 1,
+        "name.first_name": 1,
+        "name.last_name": 1,
+        _id: 0, // Exclude MongoDB's default _id
+      }
+    ).sort({ "name.last_name": 1 }); // Sort alphabetically by last name
+
+    const formattedStudents = students.map((student) => ({
+      id_number: student.id_number,
+      full_name: `${student.name.first_name} ${student.name.last_name}`,
+    }));
+
+    res.status(200).json(formattedStudents);
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    res.status(500).json({
+      error: "Error fetching student data",
+      details: err.message,
+    });
+  }
+});

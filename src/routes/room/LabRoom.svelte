@@ -14,7 +14,6 @@
   const getLabData = async () => {
     const res = await fetch(getLabURL);
     const data = await res.json();
-    console.log(data.image);
     images.pop();
     images.push(data.image);
     return data;
@@ -24,9 +23,13 @@
   const getLabSeats = async () => {
     const res = await fetch(getLabSeatsURL);
     const data = await res.json();
-    console.log(data);
     return data;
   };
+  const getStudentData = async () =>{
+    const res = await fetch("http://localhost:3000/admin/students");
+    const data = await res.json();
+    return data;
+  }
 
 
 
@@ -197,12 +200,14 @@
               <ReserveSeat userName={userName} id={id} schedule={labData.schedule} labCode={roomCode}/>
             </TabItem>
           {:else if userRole == "Admin"}
+            {#await getStudentData() then students}
             <TabItem class="w-full" {activeClass} {inactiveClass}>
               {#snippet titleSlot()}
                 <span>Block Seat for Student</span>
               {/snippet}
-              <BlockSeat paginationData={labData.reservations} />
+              <BlockSeat studentData={students} schedule={labData.schedule} labCode={roomCode}/>
             </TabItem>
+            {/await}
             <TabItem class="w-full" {activeClass} {inactiveClass}>
               {#snippet titleSlot()}
                 <span>Remove Reservation</span>

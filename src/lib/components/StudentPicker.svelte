@@ -3,131 +3,156 @@
   import { Section } from "flowbite-svelte-blocks";
   import { ChevronLeftOutline, ChevronRightOutline } from "flowbite-svelte-icons";
 
-  // import paginationData from '../../routes/room/advancedTable.json';
-
   interface Props {
     paginationData : any;
     viewSwitcher : boolean;
     studentName : string;
+    idNumber : string;
   }
-  let { paginationData, viewSwitcher = $bindable(), studentName = $bindable() } : Props = $props();
+  let { paginationData, viewSwitcher = $bindable(), studentName = $bindable(), idNumber = $bindable() } : Props = $props();
   
   let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
-	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
-	let searchClass = 'w-full relative';
-
-
+  let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
+  let searchClass = 'w-full relative';
 
   const itemsPerPage = 10;
-	const showPage = 5;
-	let totalPages = $state(0);
-	let pagesToShow: number[] = $state([]);
-	let totalItems = paginationData.length;
-	let startPage: number;
-	let endPage: number = $state(10);
+  const showPage = 5;
+  let totalPages = $state(0);
+  let pagesToShow: number[] = $state([]);
+  let totalItems = paginationData.length;
+  let startPage: number;
+  let endPage: number = $state(10);
 
   let searchTerm = $state('');
-	let currentPosition = $state(0);
+  let currentPosition = $state(0);
 
-  let j = 0;
+  // Fixed filtering logic - handles both student_name and full_name
+  let filteredItems = $derived(
+    paginationData.filter((item) => {
+      if (!searchTerm) return true;
+      
+      const searchLower = searchTerm.toLowerCase();
+      const studentName = item.student_name || item.full_name || "";
+      const idNumber = item.id_number?.toString() || "";
+      
+      return (
+        studentName.toLowerCase().includes(searchLower) ||
+        idNumber.includes(searchLower)
+      );
+    })
+  );
 
+  // Use filtered items when searching, pagination when not
+  let itemsToDisplay = $derived(searchTerm ? filteredItems : paginationData);
+  let currentPageItems = $derived(
+    searchTerm 
+      ? filteredItems 
+      : paginationData.slice(currentPosition, currentPosition + itemsPerPage)
+  );
 
-	const updateDataAndPagination = () => {
-		let currentPageItems = paginationData.slice(currentPosition, currentPosition + itemsPerPage);
-		renderPagination(currentPageItems.length);
-	};
+  // Update counts and pagination based on search state
+  $effect(() => {
+    if (searchTerm) {
+      totalItems = filteredItems.length;
+      currentPosition = 0; // Reset pagination when searching
+    } else {
+      totalItems = paginationData.length;
+    }
+    renderPagination(totalItems);
+  });
 
-	const loadNextPage = () => {
-		if (currentPosition + itemsPerPage < paginationData.length) {
-			currentPosition += itemsPerPage;
-			updateDataAndPagination();
-		}
-	};
+  const updateDataAndPagination = () => {
+    let currentPageItems = paginationData.slice(currentPosition, currentPosition + itemsPerPage);
+    renderPagination(currentPageItems.length);
+  };
 
-	const loadPreviousPage = () => {
-		if (currentPosition - itemsPerPage >= 0) {
-			currentPosition -= itemsPerPage;
-			updateDataAndPagination();
-		}
-	};
+  const loadNextPage = () => {
+    if (currentPosition + itemsPerPage < paginationData.length) {
+      currentPosition += itemsPerPage;
+      updateDataAndPagination();
+    }
+  };
 
-	const renderPagination = (totalItems: number) => {
-		totalPages = Math.ceil(paginationData.length / itemsPerPage);
-		const currentPage = Math.ceil((currentPosition + 1) / itemsPerPage);
+  const loadPreviousPage = () => {
+    if (currentPosition - itemsPerPage >= 0) {
+      currentPosition -= itemsPerPage;
+      updateDataAndPagination();
+    }
+  };
 
-		startPage = currentPage - Math.floor(showPage / 2);
-		startPage = Math.max(1, startPage);
-		endPage = Math.min(startPage + showPage - 1, totalPages);
+  const renderPagination = (totalItems: number) => {
+    totalPages = Math.ceil(paginationData.length / itemsPerPage);
+    const currentPage = Math.ceil((currentPosition + 1) / itemsPerPage);
 
-		pagesToShow = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-	};
+    startPage = currentPage - Math.floor(showPage / 2);
+    startPage = Math.max(1, startPage);
+    endPage = Math.min(startPage + showPage - 1, totalPages);
 
-	function goToPage (pageNumber: number) {
-		currentPosition = (pageNumber - 1) * itemsPerPage;
-		updateDataAndPagination();
-	};
+    pagesToShow = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  };
 
-	let startRange = $derived(currentPosition + 1);
-	let endRange = $derived(Math.min(currentPosition + itemsPerPage, totalItems));
+  function goToPage (pageNumber: number) {
+    currentPosition = (pageNumber - 1) * itemsPerPage;
+    updateDataAndPagination();
+  };
 
-	$effect(() => {
-		// Call renderPagination when the component initially mounts
-		renderPagination(paginationData.length);
-	});
+  let startRange = $derived(searchTerm ? 1 : currentPosition + 1);
+  let endRange = $derived(searchTerm ? filteredItems.length : Math.min(currentPosition + itemsPerPage, totalItems));
 
-	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
-	let filteredItems = $derived(paginationData.filter((item) => item.student_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
+  $effect(() => {
+    // Call renderPagination when the component initially mounts
+    renderPagination(paginationData.length);
+  });
 
-  function selectStudent(fromButton) {
+  function selectStudent(fromButton, studentIdNum) {
     studentName = fromButton;
+    idNumber = studentIdNum;
     viewSwitcher = true;
-
-    console.log(viewSwitcher);
   }
-
 </script>
+
 <Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg" >
-    <TableSearch placeholder="Search" hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
-      <TableHead>
-        <TableHeadCell class="px-4 py-3" scope="col">User ID</TableHeadCell>
-        <TableHeadCell class="px-4 py-3" scope="col">Student</TableHeadCell>
-        <TableBodyCell class="px-4 py-3">Select User</TableBodyCell>    
-      </TableHead>
-      <TableBody class="divide-y">
-        {#if searchTerm !== ''}
-          {#each filteredItems as item (item.id)}
-            <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{1230000 + (j++) }</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
-         
-            </TableBodyRow>
-          {/each}
-        {:else}
-          {#each currentPageItems as item (item.id)}
-            <TableBodyRow>
-              <TableBodyCell class="px-4 py-3">{1230000 + (j++) }</TableBodyCell>
-              <TableBodyCell class="px-4 py-3">{item.student_name}</TableBodyCell>
-              <TableBodyCell class="px-4 py-3"><Button onclick={() => selectStudent(item.student_name)} class="cursor-pointer">Select Student</Button></TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        {/if}
-      </TableBody>
-      {#snippet footer()}
-        <div class="flex flex-col items-start justify-between space-y-3 p-4 md:flex-row md:items-center md:space-y-0" aria-label="Table navigation">
-          <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-            Showing
-            <span class="font-semibold text-gray-900 dark:text-white">{startRange}-{endRange}</span>
-            of
-            <span class="font-semibold text-gray-900 dark:text-white">{totalItems}</span>
-          </span>
+  <TableSearch placeholder="Search by name or ID..." hoverable={true} bind:inputValue={searchTerm} {divClass} {innerDivClass} {searchClass} inputClass="w-full text-center">
+    <TableHead>
+      <TableHeadCell class="px-4 py-3" scope="col">User ID</TableHeadCell>
+      <TableHeadCell class="px-4 py-3" scope="col">Student</TableHeadCell>
+      <TableHeadCell class="px-4 py-3" scope="col">Select User</TableHeadCell>    
+    </TableHead>
+    <TableBody class="divide-y">
+      {#each currentPageItems as item (item)}
+        <TableBodyRow>
+          <TableBodyCell class="px-4 py-3">{item.id_number}</TableBodyCell>
+          <TableBodyCell class="px-4 py-3">{item.student_name || item.full_name}</TableBodyCell>
+          <TableBodyCell class="px-4 py-3">
+            <Button onclick={() => selectStudent(item.student_name || item.full_name, item.id_number)} class="cursor-pointer">
+              Select Student
+            </Button>
+          </TableBodyCell>
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+    {#snippet footer()}
+      <div class="flex flex-col items-start justify-between space-y-3 p-4 md:flex-row md:items-center md:space-y-0" aria-label="Table navigation">
+        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+          Showing
+          <span class="font-semibold text-gray-900 dark:text-white">{startRange}-{endRange}</span>
+          of
+          <span class="font-semibold text-gray-900 dark:text-white">{totalItems}</span>
+        </span>
+        {#if !searchTerm}
           <ButtonGroup>
-            <Button onclick={loadPreviousPage} disabled={currentPosition === 0}><ChevronLeftOutline size="xs" class="m-1.5" /></Button>
+            <Button onclick={loadPreviousPage} disabled={currentPosition === 0}>
+              <ChevronLeftOutline size="xs" class="m-1.5" />
+            </Button>
             {#each pagesToShow as pageNumber}
               <Button onclick={() => goToPage(pageNumber)}>{pageNumber}</Button>
             {/each}
-            <Button onclick={loadNextPage} disabled={totalPages === endPage}><ChevronRightOutline size="xs" class="m-1.5" /></Button>
+            <Button onclick={loadNextPage} disabled={totalPages === endPage}>
+              <ChevronRightOutline size="xs" class="m-1.5" />
+            </Button>
           </ButtonGroup>
-        </div>
-      {/snippet}
-    </TableSearch>
-  </Section>
+        {/if}
+      </div>
+    {/snippet}
+  </TableSearch>
+</Section>
