@@ -8,6 +8,8 @@ import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import { idText } from "typescript";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
+
 dotenv.config();
 
 const app = express();
@@ -16,6 +18,8 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const mongoURI =
   "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
@@ -124,7 +128,9 @@ app.get("/reservations/:labId", async (req, res) => {
       const isAnonymous = reservation.isAnonymous;
 
       return {
-        user_id: isAnonymous ? null : reservation.user_id?._id?.toString() || null,
+        user_id: isAnonymous
+          ? null
+          : reservation.user_id?._id?.toString() || null,
         student: {
           name: isAnonymous
             ? "Anonymous"
@@ -283,6 +289,43 @@ app.post("/users/signup", async (req, res) => {
   }
 });
 
+app.get("/lab-seats/:labId", async (req, res) => {
+  try {
+    const { labId } = req.params;
+
+    // Validate lab ID
+    if (!mongoose.Types.ObjectId.isValid(labId)) {
+      return res.status(400).json({ error: "Invalid lab ID format" });
+    }
+
+    // Find the lab and select only the seats
+    const lab = await Labs.findById(labId).select("seats lab_name");
+
+    if (!lab) {
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    // Format the seats into the required {value, name} pairs
+    const formattedSeats = lab.seats.map((seat) => ({
+      value: `${seat.col}${seat.row}`,
+      name: `${seat.col}${seat.row}`,
+    }));
+
+    res.status(200).json({
+      lab_id: labId,
+      lab_name: lab.lab_name,
+      seats: formattedSeats,
+      total_seats: formattedSeats.length,
+    });
+  } catch (err) {
+    console.error("Error fetching lab seats:", err);
+    res.status(500).json({
+      error: "Server error while fetching seats",
+      details: err.message,
+    });
+  }
+});
+
 // Used to fetch user info of current user
 app.get("/users/me", async (req, res) => {
   const authHeader = req.headers["authorization"];
@@ -423,6 +466,110 @@ app.get("/reservations", async (req, res) => {
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
+  }
+});
+
+app.post("/reservations", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      date,
+      time_start,
+      hours,
+      user_id,
+      lab_id,
+      isAnonymous = false,
+      seats,
+    } = req.body;
+
+    // [Keep all your existing validation code]
+
+    const startDateTime = new Date(`${date}T${time_start}:00`);
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setMinutes(endDateTime.getMinutes() + hours * 60);
+
+    const lab = await Labs.findById(lab_id).session(session);
+    if (!lab) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    // Process reservations sequentially instead of in parallel
+    const createdReservations = [];
+    for (const seatPos of seats) {
+      const [col, rowStr] = [seatPos[0].toUpperCase(), seatPos.slice(1)];
+      const row = parseInt(rowStr);
+
+      // [Keep your existing seat validation code]
+
+      const seat = lab.seats.find((s) => s.col === col && s.row === row);
+      if (!seat) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ error: `Seat ${seatPos} not found` });
+      }
+
+      // Check for conflicts
+      const conflicting = await Reservations.find({
+        _id: { $in: seat.reservations },
+        $or: [
+          { time_in: { $lt: endDateTime }, time_out: { $gt: startDateTime } },
+        ],
+      }).session(session);
+
+      if (conflicting.length > 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(409).json({
+          error: `Seat ${seatPos} already reserved`,
+          conflicting_times: conflicting.map((c) => ({
+            from: c.time_in,
+            to: c.time_out,
+          })),
+        });
+      }
+
+      // Create and save reservation
+      const reservation = new Reservations({
+        user_id,
+        lab_id,
+        time_in: startDateTime,
+        time_out: endDateTime,
+        status: "Confirmed",
+        isAnonymous,
+      });
+
+      await reservation.save({ session });
+      seat.reservations.push(reservation._id);
+      createdReservations.push(reservation);
+    }
+
+    // Save the lab once with all updates
+    await lab.save({ session });
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({
+      message: "Reservations created successfully",
+      reservations: createdReservations.map((r, i) => ({
+        id: r._id,
+        seat: seats[i],
+        time_in: r.time_in,
+        time_out: r.time_out,
+        status: r.status,
+      })),
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error creating reservations:", err);
+    res.status(500).json({
+      error: "Error creating reservations",
+      details: err.message,
+    });
   }
 });
 
