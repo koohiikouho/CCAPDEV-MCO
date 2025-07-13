@@ -76,6 +76,9 @@
 	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
 	let filteredItems = $derived(paginationData.filter((item) => item.student_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 
+	function delReservation(resId){
+
+	}
 
 </script>
 <Section name="advancedTable" sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg" >
@@ -88,20 +91,20 @@
       </TableHead>
       <TableBody class="divide-y">
         {#if searchTerm !== ''}
-          {#each filteredItems as item (item.id)}
+          {#each filteredItems as item (item)}
             <TableBodyRow>
-              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_start}</TableBodyCell>
               <TableBodyCell class="px-1 md:px-4 py-3">{item.student_name}</TableBodyCell>
             </TableBodyRow>
           {/each}
         {:else}
-          {#each currentPageItems as item (item.id)}
+          {#each currentPageItems as item (item)}
             <TableBodyRow>
-              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyCell>
-              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.seat}</TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3">{item.time_start}</TableBodyCell>
               <TableBodyCell class="px-1 md:px-4 py-3">{item.student_name}</TableBodyCell>
-              <TableBodyCell class="px-1 md:px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer">Delete Reservation</Button></TableBodyCell>
+              <TableBodyCell class="px-1 md:px-4 py-3 justify-end align-end flex"><Button class="cursor-pointer" onclick={ () => delReservation(item.reservation_id)}>Delete Reservation</Button></TableBodyCell>
             </TableBodyRow>
           {/each}
         {/if}

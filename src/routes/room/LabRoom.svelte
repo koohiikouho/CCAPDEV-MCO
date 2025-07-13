@@ -10,6 +10,7 @@
 
   let getLabURL = "http://localhost:3000/labs/".concat(roomCode);
   let getLabSeatsURL = "http://localhost:3000/reservations/".concat(roomCode);
+  let get10Mins = "http://localhost:3000/reservations/upcoming/".concat(roomCode);
 
   const getLabData = async () => {
     const res = await fetch(getLabURL);
@@ -30,6 +31,13 @@
     const data = await res.json();
     return data;
   }
+
+  const getWithin10 = async () =>{
+    const res = await fetch(get10Mins);
+    const data = await res.json();
+    return data.upcoming_reservations;
+  }
+
 
 
 
@@ -208,12 +216,14 @@
               <BlockSeat studentData={students} schedule={labData.schedule} labCode={roomCode}/>
             </TabItem>
             {/await}
-            <TabItem class="w-full" {activeClass} {inactiveClass}>
-              {#snippet titleSlot()}
-                <span>Remove Reservation</span>
-              {/snippet}
-              <RemoveReservationTable paginationData={labData.reservations} />
-            </TabItem>
+            {#await getWithin10() then seatdata}
+              <TabItem class="w-full" {activeClass} {inactiveClass}>
+                {#snippet titleSlot()}
+                  <span>Remove Reservation</span>
+                {/snippet}
+                <RemoveReservationTable paginationData={seatdata} />
+              </TabItem>
+            {/await}
           {/if}
         </Tabs>
       </div>
