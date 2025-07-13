@@ -1,7 +1,6 @@
 <script>
   import { Card, Button, Badge, Modal, Input, Label } from "flowbite-svelte";
-  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline, PlusOutline, EditOutline, TrashBinOutline } from "flowbite-svelte-icons";
-  import { cubicOut } from "svelte/easing";
+  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline, PlusOutline, EditOutline, TrashBinOutline } from "flowbite-svelte-icons";  import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
   import { onMount } from "svelte";
   import Particles from "../lib/components/Particles.svelte";
@@ -483,11 +482,18 @@
   }
 
   // Open cancel confirmation modal
-  function openCancelModal(reservation) {
+   function openCancelModal(reservation) {
     console.log("openCancelModal called with:", reservation);
     logDebugInfo("Cancel Modal", { reservation });
     reservationToCancel = reservation;
     showCancelModal = true;
+    
+    // DEBUG: Log modal state
+    console.log("showCancelModal set to:", showCancelModal);
+    console.log("reservationToCancel set to:", reservationToCancel);
+    
+    // Force reactivity update
+    showCancelModal = showCancelModal;
   }
 
   // Cancel reservation
@@ -535,12 +541,20 @@
         isAnonymous: reservation.isAnonymous || false
       };
       
+      showEditModal = true;
+      
+      // DEBUG: Log modal state
+      console.log("showEditModal set to:", showEditModal);
+      console.log("editingReservation set to:", editingReservation);
+      
+      // Force reactivity update
+      showEditModal = showEditModal;
+      
       // Fetch available seats for the current lab and time
       setTimeout(() => {
         fetchAvailableSeatsForEdit();
       }, 100);
       
-      showEditModal = true;
     } catch (err) {
       logDebugInfo("Edit Modal Error", { error: err.message }, true);
       console.error('Error opening edit modal:', err);
@@ -591,6 +605,19 @@
       editingReservation = null;
       availableSeats = [];
     }
+  }
+
+  // Helper functions for button clicks
+  function handleEditClick(reservation) {
+    console.log('Edit button clicked for reservation:', reservation.id);
+    logDebugInfo("Edit Button Click", { reservation });
+    openEditModal(reservation);
+  }
+
+  function handleCancelClick(reservation) {
+    console.log('Cancel button clicked for reservation:', reservation.id);
+    logDebugInfo("Cancel Button Click", { reservation });
+    openCancelModal(reservation);
   }
 
   // Toast functions
@@ -743,30 +770,20 @@
 
             {#if reservation.status === 'Confirmed' || reservation.status === 'Ongoing'}
               <div class="flex gap-2 pt-2 border-t border-surface-200 mt-4">
-                <Button 
-                  size="sm" 
-                  color="alternative" 
-                  class="bg-surface-100 text-surface-700 border-surface-300 hover:bg-surface-200 relative z-30"
-                  on:click={() => {
-                    console.log('Edit button clicked for reservation:', reservation.id);
-                    openEditModal(reservation);
-                  }}
+                <button 
+                  type="button"
+                  class="px-3 py-1 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors cursor-pointer"
+                  on:click={() => handleEditClick(reservation)}
                 >
-                  <EditOutline class="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button 
-                  size="sm" 
-                  color="red"
-                  class="relative z-30"
-                  on:click={() => {
-                    console.log('Cancel button clicked for reservation:', reservation.id);
-                    openCancelModal(reservation);
-                  }}
+                  ✏️ Edit
+                </button>
+                <button 
+                  type="button"
+                  class="px-3 py-1 text-sm bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition-colors cursor-pointer"
+                  on:click={() => handleCancelClick(reservation)}
                 >
-                  <TrashBinOutline class="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
+                  🗑️ Cancel
+                </button>
               </div>
             {/if}
           </Card>
@@ -920,112 +937,183 @@
   {/if}
 
   <!-- Cancel Confirmation Modal -->
-  {#if showCancelModal}
-    <Modal bind:open={showCancelModal} autoclose outsideclose>
-      <div slot="header" class="text-lg font-semibold">Confirm Cancellation</div>
-      <p class="text-surface-700 mb-4">Are you sure you want to cancel your reservation at {reservationToCancel?.labName} on {reservationToCancel?.date}?</p>
-      <div class="flex justify-end gap-3">
-        <Button color="alternative" on:click={() => showCancelModal = false}>No, Keep It</Button>
-        <Button color="red" on:click={confirmCancel}>Yes, Cancel</Button>
+  {#if showCancelModal && reservationToCancel}
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-surface-800">Cancel Reservation</h3>
+          <button 
+            on:click={() => showCancelModal = false}
+            class="text-surface-400 hover:text-surface-600"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <p class="text-surface-700 mb-4">Are you sure you want to cancel your reservation?</p>
+          <div class="bg-surface-50 p-4 rounded-lg border">
+            <div class="flex items-center gap-2 mb-2">
+              <FlaskOutline class="w-4 h-4 text-surface-500" />
+              <span class="font-medium text-surface-700">{reservationToCancel.labName}</span>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <CalendarMonthOutline class="w-4 h-4 text-surface-500" />
+              <span class="text-sm text-surface-600">{reservationToCancel.date}</span>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <ClockOutline class="w-4 h-4 text-surface-500" />
+              <span class="text-sm text-surface-600">{reservationToCancel.time}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ComputerSpeakerOutline class="w-4 h-4 text-surface-500" />
+              <span class="text-sm text-surface-600">Seat {reservationToCancel.seat}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button 
+            class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
+            on:click={() => showCancelModal = false}
+          >
+            Keep Reservation
+          </button>
+          <button 
+            class="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            on:click={confirmCancel}
+          >
+            Cancel Reservation
+          </button>
+        </div>
       </div>
-    </Modal>
+    </div>
   {/if}
 
   <!-- Edit Reservation Modal -->
   {#if showEditModal && editingReservation}
-    <Modal bind:open={showEditModal} autoclose outsideclose>
-      <div slot="header" class="text-lg font-semibold">Edit Reservation</div>
-      <div class="space-y-4">
-        <div>
-          <Label for="edit-lab" class="mb-2">Lab</Label>
-          <select 
-            id="edit-lab" 
-            class="w-full p-2 border border-surface-300 rounded-md"
-            bind:value={editingReservation.lab_id}
-            on:change={fetchAvailableSeatsForEdit}
-          >
-            <option value="">Select a lab</option>
-            {#each availableLabs as lab}
-              <option value={lab._id}>{lab.lab_name}</option>
-            {/each}
-          </select>
-        </div>
-
-        <div>
-          <Label for="edit-date" class="mb-2">Date</Label>
-          <Input 
-            id="edit-date" 
-            type="date" 
-            bind:value={editingReservation.date}
-            on:change={fetchAvailableSeatsForEdit}
-            min={new Date().toISOString().split('T')[0]}
-          />
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <Label for="edit-start" class="mb-2">Start Time</Label>
-            <Input 
-              id="edit-start" 
-              type="time" 
-              bind:value={editingReservation.time_in}
-              on:change={fetchAvailableSeatsForEdit}
-            />
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-surface-800">Edit Reservation</h3>
+            <button 
+              on:click={() => showEditModal = false}
+              class="text-surface-400 hover:text-surface-600"
+            >
+              ✕
+            </button>
           </div>
-          <div>
-            <Label for="edit-end" class="mb-2">End Time</Label>
-            <Input 
-              id="edit-end" 
-              type="time" 
-              bind:value={editingReservation.time_out}
-              on:change={fetchAvailableSeatsForEdit}
-            />
+          
+          <div class="space-y-6">
+            <!-- Lab Selection -->
+            <div>
+              <Label class="text-sm font-medium text-surface-700 mb-2">Laboratory</Label>
+              <select 
+                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                bind:value={editingReservation.lab_id}
+                on:change={fetchAvailableSeatsForEdit}
+              >
+                <option value="">Select a laboratory</option>
+                {#each availableLabs as lab}
+                  <option value={lab._id}>{lab.lab_name}</option>
+                {/each}
+              </select>
+            </div>
+
+            <!-- Date Selection -->
+            <div>
+              <Label class="text-sm font-medium text-surface-700 mb-2">Date</Label>
+              <Input 
+                type="date" 
+                bind:value={editingReservation.date}
+                on:change={fetchAvailableSeatsForEdit}
+                min={new Date().toISOString().split('T')[0]}
+                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            
+            <!-- Time Selection -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <Label class="text-sm font-medium text-surface-700 mb-2">Start Time</Label>
+                <Input 
+                  type="time" 
+                  bind:value={editingReservation.time_in}
+                  on:change={fetchAvailableSeatsForEdit}
+                  class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <Label class="text-sm font-medium text-surface-700 mb-2">End Time</Label>
+                <Input 
+                  type="time" 
+                  bind:value={editingReservation.time_out}
+                  on:change={fetchAvailableSeatsForEdit}
+                  class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+            </div>
+
+            <!-- Seat Selection -->
+            <div>
+              <Label class="text-sm font-medium text-surface-700 mb-2">Seat</Label>
+              <select 
+                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                bind:value={editingReservation.seat}
+              >
+                <option value="">Select a seat</option>
+                {#each availableSeats as seat}
+                  <option value={seat.position}>Seat {seat.position}</option>
+                {/each}
+              </select>
+              {#if availableSeats.length === 0 && editingReservation.lab_id}
+                <p class="text-sm text-warning-600 mt-2">No seats available for selected time</p>
+              {/if}
+            </div>
+
+            <!-- Anonymous Option -->
+            <div class="flex items-center space-x-3">
+              <input 
+                type="checkbox" 
+                id="edit-anonymous"
+                bind:checked={editingReservation.isAnonymous}
+                class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <Label for="edit-anonymous" class="text-sm text-surface-700">Make this reservation anonymous</Label>
+            </div>
+
+            <!-- Duration Display -->
+            {#if editingReservation.time_in && editingReservation.time_out}
+              <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                <div class="flex items-center gap-2">
+                  <ClockOutline class="w-4 h-4 text-primary-600" />
+                  <span class="text-sm font-medium text-primary-700">
+                    Duration: {calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out)} hours
+                  </span>
+                </div>
+              </div>
+            {/if}
           </div>
-        </div>
-
-        <div>
-          <Label for="edit-seat" class="mb-2">Seat</Label>
-          <select 
-            id="edit-seat" 
-            class="w-full p-2 border border-surface-300 rounded-md"
-            bind:value={editingReservation.seat}
-          >
-            <option value="">Select a seat</option>
-            {#each availableSeats as seat}
-              <option value={seat.position}>{seat.position}</option>
-            {/each}
-          </select>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            id="edit-anonymous"
-            bind:checked={editingReservation.isAnonymous}
-            class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <Label for="edit-anonymous" class="text-sm">Make this reservation anonymous</Label>
-        </div>
-
-        {#if editingReservation.time_in && editingReservation.time_out}
-          <div class="bg-surface-50 p-3 rounded-md">
-            <p class="text-sm text-surface-600">
-              <strong>Duration:</strong> {calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out)} hours
-            </p>
+          
+          <!-- Action Buttons -->
+          <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-surface-200">
+            <button 
+              class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
+              on:click={() => showEditModal = false}
+            >
+              Cancel
+            </button>
+            <button 
+              class="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              on:click={saveEdit}
+              disabled={!editingReservation.lab_id || !editingReservation.date || !editingReservation.time_in || !editingReservation.time_out || !editingReservation.seat}
+            >
+              Save Changes
+            </button>
           </div>
-        {/if}
-        
-        <div class="flex justify-end gap-3 pt-4">
-          <Button color="alternative" on:click={() => showEditModal = false}>Cancel</Button>
-          <Button 
-            color="primary" 
-            on:click={saveEdit}
-            disabled={!editingReservation.lab_id || !editingReservation.date || !editingReservation.time_in || !editingReservation.time_out || !editingReservation.seat}
-          >
-            Save Changes
-          </Button>
         </div>
       </div>
-    </Modal>
+    </div>
   {/if}
 </div>
