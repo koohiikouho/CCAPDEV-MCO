@@ -15,7 +15,7 @@
   let params = new URLSearchParams(location.search);
   let userCode = params.get("userCode");
 
-  // 🔐 Store the logged-in user separately for the navbar
+  // Store the logged-in user separately for the navbar
   let loggedInUser = null;
 
   // The user profile being viewed
@@ -110,7 +110,8 @@
 <TempNavbar
   userName={loggedInUser?.name || "Guest"}
   userEmail={loggedInUser?.email || "Sign in to reserve"}
-  profilePicture={getAvatar(loggedInUser?.avatar)}
+  profilePicture={loggedInUser?.avatar}
+  isLoggedIn={!!loggedInUser}
 />
 
 {#if currentUser}
