@@ -28,17 +28,20 @@ const reservationSchema = new mongoose.Schema(
     isAnonymous: {
       type: Boolean,
       required: true,
-      default: false
-    }
+      default: false,
+    },
   },
   {
-    timestamps: true,
+    timestamps: {
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
     collection: "Reservations",
   }
 );
 
 reservationSchema.index(
-  { userId: 1, labId: 1, date: 1, timeIn: 1 },
+  { user_id: 1, lab_id: 1, time_in: 1 },
   { unique: true }
 );
 
