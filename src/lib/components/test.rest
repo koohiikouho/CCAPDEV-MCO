@@ -11,7 +11,7 @@ POST http://localhost:3000/users/signup
 Content-Type: application/json
 
 {
-  "id_number": "123456789",
+  "idNumber": "12345678",
   "firstName": "Sample",
   "lastName": "Sample",
   "role": "student",

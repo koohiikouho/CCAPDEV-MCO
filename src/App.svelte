@@ -115,6 +115,11 @@
     userName = "Guest";
     userEmail = "Sign in to reserve";
     profilePicture= "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg";
+
+    localStorage.removeItem('accessToken');
+    localStorage.clear();
+
+    window.location.href = "/src/routes/login/login.html";
   }
   
   function viewSuggestions(){

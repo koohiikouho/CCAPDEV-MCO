@@ -193,7 +193,7 @@ app.post('/users/login', async (req, res) => {
 
     if (!user) {
       console.log("User not found.");
-      return res.status(400).json({error: 'Cannot find user'});
+      return res.status(400).json({error: 'Wrong email or password'});
     }
 
     if (req.body.password === user.password) {
@@ -213,7 +213,7 @@ app.post('/users/login', async (req, res) => {
       }
     });
     } else {
-      res.status(403).json({error: 'Not Allowed'});
+      res.status(403).json({error: 'Wrong email or password'});
     }
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
@@ -237,14 +237,18 @@ app.post('/users/signup', async (req, res) => {
         first_name: req.body.firstName,
         last_name: req.body.lastName
       },
-      role: req.body.role,
+      role: 'student',
       email: req.body.email,
       password: req.body.password,
       bio: ""
     });
     
+    const accessToken = jwt.sign({
+        id: newUser._id.toString(), // User OID to convert to string
+    }, process.env.ACCESS_TOKEN_SECRET);
+     res.json({accessToken: accessToken});
+
     console.log("New user created:", newUser.email);
-    res.status(201).json({ message: "User created successfully." });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ message: "Internal server error." });

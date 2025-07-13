@@ -5,7 +5,7 @@
 
 	import { verifySignUp } from '../../../api/api.js';
 
-	let result = $state(false);
+	let result = $state(true);
 	let checked = $state(false);
 	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 	let defaultModal = $state(false);
@@ -18,14 +18,14 @@
 	let passwordConfirmInput = $state("");
 	let errorMessage = $state("");
 
-	function dlsuCheck(value){
+	function dlsuCheck(value: string){
 		return result = regex.test(value);
 	}
 
 async function handleSignUp(e: Event) {
 		e.preventDefault();
 
-		if (dlsuCheck(emailInput)) {
+		if (!dlsuCheck(emailInput)) {
 			errorMessage = "Invalid email";
 			console.log(errorMessage);
 			return;
@@ -50,7 +50,6 @@ async function handleSignUp(e: Event) {
 		}
 
 		result = true;
-		checked = true;
 
 		try {
 
@@ -100,7 +99,7 @@ async function handleSignUp(e: Event) {
 				</Label>
 				<Label class="space-y-2">
 					<span>Your email</span>
-					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" bind:value={emailInput} onInput={dlsuCheck} required />
+					<Input type="email" name="email" placeholder="name@dlsu.edu.ph" bind:value={emailInput} required />
 				</Label>
 				<Label class="space-y-2">
 					<span>Your password</span>
@@ -163,8 +162,8 @@ async function handleSignUp(e: Event) {
 					</p>
 
 					{#snippet footer()}
-						<Button onclick={() => alert('Handle "success"')}>I accept</Button>
-						<Button color="alternative">Decline</Button>
+						<Button onclick={() => checked = true}>I accept</Button>
+						<Button color="alternative" onclick={() => checked = false}>Decline</Button>
 					{/snippet}
 				</Modal>
 
