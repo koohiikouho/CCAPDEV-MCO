@@ -16,7 +16,7 @@
     userName = "Guest",
     userEmail = "Log in to reserve",
     profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg",
-    isLoggedIn = true,
+    isLoggedIn = false, // Default false to reflect guest state
   } = $props();
 </script>
 
@@ -39,44 +39,35 @@
       </NavBrand>
       <NavHamburger class="bg-surface-400 hover:bg-surface-600" />
       <NavUl ulClass="items-center align-middle p-1">
-        <NavLi href="../../../index.html?view=1" class="text-surface-400"
-          >Labs</NavLi
-        >
-        <NavLi href="../../../index.html?view=2" class="text-surface-400"
-          >Users</NavLi
-        >
-        <NavLi href="../../../index.html?view=5" class="text-surface-400"
-          >Suggestions</NavLi
-        >
+        <NavLi href="../../../index.html?view=1" class="text-surface-400">Labs</NavLi>
+        <NavLi href="../../../index.html?view=2" class="text-surface-400">Users</NavLi>
+        <NavLi href="../../../index.html?view=5" class="text-surface-400">Suggestions</NavLi>
         <NavLi class="flex align-center">
           <Avatar id="user-drop" src={profilePicture} class="cursor-pointer" />
           <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70">
             <DropdownHeader>
               <span class="block text-sm text-white">{userName}</span>
-              <span class="block truncate text-sm font-medium text-white"
-                >{userEmail}</span
-              >
+              <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
             </DropdownHeader>
-            <DropdownGroup class="text-white ">
-              <DropdownItem
-                class="hover:text-surface-400 text-center w-full fixcursor"
-                href="../../../index.html?view=4">Profile</DropdownItem
-              >
-              <DropdownItem
-                class="hover:text-surface-400 text-center w-full fixcursor"
-                href="../../../index.html?view=3">Reservations</DropdownItem
-              >
-            </DropdownGroup>
+
+            {#if isLoggedIn}
+              <DropdownGroup class="text-white">
+                <DropdownItem
+                  class="hover:text-surface-400 text-center w-full fixcursor"
+                  href="../../../index.html?view=4">Profile</DropdownItem>
+                <DropdownItem
+                  class="hover:text-surface-400 text-center w-full fixcursor"
+                  href="../../../index.html?view=3">Reservations</DropdownItem>
+              </DropdownGroup>
+            {/if}
+
             <DropdownGroup class="text-white">
               {#if isLoggedIn}
-                <DropdownItem class="hover:text-surface-400"
-                >Sign out</DropdownItem
-              >
+                <DropdownItem class="hover:text-surface-400 text-center w-full cursor-pointer">Sign out</DropdownItem>
               {:else}
                 <DropdownItem
-                class="hover:text-surface-400"
-                href="/src/routes/login/login.html">Login</DropdownItem
-              >
+                  class="hover:text-surface-400 text-center w-full cursor-pointer"
+                  href="/src/routes/login/login.html">Login</DropdownItem>
               {/if}
             </DropdownGroup>
           </Dropdown>

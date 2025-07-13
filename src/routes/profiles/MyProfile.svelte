@@ -59,7 +59,7 @@
         name: `${user.first_name} ${user.last_name}`,
         email: user.email,
         avatar: user.avatar,
-        role: user.role || "Student",
+        role: user.role,
         bio: user.bio || "No description provided.",
       };
 
