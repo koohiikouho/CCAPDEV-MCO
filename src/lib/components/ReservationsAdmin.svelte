@@ -6,9 +6,9 @@
   // import paginationData from '../../routes/room/advancedTable.json';
 
   interface Props {
-    paginationData : any;
+    seatData : any;
   }
-  let { paginationData } : Props = $props();
+  let { seatData } : Props = $props();
   
   let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
 	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
@@ -16,7 +16,7 @@
 
 
 
-
+  let paginationData = seatData; 
   const itemsPerPage = 10;
 	const showPage = 5;
 	let totalPages = $state(0);
@@ -98,12 +98,12 @@
               {#if item.student_name != "Anonymous"}
               <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}
                 ><TableBodyCell class="px-0.5 md:px-4 py-3"
-                  >{item.student_name}</TableBodyCell
+                  >{item.student.name}</TableBodyCell
                 ></a
               >
             {:else}
               <TableBodyCell class="px-0.5 md:px-4 py-3"
-                >{item.student_name}</TableBodyCell
+                >{item.student.name}</TableBodyCell
               >
             {/if}
               <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_in}</TableBodyCell>
@@ -115,17 +115,17 @@
             </TableBodyRow>
           {/each}
         {:else}
-          {#each currentPageItems as item (item.id)}
+          {#each currentPageItems as item (item)}
               <TableBodyRow>
                 {#if item.student_name != "Anonymous"}
                 <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}
                   ><TableBodyCell class="px-0.5 md:px-4 py-3"
-                    >{item.student_name}</TableBodyCell
+                    >{item.student.name}</TableBodyCell
                   ></a
                 >
               {:else}
                 <TableBodyCell class="px-0.5 md:px-4 py-3"
-                  >{item.student_name}</TableBodyCell
+                  >{item.student.name}</TableBodyCell
                 >
               {/if}
               <TableBodyCell class="px-0.5 md:px-4 py-3">{item.time_in}</TableBodyCell>

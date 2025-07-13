@@ -83,6 +83,7 @@
         userEmail = user.email;
         profilePicture = user.avatar;
         isLoggedIn = true;
+        console.log(user.role);
         userRole = user.role;
         id = user.id;
 
@@ -184,7 +185,7 @@
               {#if userRole == "student"}
                 <Reservations seatData={seatdata}/>
               {:else if userRole == "Admin"}
-                <ReservationsAdmin paginationData={seatdata} />
+                <ReservationsAdmin seatData={seatdata} />
               {/if}
             </TabItem>
           {/await}

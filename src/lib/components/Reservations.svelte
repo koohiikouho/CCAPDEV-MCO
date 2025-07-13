@@ -21,8 +21,10 @@
   }
   let { seatData }: Props = $props();
 
+
   let paginationData = seatData;
 
+  console.log(paginationData);
   let divClass =
     "bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden";
   let innerDivClass =
@@ -154,10 +156,10 @@
     <TableBody class="divide-y">
       {#each currentPageItems as item (item)}
         <TableBodyRow>
-          {#if (item.student_name && item.student_name !== "Anonymous") || (item.student?.name && !item.is_anonymous)}
+          {#if (item.student.name != "Anonymous")}
             <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}>
               <TableBodyCell class="px-1 md:px-4 py-3">
-                {item.student_name || item.student?.name}
+                {item.student.name}
               </TableBodyCell>
             </a>
           {:else}
