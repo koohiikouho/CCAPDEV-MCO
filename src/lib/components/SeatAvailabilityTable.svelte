@@ -91,7 +91,7 @@
 		// Call renderPagination when the component initially mounts
 		renderPagination(paginationData.length);
 	});
-
+  
 	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
 	let filteredItems = $derived(paginationData.filter((item) => item.position.concat(item.position).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 

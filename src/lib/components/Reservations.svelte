@@ -8,6 +8,7 @@
     TableBody,
     TableBodyRow,
     TableBodyCell,
+    pagination,
   } from "flowbite-svelte";
   import { Section } from "flowbite-svelte-blocks";
   import {
@@ -38,6 +39,47 @@
 
   let searchTerm = $state("");
   let currentPosition = $state(0);
+
+  // Fixed filtering logic
+  let filteredItems = $derived(
+    paginationData.filter((item) => {
+      if (!searchTerm) return true;
+      
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Get student name based on data structure
+      const studentName = item.student_name || item.student?.name || "";
+      
+      // Search across multiple fields
+      return (
+        studentName.toLowerCase().includes(searchLower) ||
+        item.time_in?.toLowerCase().includes(searchLower) ||
+        item.time_out?.toLowerCase().includes(searchLower) ||
+        item.seat_col?.toString().includes(searchLower) ||
+        item.seat_row?.toString().includes(searchLower) ||
+        item.column?.toString().includes(searchLower) ||
+        item.row?.toString().includes(searchLower)
+      );
+    })
+  );
+
+  // Use filtered items for pagination when searching
+  let itemsToDisplay = $derived(searchTerm ? filteredItems : paginationData);
+  let currentPageItems = $derived(
+    searchTerm 
+      ? filteredItems 
+      : paginationData.slice(currentPosition, currentPosition + itemsPerPage)
+  );
+
+  // Update total items based on search
+  $effect(() => {
+    totalItems = itemsToDisplay.length;
+    if (searchTerm) {
+      // Reset pagination when searching
+      currentPosition = 0;
+    }
+    renderPagination(totalItems);
+  });
 
   const updateDataAndPagination = () => {
     let currentPageItems = paginationData.slice(
@@ -87,18 +129,6 @@
     // Call renderPagination when the component initially mounts
     renderPagination(paginationData.length);
   });
-
-  let currentPageItems = $derived(
-    paginationData.slice(currentPosition, currentPosition + itemsPerPage)
-  );
-  let filteredItems = $derived(
-    paginationData.filter(
-      (item) =>
-        item.availalbe_seats.position.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
-    )
-  );
-
-
 </script>
 
 <Section
@@ -106,7 +136,7 @@
   sectionClass="bg-offwhite dark:bg-gray-900 rounded-lg"
 >
   <TableSearch
-    placeholder="Search"
+    placeholder="Search by name, time, or seat..."
     hoverable={true}
     bind:inputValue={searchTerm}
     {divClass}
@@ -122,47 +152,25 @@
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Row</TableHeadCell>
     </TableHead>
     <TableBody class="divide-y">
-      {#if searchTerm !== ""}
-        {#each filteredItems as item (item)}
-          <TableBodyRow>
-            {#if item.student_name != "Anonymous"}
-              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}
-                ><TableBodyCell class="px-1 md:px-4 py-3"
-                  >{item.student_name}</TableBodyCell
-                ></a
-              >
-            {:else}
-              <TableBodyCell class="px-1 md:px-4 py-3"
-                >Anonymous</TableBodyCell
-              >
-            {/if}
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.time_out}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_row}</TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      {:else}
-        {#each currentPageItems as item (item)}
-          <TableBodyRow>
-            {#if item.is_anonymous != true}
-              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}
-                ><TableBodyCell class="px-1 md:px-4 py-3"
-                  >{item.student.name}</TableBodyCell
-                ></a
-              >
-            {:else}
-              <TableBodyCell class="px-1 md:px-4 py-3"
-                >Anonymous</TableBodyCell
-              >
-            {/if}
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.time_out}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.column}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.row}</TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      {/if}
+      {#each currentPageItems as item (item)}
+        <TableBodyRow>
+          {#if (item.student_name && item.student_name !== "Anonymous") || (item.student?.name && !item.is_anonymous)}
+            <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}>
+              <TableBodyCell class="px-1 md:px-4 py-3">
+                {item.student_name || item.student?.name}
+              </TableBodyCell>
+            </a>
+          {:else}
+            <TableBodyCell class="px-1 md:px-4 py-3">
+              Anonymous
+            </TableBodyCell>
+          {/if}
+          <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
+          <TableBodyCell class="px-1 md:px-4 py-3">{item.time_out}</TableBodyCell>
+          <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col || item.column}</TableBodyCell>
+          <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_row || item.row}</TableBodyCell>
+        </TableBodyRow>
+      {/each}
     </TableBody>
     {#snippet footer()}
       <div
@@ -171,25 +179,27 @@
       >
         <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
           Showing
-          <span class="font-semibold text-gray-900 dark:text-white"
-            >{startRange}-{endRange}</span
-          >
+          <span class="font-semibold text-gray-900 dark:text-white">
+            {searchTerm ? 1 : startRange}-{searchTerm ? filteredItems.length : endRange}
+          </span>
           of
-          <span class="font-semibold text-gray-900 dark:text-white"
-            >{totalItems}</span
-          >
+          <span class="font-semibold text-gray-900 dark:text-white">
+            {totalItems}
+          </span>
         </span>
-        <ButtonGroup>
-          <Button onclick={loadPreviousPage} disabled={currentPosition === 0}
-            ><ChevronLeftOutline size="xs" class="m-1.5" /></Button
-          >
-          {#each pagesToShow as pageNumber}
-            <Button onclick={() => goToPage(pageNumber)}>{pageNumber}</Button>
-          {/each}
-          <Button onclick={loadNextPage} disabled={totalPages === endPage}
-            ><ChevronRightOutline size="xs" class="m-1.5" /></Button
-          >
-        </ButtonGroup>
+        {#if !searchTerm}
+          <ButtonGroup>
+            <Button onclick={loadPreviousPage} disabled={currentPosition === 0}>
+              <ChevronLeftOutline size="xs" class="m-1.5" />
+            </Button>
+            {#each pagesToShow as pageNumber}
+              <Button onclick={() => goToPage(pageNumber)}>{pageNumber}</Button>
+            {/each}
+            <Button onclick={loadNextPage} disabled={totalPages === endPage}>
+              <ChevronRightOutline size="xs" class="m-1.5" />
+            </Button>
+          </ButtonGroup>
+        {/if}
       </div>
     {/snippet}
   </TableSearch>

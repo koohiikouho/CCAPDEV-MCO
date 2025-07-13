@@ -14,6 +14,9 @@
   const getLabData = async () => {
     const res = await fetch(getLabURL);
     const data = await res.json();
+    console.log(data.image);
+    images.pop();
+    images.push(data.image);
     return data;
   };
 
@@ -21,17 +24,10 @@
   const getLabSeats = async () => {
     const res = await fetch(getLabSeatsURL);
     const data = await res.json();
+    console.log(data);
     return data;
   };
 
-  // getLabSeats();
-  // const getCarouselData = async () => {
-  //   const res = await fetch(
-  //     "./advancedTableModified".concat(roomCode).concat(".json")
-  //   );
-  //   const data = await res.json();
-  //   images = data.images;
-  // };
 
 
   import Particles from "../../lib/components/Particles.svelte";
@@ -90,7 +86,6 @@
         userRole = user.role;
         id = user.id;
 
-        console.log("User loaded:", user);
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -103,12 +98,7 @@
       alt: "image1",
       src: "https://www.dlsu.edu.ph/wp-content/uploads/2022/02/eml-1.jpg",
       title: "comlab2",
-    },
-    {
-      alt: "image2",
-      src: "https://www.dlsu.edu.ph/wp-content/uploads/2018/09/f-7.jpg",
-      title: "comlab1",
-    },
+    }
   ]);
 
 
@@ -203,7 +193,7 @@
               {#snippet titleSlot()}
                 <span>Reserve Seat</span>
               {/snippet}
-              <ReserveSeat userName={userName} id={id} />
+              <ReserveSeat userName={userName} id={id} schedule={labData.schedule} labCode={roomCode}/>
             </TabItem>
           {:else if userRole == "Admin"}
             <TabItem class="w-full" {activeClass} {inactiveClass}>
