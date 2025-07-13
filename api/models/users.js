@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
     },
     bio: {
       type: String,
+      default: "No description provided.",
       maxlength: 500,
     },
   },
