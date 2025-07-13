@@ -1,4 +1,5 @@
 <script lang="ts">
+  import axios from "axios";
   import { TableSearch, ButtonGroup, Button, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Table } from "flowbite-svelte";
   import { Section } from "flowbite-svelte-blocks";
   import { ChevronLeftOutline, ChevronRightOutline } from "flowbite-svelte-icons";
@@ -13,6 +14,7 @@
   let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
 	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
 	let searchClass = 'w-full relative';
+
 
 
 
@@ -76,8 +78,9 @@
 	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
 	let filteredItems = $derived(paginationData.filter((item) => item.student_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 
-	function delReservation(resId){
-
+	async function delReservation(resId){
+		const res = await axios.delete('http://localhost:3000/reservations/'.concat(resId));
+    	alert(res);
 	}
 
 </script>
