@@ -16,11 +16,7 @@
     usercode,
   }: { name: string; email: string; avatar: string; role: string; usercode: string } = $props();
 
-  // Avatar URL fallback if no avatar provided
-  let avatarSrc = $derived(
-    avatar ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`
-  );
+  let avatarSrc = $derived(avatar);
 </script>
 
 <Card

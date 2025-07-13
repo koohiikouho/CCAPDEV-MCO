@@ -26,7 +26,7 @@
         id: user._id, // Use MongoDB ObjectId as unique ID
         name: `${user.name.first_name} ${user.name.last_name}`,
         email: user.email,
-        avatar: user.avatar || "/src/assets/default_avatar.png",
+        avatar: user.avatar,
         role: user.role.charAt(0).toUpperCase() + user.role.slice(1)
       }));
     } catch (err) {

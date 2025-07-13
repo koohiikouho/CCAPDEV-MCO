@@ -254,6 +254,7 @@ app.post("/users/signup", async (req, res) => {
     return res.status(409).json({ error: "Email already in use." });
   }
   try {
+    const fullName = `${req.body.firstName} ${req.body.lastName}`;
     const newUser = await Users.create({
       id_number: req.body.idNumber,
       name: {
@@ -263,6 +264,7 @@ app.post("/users/signup", async (req, res) => {
       role: "student",
       email: req.body.email,
       password: req.body.password,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=3b82f6&color=fff`,
       bio: "",
     });
 
