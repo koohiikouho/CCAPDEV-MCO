@@ -60,7 +60,7 @@
     let userName = $state("Guest");
     let userEmail = $state("Sign in to reserve");
     let profilePicture = $state("https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg");
-    let isLoggedIn: boolean = false;
+    let isLoggedIn: boolean = $state(false);
     let userRole: string = $state("guest");
 
     onMount(async () => {
@@ -120,7 +120,7 @@
 
 </script>
 
-<TempNavbar {userEmail} {userName} profilePicture={profilePicture} />
+<TempNavbar {userEmail} {userName} {profilePicture} {isLoggedIn} />
 
 {#await getLabData() then labData}
   <div class="relative z-10 px-auto md:px-60">
