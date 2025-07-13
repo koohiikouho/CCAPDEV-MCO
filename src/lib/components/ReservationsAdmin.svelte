@@ -96,7 +96,7 @@
           {#each filteredItems as item (item.id)}
             <TableBodyRow>
               {#if item.student_name != "Anonymous"}
-              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                 ><TableBodyCell class="px-0.5 md:px-4 py-3"
                   >{item.student_name}</TableBodyCell
                 ></a
@@ -118,7 +118,7 @@
           {#each currentPageItems as item (item.id)}
               <TableBodyRow>
                 {#if item.student_name != "Anonymous"}
-                <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+                <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                   ><TableBodyCell class="px-0.5 md:px-4 py-3"
                     >{item.student_name}</TableBodyCell
                   ></a

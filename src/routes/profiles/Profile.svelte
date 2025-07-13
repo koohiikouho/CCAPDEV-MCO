@@ -13,7 +13,7 @@
   import { cubicOut } from "svelte/easing";
 
   let params = new URLSearchParams(location.search);
-  let userCode = parseInt(params.get("userCode"));
+  let userCode = params.get("userCode");
   let profileParam = params.get("profile");
   let isOwnProfile = profileParam !== "1";
 
@@ -77,7 +77,6 @@
             : "Unknown";
 
         return {
-          id: index + 1,
           _id: user._id,
           name: `${user?.name?.first_name || "Unnamed"} ${user?.name?.last_name || ""}`,
           email: user?.email || "noemail@domain.com",
@@ -86,23 +85,30 @@
           bio: user?.bio || "No description provided.",
         };
       });
-      currentUser = users.find(u => u.id === userCode);
+      currentUser = users.find(u => u._id === userCode);
           // 🔽 Fetch reservations after users are loaded
     const reservationData = await getLabReservations();
-    reservations = reservationData
-      .filter(r => String(r.user_id?._id || r.user_id) === String(currentUser._id))
-      .map((r, index) => ({
-        labName: r.lab_id?.lab_name || "Unknown Lab",
-        date: new Date(r.time_in).toLocaleDateString(),
-        time: new Date(r.time_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        duration:
-          r.time_in && r.time_out &&
-          new Date(r.time_out).getTime() > new Date(r.time_in).getTime()
-            ? formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime())
-            : "Invalid time",
-        seat: r.seat || "N/A",
-        status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
-      }))
+      if (currentUser) {
+        reservations = reservationData
+          .filter(r => {
+            const rUserId = r.user_id?._id || r.user_id;
+            return String(rUserId) === String(currentUser._id);
+          })
+          .map((r, index) => ({
+            labName: r.lab_id?.lab_name || "Unknown Lab",
+            date: new Date(r.time_in).toLocaleDateString(),
+            time: new Date(r.time_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            duration:
+              r.time_in && r.time_out &&
+              new Date(r.time_out).getTime() > new Date(r.time_in).getTime()
+                ? formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime())
+                : "Invalid time",
+            seat: r.seat || "N/A",
+            status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
+          }));
+      } else {
+        console.warn("No currentUser matched userCode:", userCode);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
     }

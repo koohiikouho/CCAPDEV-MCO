@@ -22,8 +22,8 @@
   onMount(async () => {
     try {
       const data = await getUserData();
-      users = data.map((user, index) => ({
-        id: index + 1,
+      users = data.map((user) => ({
+        id: user._id, // Use MongoDB ObjectId as unique ID
         name: `${user.name.first_name} ${user.name.last_name}`,
         email: user.email,
         avatar: user.avatar || "/src/assets/default_avatar.png",

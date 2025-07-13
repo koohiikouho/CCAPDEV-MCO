@@ -121,10 +121,10 @@ app.get("/reservations/:labId", async (req, res) => {
 
     // Format the response with snake_case
     const formattedReservations = allReservations.map((reservation) => {
-      // Check if reservation is anonymous
       const isAnonymous = reservation.isAnonymous;
 
       return {
+        user_id: isAnonymous ? null : reservation.user_id?._id?.toString() || null,
         student: {
           name: isAnonymous
             ? "Anonymous"
@@ -139,7 +139,7 @@ app.get("/reservations/:labId", async (req, res) => {
         row: reservation.seat.row,
         lab_name: reservation.lab_id?.lab_name || "N/A",
         status: reservation.status,
-        is_anonymous: isAnonymous, // Include the anonymous flag in response
+        is_anonymous: isAnonymous,
       };
     });
 

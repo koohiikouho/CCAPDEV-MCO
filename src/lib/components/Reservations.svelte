@@ -131,7 +131,7 @@
         {#each filteredItems as item (item)}
           <TableBodyRow>
             {#if item.student_name != "Anonymous"}
-              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                 ><TableBodyCell class="px-1 md:px-4 py-3"
                   >{item.student_name}</TableBodyCell
                 ></a
@@ -151,7 +151,7 @@
         {#each currentPageItems as item (item)}
           <TableBodyRow>
             {#if item.is_anonymous != true}
-              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                 ><TableBodyCell class="px-1 md:px-4 py-3"
                   >{item.student.name}</TableBodyCell
                 ></a
