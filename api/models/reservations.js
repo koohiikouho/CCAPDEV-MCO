@@ -25,6 +25,11 @@ const reservationSchema = new mongoose.Schema(
       required: true,
       enum: ["Confirmed", "Ongoing", "Completed", "Cancelled"],
     },
+    isAnonymous: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
   },
   {
     timestamps: true,
