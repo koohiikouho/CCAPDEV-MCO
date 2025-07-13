@@ -16,17 +16,12 @@
   } from "flowbite-svelte";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
   import Particles from "../../lib/components/Particles.svelte";
+  import { onMount } from "svelte";
 
   const views = [];
 
-  let navbar = null;
-  let navbarText = null;
-
-  
-
   let viewportComponent = null;
   let currentView = 0;
-
 
   function updateViewportComponent() {
     viewportComponent = views[currentView];
@@ -47,6 +42,6 @@
   size={size} vx={vx} vy={vy}/>
 </div>
 
-<TempNavbar/>
+<TempNavbar isLoggedIn={false} />
 
 <LoginInt />

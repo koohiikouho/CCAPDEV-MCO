@@ -47,6 +47,6 @@
   size={size} vx={vx} vy={vy}/>
 </div>
 
-<TempNavbar/>
+<TempNavbar isLoggedIn={false} />
 
 <SignUpComp/>

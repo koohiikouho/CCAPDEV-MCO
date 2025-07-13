@@ -20,12 +20,12 @@
 
   let navbar = null;
 
-  let viewportComponent = null;
-  let currentView = 0;
-  let userName = "Guest";
-  let userEmail = "Sign in to reserve"
-  let profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg";
-  let isLoggedIn: boolean = false;
+  let viewportComponent = $state(null);
+  let currentView = $state(0);
+  let userName = $state("Guest");
+  let userEmail = $state("Sign in to reserve");
+  let profilePicture = $state("https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg");
+  let isLoggedIn: boolean = $state(false);
 
   onMount(async () => {
     const token = localStorage.getItem('accessToken');
@@ -105,10 +105,6 @@
   changeViewOnLoad()
 
   updateViewportComponent();
-  
-  let isTech : number = 1;
-
-  // isLoggedIn = Boolean(params.get("signedIn"));
 
   function signOut(){
     isLoggedIn = false;
@@ -128,8 +124,6 @@
     navbar.add();
     updateViewportComponent();  
   }
-  // if(isLoggedIn == false)
-  //    signOut();
 
 </script>
 
