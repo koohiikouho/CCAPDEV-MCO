@@ -9,7 +9,7 @@
     let eventTitle = $state("Digital Transformation");
     let eventLocation = $state("California, USA");
     let eventDuration = $state("0.5");
-    let eventType = $state(["A2"]);
+    let eventType = $state([]);
     let participants = [
       { img: "/images/profile-picture-1.webp", alt: "Participant 1" },
       { img: "/images/profile-picture-2.webp", alt: "Participant 2" },
@@ -37,6 +37,19 @@
     { value: "A4", name: "A4", disabled: true },
     { value: "A5", name: "A5", disabled: true }
     ];
+
+    async function getLabSeats() {
+      let params = new URLSearchParams(location.search);
+      let roomCode: string = params.get("labCode");
+      let getSeatsURL = "http://localhost:3000/lab-seats/".concat(roomCode);
+
+      const res = await fetch(getSeatsURL);
+      const data = await res.json();
+      console.log(data);
+      return data.seats;
+
+    }
+
   </script>
   
   <div class="mx-auto rounded-lg bg-white shadow-md dark:bg-gray-800">
@@ -75,8 +88,11 @@
     <div class="px-6">
         <div class="space-y-4 border-t border-gray-200 py-6 ">
             <div>
+              {#await getLabSeats() then seatData}
                 <Label for="event-location" class="mb-2">Seat</Label>
-                <MultiSelect items={countries} bind:value={eventType}  size="md"/>
+                <MultiSelect items={seatData} bind:value={eventType}  size="md"/>
+
+              {/await}
             </div>
             <div>
                 <Label for="event-duration">Duration</Label>
@@ -107,8 +123,6 @@
         </div>
     </div>
 
-
-  
     <div class="border-t border-gray-200 p-6 dark:border-gray-700">
       <Button color="primary" class="w-full">Schedule Seat</Button>
     </div>
