@@ -99,6 +99,7 @@
                 : "Invalid time",
             seat: r.seat || "N/A",
             status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
+            createdOn: new Date(r.createdAt).toLocaleString(),
           }));
       }
     } catch (error) {
@@ -171,6 +172,7 @@
                     <span class="text-sm text-surface-600">{reservation.seat}</span>
                   </div>
                 </div>
+                <p class="text-xs text-surface-400 mt-2">Created on: {reservation.createdOn}</p>
               </Card>
             </div>
           {/each}
