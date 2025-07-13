@@ -24,8 +24,8 @@
   let { seatData }: Props = $props();
 
   console.log(seatData);
-  let paginationData = seatData;
 
+  let paginationData = seatData;
 
   let divClass =
     "bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden";
@@ -102,6 +102,8 @@
         item.student.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
     )
   );
+
+
 </script>
 
 <Section
@@ -121,51 +123,48 @@
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Student</TableHeadCell>
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Time In</TableHeadCell>
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Time Out</TableHeadCell>
-      <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Date</TableHeadCell>
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Column</TableHeadCell>
       <TableHeadCell class="px-1 md:px-4 py-3" scope="col">Row</TableHeadCell>
     </TableHead>
     <TableBody class="divide-y">
       {#if searchTerm !== ""}
-        {#each filteredItems as item (item.id)}
+        {#each filteredItems as item (item)}
           <TableBodyRow>
             {#if item.student_name != "Anonymous"}
-              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                 ><TableBodyCell class="px-1 md:px-4 py-3"
                   >{item.student_name}</TableBodyCell
                 ></a
               >
             {:else}
               <TableBodyCell class="px-1 md:px-4 py-3"
-                >{item.student_name}</TableBodyCell
+                >Anonymous</TableBodyCell
               >
             {/if}
             <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
             <TableBodyCell class="px-1 md:px-4 py-3">{item.time_out}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.date}</TableBodyCell>
             <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}</TableBodyCell>
             <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_row}</TableBodyCell>
           </TableBodyRow>
         {/each}
       {:else}
-        {#each currentPageItems as item (item.id)}
+        {#each currentPageItems as item (item)}
           <TableBodyRow>
-            {#if item.student_name != "Anonymous"}
-              <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
+            {#if item.is_anonymous != true}
+              <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}&profile=1`}
                 ><TableBodyCell class="px-1 md:px-4 py-3"
-                  >{item.student_name}</TableBodyCell
+                  >{item.student.name}</TableBodyCell
                 ></a
               >
             {:else}
               <TableBodyCell class="px-1 md:px-4 py-3"
-                >{item.student_name}</TableBodyCell
+                >Anonymous</TableBodyCell
               >
             {/if}
             <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
             <TableBodyCell class="px-1 md:px-4 py-3">{item.time_out}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.date}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_col}</TableBodyCell>
-            <TableBodyCell class="px-1 md:px-4 py-3">{item.seat_row}</TableBodyCell>
+            <TableBodyCell class="px-1 md:px-4 py-3">{item.column}</TableBodyCell>
+            <TableBodyCell class="px-1 md:px-4 py-3">{item.row}</TableBodyCell>
           </TableBodyRow>
         {/each}
       {/if}

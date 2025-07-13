@@ -7,7 +7,7 @@ import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import { idText } from "typescript";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
@@ -16,7 +16,6 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
 
 const mongoURI =
   "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
@@ -95,6 +94,16 @@ app.get("/reservations/:labId", async (req, res) => {
       return res.status(404).json({ error: "Lab not found" });
     }
 
+    // Helper function to format dates as MM-DD-HH:Minute
+    const formatDateTime = (date) => {
+      const d = new Date(date);
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const hours = String(d.getHours()).padStart(2, "0");
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+      return `${month}-${day}-${hours}:${minutes}`;
+    };
+
     // Extract all reservations from all seats
     const allReservations = [];
 
@@ -110,22 +119,29 @@ app.get("/reservations/:labId", async (req, res) => {
       });
     });
 
-    // Format the response
-    const formattedReservations = allReservations.map((reservation) => ({
-      student: {
-        name: reservation.user_id?.name
-          ? `${reservation.user_id.name.first_name} ${reservation.user_id.name.last_name}`
-          : "Unknown",
-        email: reservation.user_id?.email || "N/A",
-      },
-      timeIn: reservation.time_in,
-      timeOut: reservation.time_out,
-      date: reservation.time_in.toISOString().split("T")[0],
-      column: reservation.seat.col,
-      row: reservation.seat.row,
-      labName: reservation.lab_id?.lab_name || "N/A",
-      status: reservation.status,
-    }));
+    // Format the response with snake_case
+    const formattedReservations = allReservations.map((reservation) => {
+      const isAnonymous = reservation.isAnonymous;
+
+      return {
+        user_id: isAnonymous ? null : reservation.user_id?._id?.toString() || null,
+        student: {
+          name: isAnonymous
+            ? "Anonymous"
+            : reservation.user_id?.name
+              ? `${reservation.user_id.name.first_name} ${reservation.user_id.name.last_name}`
+              : "Unknown",
+          email: isAnonymous ? "N/A" : reservation.user_id?.email || "N/A",
+        },
+        time_in: formatDateTime(reservation.time_in),
+        time_out: formatDateTime(reservation.time_out),
+        column: reservation.seat.col,
+        row: reservation.seat.row,
+        lab_name: reservation.lab_id?.lab_name || "N/A",
+        status: reservation.status,
+        is_anonymous: isAnonymous,
+      };
+    });
 
     res.status(200).json(formattedReservations);
   } catch (err) {
@@ -183,9 +199,11 @@ app.get("/users", async (req, res) => {
 });
 
 // Used to verify login credentials w/ db
-app.post('/users/login', async (req, res) => {
+app.post("/users/login", async (req, res) => {
   console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] POST /users/login (Login attempt)`);
+  console.log(
+    `[${new Date().toLocaleTimeString()}] POST /users/login (Login attempt)`
+  );
 
   try {
     console.log(`Looking up user with email: ${req.body.email}`);
@@ -193,7 +211,7 @@ app.post('/users/login', async (req, res) => {
 
     if (!user) {
       console.log("User not found.");
-      return res.status(400).json({error: 'Wrong email or password'});
+      return res.status(400).json({ error: "Wrong email or password" });
     }
 
     if (req.body.password === user.password) {
@@ -201,67 +219,75 @@ app.post('/users/login', async (req, res) => {
       console.log("Successfully logged in.");
 
       // No expiration yet
-      const accessToken = jwt.sign({
-        id: user._id.toString(), // User OID to convert to string
-      }, process.env.ACCESS_TOKEN_SECRET);
-     res.json({
-      accessToken: accessToken,
-      user: {
-        first_name: user.name.first_name,
-        last_name: user.name.last_name,
-        role: user.role
-      }
-    });
+      const accessToken = jwt.sign(
+        {
+          id: user._id.toString(), // User OID to convert to string
+        },
+        process.env.ACCESS_TOKEN_SECRET
+      );
+      res.json({
+        accessToken: accessToken,
+        user: {
+          first_name: user.name.first_name,
+          last_name: user.name.last_name,
+          role: user.role,
+        },
+      });
     } else {
-      res.status(403).json({error: 'Wrong email or password'});
+      res.status(403).json({ error: "Wrong email or password" });
     }
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
-    res.status(500).json({error: "Server error during login"});
+    res.status(500).json({ error: "Server error during login" });
   }
 });
 
 // Sign up function
-app.post('/users/signup', async (req, res) => {
+app.post("/users/signup", async (req, res) => {
   console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`);
+  console.log(
+    `[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`
+  );
 
   const existingUser = await Users.findOne({ email: req.body.email });
-    if (existingUser) {
-      return res.status(409).json({ error: "Email already in use." });
-    }
+  if (existingUser) {
+    return res.status(409).json({ error: "Email already in use." });
+  }
   try {
     const newUser = await Users.create({
       id_number: req.body.idNumber,
       name: {
         first_name: req.body.firstName,
-        last_name: req.body.lastName
+        last_name: req.body.lastName,
       },
-      role: 'student',
+      role: "student",
       email: req.body.email,
       password: req.body.password,
-      bio: ""
+      bio: "",
     });
-    
-    const accessToken = jwt.sign({
+
+    const accessToken = jwt.sign(
+      {
         id: newUser._id.toString(), // User OID to convert to string
-    }, process.env.ACCESS_TOKEN_SECRET);
-     res.json({accessToken: accessToken});
+      },
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    res.json({ accessToken: accessToken });
 
     console.log("New user created:", newUser.email);
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ message: "Internal server error." });
   }
-})
+});
 
 // Used to fetch user info of current user
-app.get('/users/me', async (req, res) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer
+app.get("/users/me", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer
 
   if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
+    return res.status(401).json({ error: "No token provided" });
   }
 
   try {
@@ -269,7 +295,7 @@ app.get('/users/me', async (req, res) => {
     const user = await Users.findById(decoded.id).exec();
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     res.json({
@@ -279,11 +305,11 @@ app.get('/users/me', async (req, res) => {
       last_name: user.name.last_name,
       email: user.email,
       avatar: user.avatar,
-      role: user.role
+      role: user.role,
     });
   } catch (err) {
     console.error("Token verification failed:", err);
-    res.status(403).json({ error: 'Invalid token' });
+    res.status(403).json({ error: "Invalid token" });
   }
 });
 
