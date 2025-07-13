@@ -16,7 +16,7 @@
 
 	onMount(async () => {
 		const token = localStorage.getItem('accessToken');
-		if (token) {
+		if (token && !sessionStorage.getItem('welcomeShown')) {
 			console.log('Token found:', token);
 			try {
 				const response = await fetch('http://localhost:3000/users/me', {
@@ -32,6 +32,7 @@
 				const userData = await response.json();
 				user = userData;
 				defaultModal = true;
+				sessionStorage.setItem('welcomeShown', 'true');
 			} catch (err) {
 				console.error("Error fetching user:", err);
 			}
@@ -39,9 +40,23 @@
 	});
 </script>
 
-<Modal bind:open={defaultModal}>
-	<h1>Welcome {user.first_name}!</h1>
+<Modal bind:open={defaultModal} autoclose class="backdrop-blur-sm border-2 border-primary-200 rounded-xl px-8 py-10 bg-white dark:bg-gray-900 shadow-md flex flex-col items-center space-y-5 text-center">
+    
+    <img src="/src/assets/logo.png" alt="Lab Club Logo" class="w-24 h-auto" />
+
+    <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 bg-clip-text text-transparent dark:from-white dark:to-slate-500">
+      Welcome, {user.first_name}!
+    </h1>
+
+    <p class="text-gray-700 dark:text-gray-300 text-base">
+      You're now loged in to <span class="font-semibold">Lab Club</span> - your all-in-one<br/> lab reservation platform.
+	</p>
+
+    <button on:click={() => (defaultModal = false)} class="px-6 py-2 text-white font-medium rounded-full text-lg shadow-sm bg-blue-400 border-2 border-red-300 hover:bg-blue-500 transition-all">
+      Let’s get started
+    </button>
 </Modal>
+
 
 <div class="flex flex-col">
 <div class="relative flex h-screen w-screen flex-col items-center justify-start overflow-hidden bg-background md:shadow-xl pb-50">
