@@ -8,14 +8,22 @@ import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import { idText } from "typescript";
 import dotenv from "dotenv";
+import path from "path";
+import userUploadRoutes from "./controllers/users.js";
+
 dotenv.config();
 
 const app = express();
 const port = 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 const mongoURI =
   "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
@@ -308,6 +316,7 @@ app.get("/users/me", async (req, res) => {
       email: user.email,
       avatar: user.avatar,
       role: user.role,
+      bio: user.bio,
     });
   } catch (err) {
     console.error("Token verification failed:", err);
@@ -433,3 +442,61 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`labclub api listening on port ${port}`);
 });
+
+app.put("/users/me", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const updates = req.body;
+
+    const allowedFields = ["name", "bio", "avatar"];
+    const updateData = {};
+
+    // Filter only the allowed fields to update
+    for (const key of allowedFields) {
+      if (updates[key]) {
+        updateData[key] = updates[key];
+      }
+    }
+
+    // Handle name as string → split to first and last name if needed
+    if (updateData.name && typeof updateData.name === "string") {
+      const parts = updateData.name.trim().split(" ");
+      updateData.name = {
+        first_name: parts[0],
+        last_name: parts.slice(1).join(" ") || "",
+      };
+    }
+
+    const updatedUser = await Users.findByIdAndUpdate(
+      decoded.id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        bio: updatedUser.bio,
+        avatar: updatedUser.avatar,
+        role: updatedUser.role,
+      },
+    });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+app.use("/users", userUploadRoutes);

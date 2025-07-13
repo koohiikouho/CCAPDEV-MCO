@@ -41,6 +41,7 @@
     "mini-svg-data-uri": "^1.4.4",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",
+    "multer": "^2.0.1",
     "node-fetch": "^3.3.2",
     "prettier": "^3.5.3",
     "svelte-motion": "^0.12.2",

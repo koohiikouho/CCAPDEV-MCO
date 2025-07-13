@@ -38,3 +38,17 @@ export async function verifySignUp(firstName, lastName, idNumber, email, passwor
   const data = await response.json();
   return data;
 }
+
+export async function updateUserProfile(payload, token) {
+  const response = await fetch("http://localhost:3000/users/me", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  return data;
+}
