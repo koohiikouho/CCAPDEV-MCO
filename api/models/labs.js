@@ -21,6 +21,21 @@ const seatSchema = new mongoose.Schema({
   ],
 });
 
+const scheduleSchema = new mongoose.Schema({
+  day: {
+    type: String,
+    enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  },
+  opening: {
+    type: String,
+    required: false
+  },
+  closing: {
+    type: String,
+    required: false
+  }
+});
+
 const labSchema = new mongoose.Schema(
   {
     lab_name: {
@@ -66,6 +81,10 @@ const labSchema = new mongoose.Schema(
       type: [seatSchema],
       required: true,
     },
+    schedule: {
+      type: [scheduleSchema],
+      required: true
+    }
   },
   {
     timestamps: true,
