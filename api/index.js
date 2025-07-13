@@ -95,11 +95,11 @@ app.get("/reservations/:labId", async (req, res) => {
   try {
     const labId = req.params.labId;
 
-    // First get the lab with all seats and their reservations populated
+    // Get lab with populated reservations
     const lab = await Labs.findById(labId).populate({
       path: "seats.reservations",
       populate: [
-        { path: "user_id", select: "name email" },
+        { path: "user_id", select: "name email id_number" }, // Include id_number
         { path: "lab_id", select: "lab_name" },
       ],
     });
@@ -108,62 +108,50 @@ app.get("/reservations/:labId", async (req, res) => {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Helper function to format dates as MM-DD-HH:Minute
+    // Format date as MM-DD HH:MM
     const formatDateTime = (date) => {
       const d = new Date(date);
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      const hours = String(d.getHours()).padStart(2, "0");
-      const minutes = String(d.getMinutes()).padStart(2, "0");
-      return `${month}-${day} ${hours}:${minutes}`;
+      return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
 
-    // Extract all reservations from all seats
-    const allReservations = [];
+    // Process all reservations
+    const formattedReservations = lab.seats.flatMap((seat) =>
+      seat.reservations.map((reservation) => {
+        const isAnonymous = reservation.isAnonymous;
+        const user = reservation.user_id;
 
-    lab.seats.forEach((seat) => {
-      seat.reservations.forEach((reservation) => {
-        allReservations.push({
-          ...reservation.toObject(),
-          seat: {
-            col: seat.col,
-            row: seat.row,
+        return {
+          reservation_id: reservation._id,
+          user_id: user?._id, // Always include user_id
+          student: {
+            id_number: isAnonymous ? null : user?.id_number, // Hide if anonymous
+            name: isAnonymous
+              ? "Anonymous"
+              : user?.name
+                ? `${user.name.first_name} ${user.name.last_name}`
+                : "Unknown",
+            email: isAnonymous ? null : user?.email, // Hide if anonymous
           },
-        });
-      });
-    });
-
-    // Format the response with snake_case
-    const formattedReservations = allReservations.map((reservation) => {
-      const isAnonymous = reservation.isAnonymous;
-
-      return {
-        user_id: isAnonymous
-          ? null
-          : reservation.user_id?._id?.toString() || null,
-        student: {
-          name: isAnonymous
-            ? "Anonymous"
-            : reservation.user_id?.name
-              ? `${reservation.user_id.name.first_name} ${reservation.user_id.name.last_name}`
-              : "Unknown",
-          email: isAnonymous ? "N/A" : reservation.user_id?.email || "N/A",
-        },
-        time_in: formatDateTime(reservation.time_in),
-        time_out: formatDateTime(reservation.time_out),
-        column: reservation.seat.col,
-        row: reservation.seat.row,
-        lab_name: reservation.lab_id?.lab_name || "N/A",
-        status: reservation.status,
-        is_anonymous: isAnonymous,
-      };
-    });
+          time_in: formatDateTime(reservation.time_in),
+          time_out: formatDateTime(reservation.time_out),
+          timestamp_in: reservation.time_in,
+          timestamp_out: reservation.time_out,
+          column: seat.col,
+          row: seat.row,
+          lab_name: reservation.lab_id?.lab_name || "N/A",
+          status: reservation.status,
+          is_anonymous: isAnonymous,
+          created_at: reservation.createdAt,
+          updated_at: reservation.updatedAt,
+        };
+      })
+    );
 
     res.status(200).json(formattedReservations);
   } catch (err) {
-    console.error("Error fetching lab reservations:", err);
+    console.error("Error fetching reservations:", err);
     res.status(500).json({
-      error: "Error fetching lab reservations",
+      error: "Error fetching reservations",
       details: err.message,
     });
   }
@@ -922,6 +910,180 @@ app.post("/admin/reservations", async (req, res) => {
     console.error("Error creating reservation:", err);
     res.status(500).json({
       error: "Error creating reservation",
+      details: err.message,
+    });
+  }
+});
+
+app.put("/reservations/:reservationId", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { reservationId } = req.params;
+    const { time_in, time_out, column, row } = req.body;
+
+    // Validate inputs
+    if (!time_in || !time_out || !column || !row) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Validate seat format
+    if (
+      !["A", "B", "C", "D", "E"].includes(column.toUpperCase()) ||
+      isNaN(row)
+    ) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid seat format" });
+    }
+
+    // Convert to Date objects
+    const newStartTime = new Date(time_in);
+    const newEndTime = new Date(time_out);
+
+    // Find the existing reservation
+    const reservation = await Reservations.findById(reservationId)
+      .populate("lab_id")
+      .session(session);
+
+    if (!reservation) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    // Get the lab with seats
+    const lab = await Labs.findById(reservation.lab_id._id).session(session);
+
+    if (!lab) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    // Check lab operating hours
+    const reservationDay = newStartTime.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+    const labSchedule = lab.schedule.find((s) => s.day === reservationDay);
+
+    if (!labSchedule || !labSchedule.opening || !labSchedule.closing) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(400)
+        .json({ error: "Lab is closed on " + reservationDay });
+    }
+
+    // Parse opening/closing times
+    const [openingHour, openingMinute] = labSchedule.opening
+      .split(":")
+      .map(Number);
+    const [closingHour, closingMinute] = labSchedule.closing
+      .split(":")
+      .map(Number);
+
+    // Create comparison dates using the reservation date (ignore year/month/day)
+    const openingTime = new Date(newStartTime);
+    openingTime.setHours(openingHour, openingMinute, 0, 0);
+
+    const closingTime = new Date(newStartTime);
+    closingTime.setHours(closingHour, closingMinute, 0, 0);
+
+    // Proper time comparison
+    if (
+      newStartTime.getTime() < openingTime.getTime() ||
+      newEndTime.getTime() > closingTime.getTime()
+    ) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        error: "New time conflicts with lab hours",
+        lab_hours: {
+          day: reservationDay,
+          opening: labSchedule.opening,
+          closing: labSchedule.closing,
+        },
+        attempted_times: {
+          start: newStartTime.toLocaleTimeString(),
+          end: newEndTime.toLocaleTimeString(),
+        },
+      });
+    }
+
+    // Find current seat to remove reservation reference
+    const currentSeat = lab.seats.find((s) =>
+      s.reservations.some((resId) => resId.equals(reservation._id))
+    );
+
+    // Find new seat
+    const newSeat = lab.seats.find(
+      (s) => s.col === column.toUpperCase() && s.row === row
+    );
+
+    if (!newSeat) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Requested seat not found" });
+    }
+
+    // Check for conflicts in new seat
+    const conflictingReservations = await Reservations.find({
+      _id: { $in: newSeat.reservations },
+      _id: { $ne: reservation._id }, // Exclude current reservation
+      $or: [{ time_in: { $lt: newEndTime }, time_out: { $gt: newStartTime } }],
+    }).session(session);
+
+    if (conflictingReservations.length > 0) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(409).json({
+        error: "Seat already reserved for this time",
+        conflicts: conflictingReservations.map((r) => ({
+          from: r.time_in,
+          to: r.time_out,
+        })),
+      });
+    }
+
+    // Update reservation
+    reservation.time_in = newStartTime;
+    reservation.time_out = newEndTime;
+    await reservation.save({ session });
+
+    // Update seat references
+    if (currentSeat) {
+      currentSeat.reservations = currentSeat.reservations.filter(
+        (resId) => !resId.equals(reservation._id)
+      );
+    }
+
+    newSeat.reservations.push(reservation._id);
+    await lab.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: "Reservation updated successfully",
+      reservation: {
+        id: reservation._id,
+        lab_id: reservation.lab_id._id,
+        seat: `${column}${row}`,
+        time_in: reservation.time_in,
+        time_out: reservation.time_out,
+        status: reservation.status,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error updating reservation:", err);
+    res.status(500).json({
+      error: "Error updating reservation",
       details: err.message,
     });
   }

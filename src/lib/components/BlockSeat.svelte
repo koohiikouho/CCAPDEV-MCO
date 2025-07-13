@@ -131,7 +131,7 @@
         isAnonymous: isAnonymousVar,
         seats: Object.values(eventType)
       })
-      console.log 
+
       
       if (result.success) {
         alert('Reservation successful!');
