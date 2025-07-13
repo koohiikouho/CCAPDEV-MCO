@@ -16,6 +16,8 @@
   let reservations = [];
   let showEditModal = false;
   let editableUser = null;
+  let avatarUploading = false;
+
 
   function getAvatar(avatar: string): string {
     return avatar && avatar !== "" ? avatar : "/src/assets/default_avatar.png";
@@ -45,11 +47,13 @@
       const token = localStorage.getItem("accessToken");
       if (!token) throw new Error("No access token");
 
-      const payload = {
+      let payload = {
         name: editableUser.name,
         bio: editableUser.bio,
         avatar: editableUser.avatar
       };
+
+      console.log("Saving profile with payload:", payload);
 
       const result = await updateUserProfile(payload, token);
 
@@ -244,6 +248,7 @@
             if (file) {
               const formData = new FormData();
               formData.append("avatar", file);
+              avatarUploading = true;
 
               try {
                 const res = await fetch("http://localhost:3000/users/upload-avatar", {
@@ -251,15 +256,27 @@
                   body: formData,
                 });
 
-                const data = await res.json();
-                if (data.url) {
-                  editableUser.avatar = data.url; // Save the file path returned
-                } else {
-                  console.error("Failed to upload avatar");
+                if (!res.ok) {
+                  const errorText = await res.text();
+                  console.error("Upload failed:", errorText);
+                  return;
+                }
+
+                const contentType = res.headers.get("content-type");
+                if (contentType?.includes("application/json")) {
+                  const data = await res.json();
+                  if (data.url) {
+                    editableUser.avatar = data.url;
+                    console.log("Avatar set to:", editableUser.avatar);
+                  }
                 }
               } catch (err) {
                 console.error("Upload error:", err);
+              } finally {
+                avatarUploading = false;
               }
+
+              console.log("New avatar URL:", editableUser.avatar);
             }
           }}
        />
@@ -274,7 +291,9 @@
 
     <div class="flex justify-between pt-4">
       <Button color="gray" onclick={() => (showEditModal = false)}>Cancel</Button>
-      <Button color="primary" onclick={saveProfile}>Save</Button>
+      <Button color="primary" onclick={saveProfile} disabled={avatarUploading}>
+        {avatarUploading ? 'Uploading Image...' : 'Save'}
+      </Button>
     </div>
   </div>
 </Modal>
