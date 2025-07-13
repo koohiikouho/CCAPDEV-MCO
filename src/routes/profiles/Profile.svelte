@@ -15,6 +15,10 @@
   let params = new URLSearchParams(location.search);
   let userCode = params.get("userCode");
 
+  // 🔐 Store the logged-in user separately for the navbar
+  let loggedInUser = null;
+
+  // The user profile being viewed
   let users = [];
   let currentUser = null;
 
@@ -44,6 +48,30 @@
   let reservations = [];
 
   onMount(async () => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        const res = await fetch("http://localhost:3000/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const me = await res.json();
+          loggedInUser = {
+            name: `${me.first_name} ${me.last_name}`,
+            email: me.email,
+            avatar: me.avatar || "/src/assets/default_avatar.png"
+          };
+        } else {
+          console.error("Failed to fetch logged-in user");
+        }
+      } catch (e) {
+        console.error("Error loading logged-in user:", e);
+      }
+    }
+
     try {
       const data = await getUserData();
       users = data.map((user) => ({
@@ -80,9 +108,9 @@
 </script>
 
 <TempNavbar
-  userName={currentUser?.name || "Loading..."}
-  userEmail={currentUser?.email || "Loading..."}
-  profilePicture={getAvatar(currentUser?.avatar)}
+  userName={loggedInUser?.name || "Guest"}
+  userEmail={loggedInUser?.email || "Sign in to reserve"}
+  profilePicture={getAvatar(loggedInUser?.avatar)}
 />
 
 {#if currentUser}
