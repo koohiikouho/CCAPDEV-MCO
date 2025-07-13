@@ -157,20 +157,26 @@
       
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to create reservation',
+        error: error.response?.data?.error || 'Failed to edit reservation',
         details: error.response?.data?.details || error.message
       };
     }
   };
 
   async function putEditReservation(){
+    
     const result = await createReservation(tempId, {
+      time_in: tempIn,
+      time_out: tempOut,
+      column: tempCol,
+      row: Number(tempRow)
+    })
+      console.log({
       time_in: tempIn,
       time_out: tempOut,
       column: tempCol,
       row: tempRow
     })
-
     if (result.success) {
       alert('Reservation successful!');
       console.log('Created reservations:', result.data.reservations);
@@ -178,7 +184,8 @@
       alert('Reservation Edit Unsuccessful'.concat(result.error));
 
     }
-  } 
+
+  }
 
   let defaultModal = $state(false);
 </script>
@@ -189,7 +196,7 @@
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Student</TableHeadCell>
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Time In</TableHeadCell>
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Time Out</TableHeadCell>
-      <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Date</TableHeadCell>
+      <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Date Reserved</TableHeadCell>
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Col</TableHeadCell>
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Row</TableHeadCell>
       <TableHeadCell class="px-0.5 md:px-4 py-3" scope="col">Actions</TableHeadCell>
