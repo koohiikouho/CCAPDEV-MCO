@@ -6,14 +6,14 @@
   import Users from './routes/Users.svelte';
   // import Labs from './routs/Labs.svelte';
   import Reservations from './routes/Reservations.svelte';
-  import Profile from './routes/profiles/Profile.svelte';
+  import MyProfile from './routes/profiles/MyProfile.svelte';
   import { fade } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import Suggestions from './routes/Suggestions.svelte';
   import { onMount } from 'svelte';
 
-  const views = [Home, Lab, Users, Reservations, Profile, Suggestions];
+  const views = [Home, Lab, Users, Reservations, MyProfile, Suggestions];
 
   let params = new URLSearchParams(location.search);
   let viewNumber = Number(params.get("view"));
