@@ -126,9 +126,20 @@
       <div class="flex flex-col items-center">
         <Avatar
           src={getAvatar(currentUser.avatar)}
-          class="w-70 h-70 rounded-full ring-4 ring-primary-500 shadow-lg object-cover"
+          class="w-70 h-70 rounded-full ring-4 ring-primary-500 shadow-lg object-cover mb-10"
         />
+        <Button
+          color="primary"
+          onclick={() => {
+            editableUser = { ...currentUser };
+            showEditModal = true;
+          }}
+        >
+          Edit Profile
+        </Button>
       </div>
+
+
       <div class="md:col-span-2 space-y-4">
         <h1 class="text-4xl font-bold text-primary-900">{currentUser.name}</h1>
         <p class="text-lg text-primary-700">{currentUser.email}</p>
@@ -140,18 +151,6 @@
       </div>
     </div>
 
-    <div class="flex gap-2 ml-27">
-      <Button
-        color="primary"
-        onclick={() => {
-          editableUser = { ...currentUser }; // shallow copy
-          showEditModal = true;
-        }}
-      >
-        Edit Profile
-      </Button>
-
-    </div>
 
     <hr class="my-4 border-t border-gray-300" />
 

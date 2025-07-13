@@ -18,6 +18,13 @@
     profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg",
     isLoggedIn = false, // Default false to reflect guest state
   } = $props();
+
+  function signOut() {
+    localStorage.removeItem('accessToken');
+    localStorage.clear();
+    window.location.href = "/src/routes/login/login.html";
+  }
+
 </script>
 
 <header>
@@ -63,7 +70,12 @@
 
             <DropdownGroup class="text-white">
               {#if isLoggedIn}
-                <DropdownItem class="hover:text-surface-400 text-center w-full cursor-pointer">Sign out</DropdownItem>
+                <DropdownItem
+                  class="hover:text-surface-400 text-center w-full cursor-pointer"
+                  onclick={signOut}
+                >
+                  Sign out
+                </DropdownItem>
               {:else}
                 <DropdownItem
                   class="hover:text-surface-400 text-center w-full cursor-pointer"
