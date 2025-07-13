@@ -70,31 +70,26 @@
   function viewHome(){
     currentView = 0;
     scrollTo(0, 0);
-    navbar.add();
     updateViewportComponent();  
   }
 
   function viewLabs(){
     currentView = 1;
-    navbar.add();
     updateViewportComponent();  
   }
 
   function viewUsers() {
     currentView = 2;
-    navbar.add();
     updateViewportComponent();
   }
 
   function viewReservations() {
     currentView = 3;
-    navbar.add();
     updateViewportComponent();
   }
 
     function viewProfile() {
     currentView = 4;
-    navbar.add();
     updateViewportComponent();
   }
 

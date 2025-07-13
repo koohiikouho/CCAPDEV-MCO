@@ -10,10 +10,12 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { updateUserProfile } from "../../../api/api.js";
 
   let currentUser = null;
   let reservations = [];
   let showEditModal = false;
+  let editableUser = null;
 
   function getAvatar(avatar: string): string {
     return avatar && avatar !== "" ? avatar : "/src/assets/default_avatar.png";
@@ -39,8 +41,28 @@
   }
 
   async function saveProfile() {
-    console.log("Updated Profile:", currentUser);
-    showEditModal = false;
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("No access token");
+
+      const payload = {
+        name: editableUser.name,
+        bio: editableUser.bio,
+        avatar: editableUser.avatar
+      };
+
+      const result = await updateUserProfile(payload, token);
+
+      if (result.error) {
+        console.error("Update failed:", result.error);
+        return;
+      }
+
+      currentUser = { ...currentUser, ...editableUser };
+      showEditModal = false;
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
   }
 
   onMount(async () => {
@@ -90,6 +112,7 @@
   userName={currentUser?.name || "Loading..."}
   userEmail={currentUser?.email || "Loading..."}
   profilePicture={getAvatar(currentUser?.avatar)}
+  isLoggedIn={!!currentUser}
 />
 
 {#if currentUser}
@@ -114,7 +137,16 @@
     </div>
 
     <div class="flex gap-2 ml-27">
-      <Button color="primary" onclick={() => (showEditModal = true)}>Edit Profile</Button>
+      <Button
+        color="primary"
+        onclick={() => {
+          editableUser = { ...currentUser }; // shallow copy
+          showEditModal = true;
+        }}
+      >
+        Edit Profile
+      </Button>
+
     </div>
 
     <hr class="my-4 border-t border-gray-300" />
@@ -174,21 +206,28 @@
     <div class="space-y-4">
       <div>
         <Label for="name">Name</Label>
-        <Input id="name" type="text" bind:value={currentUser.name} />
+        <Input id="name" type="text" bind:value={editableUser.name} />
       </div>
 
       <div>
         <Label for="email">Email</Label>
-        <Input id="email" type="email" bind:value={currentUser.email} disabled />
+        <Input
+          id="email"
+          type="email"
+          value={editableUser.email}
+          readonly
+          class="bg-gray-100 cursor-not-allowed"
+        />
       </div>
+
 
       <div>
         <Label for="bio">Description</Label>
         <textarea
           id="bio"
           rows="3"
-          bind:value={currentUser.bio}
-          class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+          bind:value={editableUser.bio}
+          class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 text-gray-800"
         ></textarea>
       </div>
 
@@ -199,21 +238,34 @@
           type="file"
           accept="image/*"
           class="block mb-1 pl-8"
-          onchange={(e) => {
+          onchange={async (e) => {
             const input = e.target as HTMLInputElement;
             const file = input?.files?.[0];
             if (file) {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                currentUser.avatar = event.target?.result as string;
-              };
-              reader.readAsDataURL(file);
+              const formData = new FormData();
+              formData.append("avatar", file);
+
+              try {
+                const res = await fetch("http://localhost:3000/users/upload-avatar", {
+                  method: "POST",
+                  body: formData,
+                });
+
+                const data = await res.json();
+                if (data.url) {
+                  editableUser.avatar = data.url; // Save the file path returned
+                } else {
+                  console.error("Failed to upload avatar");
+                }
+              } catch (err) {
+                console.error("Upload error:", err);
+              }
             }
           }}
-        />
+       />
         <p class="text-sm text-gray-500 mt-1">Preview:</p>
         <img
-          src={currentUser.avatar}
+          src={editableUser.avatar}
           alt="Preview"
           class="mt-2 w-24 h-24 rounded-full border-2 border-primary-500 object-cover"
         />
