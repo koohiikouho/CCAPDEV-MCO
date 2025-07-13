@@ -150,7 +150,7 @@
       {:else}
         {#each currentPageItems as item (item)}
           <TableBodyRow>
-            {#if item.student_name != "Anonymous"}
+            {#if item.is_anonymous != true}
               <a href="/src/routes/profiles/viewProfile.html?userCode=1&profile=1"
                 ><TableBodyCell class="px-1 md:px-4 py-3"
                   >{item.student.name}</TableBodyCell
@@ -158,7 +158,7 @@
               >
             {:else}
               <TableBodyCell class="px-1 md:px-4 py-3"
-                >{item.name}</TableBodyCell
+                >Anonymous</TableBodyCell
               >
             {/if}
             <TableBodyCell class="px-1 md:px-4 py-3">{item.time_in}</TableBodyCell>
