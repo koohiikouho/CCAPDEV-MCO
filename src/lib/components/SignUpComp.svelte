@@ -5,7 +5,6 @@
 
 	import { verifySignUp } from '../../../api/api.js';
 
-	let result = $state(true);
 	let checked = $state(false);
 	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 	let defaultModal = $state(false);
@@ -16,40 +15,35 @@
 	let emailInput = $state("");
 	let passwordInput = $state("");
 	let passwordConfirmInput = $state("");
-	let errorMessage = $state("");
-
-	function dlsuCheck(value: string){
-		return result = regex.test(value);
-	}
+	let errors: string[] = $state([]);
 
 async function handleSignUp(e: Event) {
 		e.preventDefault();
+		errors = [];
 
-		if (!dlsuCheck(emailInput)) {
-			errorMessage = "Invalid email";
-			console.log(errorMessage);
-			return;
+		if (!regex.test(emailInput)) {
+			errors.push("Please enter a valid email address.");
+			console.log("Invalid email address format: " + emailInput);
 		}
 		
 		if (idNumberInput.length < 8) {
-			errorMessage = "Invalid ID number";
-			console.log(errorMessage);
-			return;
+			errors.push("Please enter a valid ID number address.");
+			console.log("Invalid ID number length.");
 		}
 
 		if (passwordInput.length < 8) {
-			errorMessage = "Password must be at least 8 characters.";
-			console.log(errorMessage);
-			return;
+			errors.push("Password must be at least 8 characters.");
+			console.log("Invalid password length.");
 		}
 
 		if (passwordInput !== passwordConfirmInput) {
-			errorMessage = "Password invalid.";
-			console.log(errorMessage);
-			return;
+			errors.push("Passwords do not match.");
+			console.log("Passwords do not match.");
 		}
 
-		result = true;
+		if (errors.length > 0) {
+			return;
+		}
 
 		try {
 
@@ -58,7 +52,7 @@ async function handleSignUp(e: Event) {
 
 			// If the backend sent an error, handle it
 			if (data.error) {
-				errorMessage = data.error;
+				errors.push(data.error);
 				return;
 			}
 
@@ -67,11 +61,9 @@ async function handleSignUp(e: Event) {
 			console.log('Login successful:', data.user);
 
 			// Redirect to homepage w/ modal
-			window.location.href = "../../../index.html?signedIn=1";
+			window.location.href = "../../../index.html";
 		} catch (err) {
 			console.error("Login failed:", err);
-			errorMessage = "An error occurred during login. Please try again.";
-			alert(errorMessage);
 		}
 	}
 	
@@ -166,8 +158,15 @@ async function handleSignUp(e: Event) {
 						<Button color="alternative" onclick={() => checked = false}>Decline</Button>
 					{/snippet}
 				</Modal>
+				{#if errors.length > 0}
+					<ul class="text-sm text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+						{#each errors as err}
+							<li>{err}</li>
+						{/each}
+					</ul>
+				{/if}
 
-				{#if result && checked}
+				{#if checked}
 				<Button type="submit" class="text-white bg-gradient-to-r from-primary-200 via-primary-300 to-primary-400 hover:bg-gradient-to-br 
                 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor">Create an account</Button>
 				{:else}
