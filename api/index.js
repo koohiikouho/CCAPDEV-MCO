@@ -1080,3 +1080,87 @@ app.put("/reservations/:reservationId", async (req, res) => {
     });
   }
 });
+
+app.delete("/reservations/:reservationId", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { reservationId } = req.params;
+
+    // Validate reservation ID format
+    if (!mongoose.Types.ObjectId.isValid(reservationId)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid reservation ID format" });
+    }
+
+    // Find and populate the reservation with lab reference
+    const reservation = await Reservations.findById(reservationId)
+      .populate("lab_id")
+      .session(session);
+
+    if (!reservation) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    // Get the lab containing the reservation
+    const lab = await Labs.findById(reservation.lab_id._id).session(session);
+
+    if (!lab) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Associated lab not found" });
+    }
+
+    // Find and remove reservation reference from the seat
+    let seatFound = false;
+    for (const seat of lab.seats) {
+      const reservationIndex = seat.reservations.findIndex((resId) =>
+        resId.equals(reservationId)
+      );
+
+      if (reservationIndex !== -1) {
+        seat.reservations.splice(reservationIndex, 1);
+        seatFound = true;
+        break;
+      }
+    }
+
+    if (!seatFound) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(404)
+        .json({ error: "Reservation not found in any seat" });
+    }
+
+    // Save the updated lab and delete the reservation
+    await lab.save({ session });
+    await Reservations.deleteOne({ _id: reservationId }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: "Reservation deleted successfully",
+      deleted_reservation: {
+        id: reservation._id,
+        lab_id: reservation.lab_id._id,
+        time_in: reservation.time_in,
+        time_out: reservation.time_out,
+        status: reservation.status,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error deleting reservation:", err);
+    res.status(500).json({
+      error: "Error deleting reservation",
+      details: err.message,
+    });
+  }
+});
