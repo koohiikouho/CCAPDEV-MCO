@@ -169,7 +169,7 @@
 
 {#if viewportComponent == views[currentView]}
 	<div id="viewport" onoutroend={updateViewportComponent} transition:fade={{ duration: 200, easing: expoIn}}>
-	  <svelte:component this={viewportComponent}></svelte:component>
+	  {viewportComponent}
 	</div>
 {/if}
 
