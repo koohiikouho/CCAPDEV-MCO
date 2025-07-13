@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio } from "flowbite-svelte";
+    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio, Modal } from "flowbite-svelte";
     import { CalendarMonthSolid, ClockSolid, MapPinSolid, TheatreOutline, UserCircleOutline } from "flowbite-svelte-icons";
 
     let {userName = "Username"} = $props();
@@ -50,6 +50,10 @@
 
     }
 
+    function postReservation(){
+
+    }
+      let defaultModal = $state(false);
   </script>
   
   <div class="mx-auto rounded-lg bg-white shadow-md dark:bg-gray-800">
@@ -124,6 +128,14 @@
     </div>
 
     <div class="border-t border-gray-200 p-6 dark:border-gray-700">
-      <Button color="primary" class="w-full">Schedule Seat</Button>
+      <Button color="primary" class="w-full" onclick={postReservation}>Schedule Seat</Button>
     </div>
   </div>
+
+<Modal title="Terms of Service" form bind:open={defaultModal} onaction={({ action }) => alert(`Handle "${action}"`)}>
+  bro
+  {#snippet footer()}
+    <Button type="submit" value="success">I accept</Button>
+    <Button type="submit" value="decline" color="alternative">Decline</Button>
+  {/snippet}
+</Modal>
