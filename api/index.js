@@ -101,7 +101,7 @@ app.get("/reservations/:labId", async (req, res) => {
       const day = String(d.getDate()).padStart(2, "0");
       const hours = String(d.getHours()).padStart(2, "0");
       const minutes = String(d.getMinutes()).padStart(2, "0");
-      return `${month}-${day}-${hours}:${minutes}`;
+      return `${month}-${day} ${hours}:${minutes}`;
     };
 
     // Extract all reservations from all seats
@@ -312,6 +312,72 @@ app.get("/users/me", async (req, res) => {
   } catch (err) {
     console.error("Token verification failed:", err);
     res.status(403).json({ error: "Invalid token" });
+  }
+});
+
+app.get("/available-seats/:labId", async (req, res) => {
+  try {
+    const { labId } = req.params;
+    const { date, time_in, time_out } = req.query;
+
+    // Validate inputs
+    if (!mongoose.Types.ObjectId.isValid(labId)) {
+      return res.status(400).json({ error: "Invalid lab ID" });
+    }
+
+    // Create full datetime objects
+    const startDateTime = new Date(`${date}T${time_in}:00`);
+    const endDateTime = new Date(`${date}T${time_out}:00`);
+
+    // 1. Get the lab with all seats and their reservations populated
+    const lab = await Labs.findById(labId).populate({
+      path: "seats.reservations",
+      match: {
+        $or: [
+          {
+            time_in: { $lt: endDateTime },
+            time_out: { $gt: startDateTime },
+          },
+        ],
+      },
+    });
+
+    if (!lab) {
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    // 2. Find available seats (seats with no conflicting reservations)
+    const availableSeats = lab.seats.filter((seat) => {
+      // A seat is available if either:
+      // - It has no reservations at all, or
+      // - None of its reservations conflict with our time range
+      return !seat.reservations || seat.reservations.length === 0;
+    });
+
+    // 3. Format response
+    const response = {
+      lab_id: labId,
+      lab_name: lab.lab_name,
+      date: date,
+      time_in: time_in,
+      time_out: time_out,
+      available_seats: availableSeats.map((seat) => ({
+        seat_id: seat._id,
+        position: `${seat.col}${seat.row}`,
+        column: seat.col,
+        row: seat.row,
+      })),
+      total_available: availableSeats.length,
+      total_seats: lab.seats.length,
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Error finding available seats:", err);
+    res.status(500).json({
+      error: "Server error",
+      details: err.message,
+    });
   }
 });
 

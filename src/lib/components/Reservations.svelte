@@ -15,15 +15,10 @@
     ChevronRightOutline,
   } from "flowbite-svelte-icons";
 
-  let params = new URLSearchParams(location.search);
-  let roomCode: string = params.get("labCode");
-
   interface Props {
     seatData: any;
   }
   let { seatData }: Props = $props();
-
-  console.log(seatData);
 
   let paginationData = seatData;
 
@@ -99,7 +94,7 @@
   let filteredItems = $derived(
     paginationData.filter(
       (item) =>
-        item.student.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
+        item.availalbe_seats.position.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
     )
   );
 

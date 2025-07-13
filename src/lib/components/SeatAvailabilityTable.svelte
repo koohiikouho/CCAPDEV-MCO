@@ -3,12 +3,20 @@
   import { Section } from "flowbite-svelte-blocks";
   import { ChevronLeftOutline, ChevronRightOutline } from "flowbite-svelte-icons";
 
-  import paginationData from "../../routes/room/advancedTable.json";
 
   let divClass = 'bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden';
 	let innerDivClass = 'flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4';
 	let searchClass = 'w-full relative';
 
+  interface Props {
+    seatData: any;
+  }
+
+  let { seatData }: Props = $props();
+
+  
+  let paginationData = seatData;
+  console.log(paginationData);
   const itemsPerPage = 50;
 	const showPage = 5;
 	let totalPages = $state(0);
@@ -86,7 +94,7 @@
 	});
 
 	let currentPageItems = $derived(paginationData.slice(currentPosition, currentPosition + itemsPerPage));
-	let filteredItems = $derived(paginationData.filter((item) => item.seat_col.concat(item.seat_row).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
+	let filteredItems = $derived(paginationData.filter((item) => item.position.concat(item.position).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 
 
 </script>
@@ -99,27 +107,27 @@
         {#if searchTerm !== ''}
         {iClear()}
         {jClear()}
-          {#each filteredItems as item (item.id)}
+          {#each filteredItems as item (item)}
             {iAdd()}
             {#if i % 5 === 0 && j != 0}
               <TableBodyRow/>
             {/if}
             {jAdd()}
             <TableBodyCell>
-              <TableBodyRow class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+              <TableBodyRow class="px-1 md:px-4 py-3">{item.position}</TableBodyRow>
             </TableBodyCell>
           {/each}
         {:else}
         {iClear()}
         {jClear()}
-            {#each currentPageItems as item (item.id)}
+            {#each currentPageItems as item (item)}
               {iAdd()}
               {#if i % 5 === 0 && j != 0}
                 <TableBodyRow/>
               {/if}
               {jAdd()}
               <TableBodyCell>
-                <TableBodyRow class="px-1 md:px-4 py-3">{item.seat_col}{item.seat_row}</TableBodyRow>
+                <TableBodyRow class="px-1 md:px-4 py-3">{item.position}</TableBodyRow>
               </TableBodyCell>
             {/each}
         {/if}

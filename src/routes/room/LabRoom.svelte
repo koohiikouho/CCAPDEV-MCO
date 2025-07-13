@@ -52,6 +52,49 @@
   import BlockSeat from "../../lib/components/BlockSeat.svelte";
   import RemoveReservationTable from "../../lib/components/RemoveReservationTable.svelte";
   import ReservationsAdmin from "../../lib/components/ReservationsAdmin.svelte";
+  import { onMount } from 'svelte';
+  
+
+    let viewportComponent = null;
+    let currentView = 0;
+    let userName = $state("Guest");
+    let userEmail = $state("Sign in to reserve");
+    let profilePicture = $state("https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg");
+    let isLoggedIn: boolean = false;
+    let userRole: string = $state("guest");
+
+    onMount(async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      console.log('Token found');
+
+      try {
+        const response = await fetch('http://localhost:3000/users/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user info");
+        }
+
+        const user = await response.json();
+        userName = `${user.first_name} ${user.last_name}`;
+        userEmail = user.email;
+        profilePicture = user.avatar;
+        isLoggedIn = true;
+        userRole = user.role;
+
+        console.log("User loaded:", user);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    }
+  });
+
 
   let images = $state([
     {
@@ -66,11 +109,6 @@
     },
   ]);
 
-  // getCarouselData();
-  let profilePic = "/src/assets/profilepic.jpg";
-
-  let userName = "Kasane Teto";
-  let userEmail = "kasaneteto@dlsu.edu.ph";
 
   let qty: number = 50;
   let vx: number = -0.2;
@@ -79,10 +117,10 @@
   let staticity: number = 100;
   let divider: boolean = false;
 
-  let userRole: string = "student";
+
 </script>
 
-<TempNavbar {userEmail} {userName} profilePicture={profilePic} />
+<TempNavbar {userEmail} {userName} profilePicture={profilePicture} />
 
 {#await getLabData() then labData}
   <div class="relative z-10 px-auto md:px-60">
@@ -108,7 +146,7 @@
           <div
             class="bg-secondary-50/30 px-3 md:px-3 pb-3 pt-2 outline-2 rounded-2xl outline-primary-50/60 outline-dashed text-surface-500"
           >
-            {labData.labDescription}
+            {labData.lab_description}
           </div>
         </div>
         <div
@@ -153,7 +191,7 @@
               {/snippet}
               {#if userRole == "student"}
                 <Reservations seatData={seatdata}/>
-              {:else if userRole == "labTech"}
+              {:else if userRole == "Admin"}
                 <ReservationsAdmin paginationData={seatdata} />
               {/if}
             </TabItem>
@@ -165,7 +203,7 @@
               {/snippet}
               <ReserveSeat {userName} />
             </TabItem>
-          {:else if userRole == "labTech"}
+          {:else if userRole == "Admin"}
             <TabItem class="w-full" {activeClass} {inactiveClass}>
               {#snippet titleSlot()}
                 <span>Block Seat for Student</span>
