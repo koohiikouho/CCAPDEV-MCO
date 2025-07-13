@@ -86,7 +86,7 @@ onMount(async () => {
       email: user.email,
       avatar: user.avatar,
       role: user.role,
-      bio: user.bio || "No description provided.",
+      bio: user.bio
     };
 
     // Fetch all reservations
