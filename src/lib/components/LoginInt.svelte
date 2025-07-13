@@ -81,6 +81,10 @@
 					{/snippet}
 				</Modal>
 
+				{#if errorMessage}
+					<p class="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+				{/if}
+
 				{#if result}
 				<Button type="submit" class="text-white bg-gradient-to-r from-success-500 via-success-600 to-success-700 hover:bg-gradient-to-br 
                 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-800 font-medium rounded-full text-lg px-5 py-2.5 text-center me-2 mb-2 pointer-events-auto fixcursor">Sign in</Button>
