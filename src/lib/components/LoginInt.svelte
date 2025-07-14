@@ -24,22 +24,26 @@
 	let passwordInput = $state("");
 	let resetEmail = $state("");
 	let errorMessage = $state("");
+	let rememberMe = $state(false);
 
     async function handleLogin(e: Event) {
 		e.preventDefault();
 
 		try {
-			// Call backend to verify login
 			const data = await verifyLogin(emailInput, passwordInput);
 
-			// If the backend sent an error, handle it
 			if (data.error) {
 				errorMessage = data.error;
 				return;
 			}
 			
 			// Login successful - store the token and user data
-			localStorage.setItem('accessToken', data.accessToken);
+			// JWT to be stored on local storage
+			if(rememberMe) {
+				localStorage.setItem('accessToken', data.accessToken);
+			} else {
+				sessionStorage.setItem('accessToken', data.accessToken);
+			}
 			console.log('Login successful:', data.user);
 
 			// Redirect to homepage w/ modal
@@ -69,7 +73,7 @@
 					<Input type="password" name="password" placeholder="•••••" required bind:value={passwordInput}/>
 				</Label>
 				<div class="flex items-start">
-					<Checkbox class="accent-primary-200 text-primary-200 focus:ring-primary-200 focus:ring-2">Remember me</Checkbox>
+					<Checkbox class="accent-primary-200 text-primary-200 focus:ring-primary-200 focus:ring-2" bind:checked={rememberMe}>Remember me</Checkbox>
 					<a href="#a" class="ml-auto text-sm text-blue-700 hover:underline dark:text-blue-500" onclick={() => (defaultModal = true)}>Forgot password?</a>
 				</div>
 				<Modal title="Reset Password" bind:open={defaultModal} autoclose>

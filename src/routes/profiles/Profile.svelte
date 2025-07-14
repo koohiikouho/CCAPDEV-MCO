@@ -48,7 +48,7 @@
   let reservations = [];
 
   onMount(async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
     if (token) {
       try {
         const res = await fetch("http://localhost:3000/users/me", {

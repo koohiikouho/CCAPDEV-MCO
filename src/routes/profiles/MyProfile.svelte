@@ -46,7 +46,7 @@
 
   async function saveProfile() {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
       if (!token) throw new Error("No access token");
 
       let payload = {

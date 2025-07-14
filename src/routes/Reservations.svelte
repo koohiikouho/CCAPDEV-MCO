@@ -68,7 +68,7 @@
     
     try {
       // DEBUG MARKER 2: Check token existence
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       debugInfo.authToken = token ? "Present" : "Missing";
       logDebugInfo("Token Check", { tokenExists: !!token, tokenLength: token?.length });
       

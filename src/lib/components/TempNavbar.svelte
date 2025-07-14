@@ -18,10 +18,12 @@
     profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg",
     isLoggedIn = false, // Default false to reflect guest state
   } = $props();
-
+ 
   function signOut() {
     localStorage.removeItem('accessToken');
     localStorage.clear();
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.clear();
     window.location.href = "/src/routes/login/login.html";
   }
 
