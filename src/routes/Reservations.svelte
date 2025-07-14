@@ -293,7 +293,10 @@
         <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg p-8">
           <h2 class="text-2xl font-semibold text-surface-800 mb-6">Edit Reservation</h2>
 
-          <form class="space-y-5" onsubmit={saveEdit}>
+          <form class="space-y-5" onsubmit={(e) => {
+            e.preventDefault();
+            saveEdit();
+          }}>
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="space-y-1">
                 <label for="edit-date" class="block text-sm font-medium text-surface-700">Date</label>
