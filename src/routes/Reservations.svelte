@@ -28,15 +28,6 @@
   let showToast = false;
   let currentUser = null;
 
-  // DEBUG MARKERS - Add debug state
-  let debugInfo = {
-    userLoadStatus: "Not started",
-    reservationLoadStatus: "Not started",
-    authToken: null,
-    apiResponses: [],
-    errors: []
-  };
-
   // Particles settings
   let qty = 35;
   let vx = -1;
@@ -45,36 +36,13 @@
   let staticity = 20;
   let color = "#bad6e9";
 
-  // DEBUG MARKER 1: Enhanced error logging function
-  function logDebugInfo(stage, data, isError = false) {
-    const timestamp = new Date().toISOString();
-    const logEntry = { timestamp, stage, data, isError };
-    
-    if (isError) {
-      debugInfo.errors.push(logEntry);
-      console.error(`[DEBUG ERROR ${timestamp}] ${stage}:`, data);
-    } else {
-      debugInfo.apiResponses.push(logEntry);
-      console.log(`[DEBUG INFO ${timestamp}] ${stage}:`, data);
-    }
-    
-    // Trigger reactivity
-    debugInfo = { ...debugInfo };
-  }
-
   // Fetch user data and reservations on component mount
   onMount(async () => {
-    logDebugInfo("Component Mount", "Starting onMount");
     
     try {
-      // DEBUG MARKER 2: Check token existence
       const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      debugInfo.authToken = token ? "Present" : "Missing";
-      logDebugInfo("Token Check", { tokenExists: !!token, tokenLength: token?.length });
       
       if (token) {
-        debugInfo.userLoadStatus = "Loading";
-        logDebugInfo("User Fetch", "Starting user fetch request");
         
         const userResponse = await fetch('http://localhost:3000/users/me', {
           headers: {
@@ -82,17 +50,8 @@
           }
         });
         
-        // DEBUG MARKER 3: Log response details
-        logDebugInfo("User Response", {
-          status: userResponse.status,
-          statusText: userResponse.statusText,
-          ok: userResponse.ok,
-          headers: Object.fromEntries(userResponse.headers.entries())
-        });
-        
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          logDebugInfo("User Data", userData);
           
           currentUser = {
             id: userData._id || userData.id,
@@ -102,40 +61,18 @@
             original_id_type: typeof userData.id
           };
           
-          debugInfo.userLoadStatus = "Success";
-          logDebugInfo("Current User Set", currentUser);
-          
           await fetchReservations();
         } else {
-          // DEBUG MARKER 4: Enhanced error details for failed auth
-          const errorText = await userResponse.text();
-          debugInfo.userLoadStatus = "Failed";
-          logDebugInfo("User Auth Failed", {
-            status: userResponse.status,
-            statusText: userResponse.statusText,
-            responseBody: errorText
-          }, true);
-          
           error = `Failed to authenticate user (Status: ${userResponse.status})`;
           isLoading = false;
         }
       } else {
-        debugInfo.userLoadStatus = "No Token";
-        logDebugInfo("No Token", "User not authenticated", true);
         // Set empty reservations instead of error for no token
         reservations = [];
         currentUser = null;
         isLoading = false;
       }
     } catch (err) {
-      // DEBUG MARKER 5: Catch block with enhanced error info
-      debugInfo.userLoadStatus = "Error";
-      logDebugInfo("Mount Error", {
-        message: err.message,
-        stack: err.stack,
-        name: err.name
-      }, true);
-      
       error = "Failed to load reservations: " + err.message;
       console.error(err);
       isLoading = false;
@@ -145,64 +82,27 @@
   // Fetch reservations from API
   async function fetchReservations() {
     if (!currentUser) {
-      logDebugInfo("Fetch Reservations", "No current user, skipping", true);
       return;
     }
     
     try {
       isLoading = true;
-      debugInfo.reservationLoadStatus = "Loading";
-      logDebugInfo("Reservations Fetch", "Starting reservations fetch");
       
       const response = await fetch('http://localhost:3000/reservations');
-      
-      // DEBUG MARKER 6: Log reservations response
-      logDebugInfo("Reservations Response", {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
-      
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      logDebugInfo("Reservations Raw Data", {
-        dataLength: data.length,
-        sampleData: data.slice(0, 2), // First 2 items for debugging
-        dataTypes: data.map(item => typeof item)
-      });
       
-      // DEBUG MARKER 7: Enhanced filtering with detailed logging
       const filteredReservations = data.filter(res => {
         const userId = res.user_id?._id || res.user_id;
         const currentUserId = currentUser.id;
         const matches = userId === currentUserId || userId?.toString() === currentUserId?.toString();
         
-        // Log every reservation for debugging
-        logDebugInfo("Reservation Filter Check", {
-          reservationId: res._id,
-          userId: userId,
-          currentUserId: currentUserId,
-          userIdType: typeof userId,
-          currentUserIdType: typeof currentUserId,
-          matches: matches,
-          labName: res.lab_id?.lab_name || 'Unknown',
-          status: res.status,
-          time_in: res.time_in
-        });
-        
         return matches;
       });
       
-      logDebugInfo("Filtered Reservations", {
-        originalCount: data.length,
-        filteredCount: filteredReservations.length,
-        currentUserId: currentUser.id
-      });
-      
-      // DEBUG MARKER 8: Enhanced mapping with error handling
       reservations = filteredReservations.map((res, index) => {
         try {
           const mapped = {
@@ -221,19 +121,9 @@
             isAnonymous: res.isAnonymous || false,
             rawDate: res.time_in
           };
-          
-          if (index === 0) {
-            logDebugInfo("Sample Mapped Reservation", mapped);
-          }
-          
+
           return mapped;
         } catch (mapError) {
-          logDebugInfo("Mapping Error", {
-            index,
-            error: mapError.message,
-            originalData: res
-          }, true);
-          
           return {
             id: res._id || `error-${index}`,
             labName: 'Error Loading',
@@ -252,21 +142,7 @@
         }
       });
       
-      debugInfo.reservationLoadStatus = "Success";
-      logDebugInfo("Final Reservations", {
-        count: reservations.length,
-        sample: reservations.slice(0, 1)
-      });
-      
-    } catch (err) {
-      // DEBUG MARKER 9: Enhanced error handling for reservations
-      debugInfo.reservationLoadStatus = "Error";
-      logDebugInfo("Reservations Fetch Error", {
-        message: err.message,
-        stack: err.stack,
-        name: err.name
-      }, true);
-      
+    } catch (err) {      
       error = "Failed to fetch reservations: " + err.message;
       console.error(err);
     } finally {
@@ -281,7 +157,6 @@
       const formatted = date.toTimeString().slice(0, 5);
       return formatted;
     } catch (err) {
-      logDebugInfo("Time Format Error", { dateString, error: err.message }, true);
       return '00:00';
     }
   }
@@ -303,15 +178,12 @@
         return `${hours}h ${minutes}m`;
       }
     } catch (err) {
-      logDebugInfo("Duration Calculation Error", { start, end, error: err.message }, true);
       return "N/A";
     }
   }
 
-  // DEBUG MARKER 10: Enhanced fetch labs with error handling
   async function fetchLabs() {
     try {
-      logDebugInfo("Labs Fetch", "Starting labs fetch");
       const response = await fetch('http://localhost:3000/labs');
       
       if (!response.ok) {
@@ -319,11 +191,9 @@
       }
       
       const labs = await response.json();
-      logDebugInfo("Labs Response", { count: labs.length, sample: labs.slice(0, 1) });
       
       availableLabs = labs;
     } catch (err) {
-      logDebugInfo("Labs Fetch Error", { error: err.message }, true);
       console.error('Failed to fetch labs:', err);
       availableLabs = [];
     }
@@ -336,14 +206,7 @@
       return;
     }
 
-    try {
-      logDebugInfo("Seats Fetch", {
-        lab_id: newReservation.lab_id,
-        date: newReservation.date,
-        time_in: newReservation.time_in,
-        time_out: newReservation.time_out
-      });
-      
+    try {      
       const response = await fetch(`http://localhost:3000/available-seats/${newReservation.lab_id}?date=${newReservation.date}&time_in=${newReservation.time_in}&time_out=${newReservation.time_out}`);
       
       if (!response.ok) {
@@ -351,11 +214,9 @@
       }
       
       const data = await response.json();
-      logDebugInfo("Seats Response", { available_seats: data.available_seats?.length || 0 });
       
       availableSeats = data.available_seats || [];
     } catch (err) {
-      logDebugInfo("Seats Fetch Error", { error: err.message }, true);
       console.error('Failed to fetch available seats:', err);
       availableSeats = [];
     }
@@ -368,13 +229,6 @@
     }
 
     try {
-      logDebugInfo("Edit Seats Fetch", {
-        lab_id: editingReservation.lab_id,
-        date: editingReservation.date,
-        time_in: editingReservation.time_in,
-        time_out: editingReservation.time_out
-      });
-      
       const response = await fetch(`http://localhost:3000/available-seats/${editingReservation.lab_id}?date=${editingReservation.date}&time_in=${editingReservation.time_in}&time_out=${editingReservation.time_out}&exclude_reservation=${editingReservation.id}`);
       
       if (!response.ok) {
@@ -382,7 +236,6 @@
       }
       
       const data = await response.json();
-      logDebugInfo("Edit Seats Response", { available_seats: data.available_seats?.length || 0 });
       
       availableSeats = data.available_seats || [];
       
@@ -391,7 +244,6 @@
         availableSeats.unshift({ position: editingReservation.seat });
       }
     } catch (err) {
-      logDebugInfo("Edit Seats Fetch Error", { error: err.message }, true);
       console.error('Failed to fetch available seats for edit:', err);
       availableSeats = [{ position: editingReservation.seat }]; // Fallback to current seat
     }
@@ -401,11 +253,6 @@
   async function createReservation() {
     try {
       const token = localStorage.getItem('accessToken');
-      logDebugInfo("Create Reservation", {
-        hasToken: !!token,
-        currentUser: currentUser,
-        newReservation: newReservation
-      });
       
       const response = await fetch('http://localhost:3000/reservations', {
         method: 'POST',
@@ -424,11 +271,6 @@
         })
       });
 
-      logDebugInfo("Create Response", {
-        status: response.status,
-        ok: response.ok
-      });
-
       if (response.ok) {
         showSuccessToast("Reservation created successfully");
         await fetchReservations();
@@ -438,7 +280,6 @@
         throw new Error(errorData.error || "Failed to create reservation");
       }
     } catch (err) {
-      logDebugInfo("Create Error", { error: err.message }, true);
       showErrorToast("Error creating reservation: " + err.message);
       console.error(err);
     } finally {
@@ -455,7 +296,6 @@
       const endMinutes = endHour * 60 + endMin;
       return (endMinutes - startMinutes) / 60;
     } catch (err) {
-      logDebugInfo("Hours Calculation Error", { startTime, endTime, error: err.message }, true);
       return 1; // Default to 1 hour
     }
   }
@@ -476,11 +316,9 @@
   // Open cancel confirmation modal
    function openCancelModal(reservation) {
     console.log("openCancelModal called with:", reservation);
-    logDebugInfo("Cancel Modal", { reservation });
     reservationToCancel = reservation;
     showCancelModal = true;
     
-    // DEBUG: Log modal state
     console.log("showCancelModal set to:", showCancelModal);
     console.log("reservationToCancel set to:", reservationToCancel);
     
@@ -513,7 +351,6 @@
           throw new Error('Cancel endpoint not found');
         }
       } catch (firstError) {
-        logDebugInfo("Cancel first attempt failed", { url, error: firstError.message });
         
         // Second try: PATCH method
         try {
@@ -531,7 +368,6 @@
             throw new Error('PATCH method not found');
           }
         } catch (secondError) {
-          logDebugInfo("Cancel second attempt failed", { url, error: secondError.message });
           
           // Third try: POST to general cancel endpoint
           url = `http://localhost:3000/reservations/cancel`;
@@ -567,7 +403,6 @@
         throw new Error(errorMessage);
       }
     } catch (err) {
-      logDebugInfo("Cancel Error", { error: err.message }, true);
       showErrorToast("Error cancelling reservation: " + err.message);
       console.error(err);
     } finally {
@@ -580,7 +415,6 @@
   function openEditModal(reservation) {
     try {
       console.log("openEditModal called with:", reservation);
-      logDebugInfo("Edit Modal", { reservation });
       
       // Fetch labs for dropdown
       fetchLabs();
@@ -594,7 +428,6 @@
       
       showEditModal = true;
       
-      // DEBUG: Log modal state
       console.log("showEditModal set to:", showEditModal);
       console.log("editingReservation set to:", editingReservation);
       
@@ -607,7 +440,6 @@
       }, 100);
       
     } catch (err) {
-      logDebugInfo("Edit Modal Error", { error: err.message }, true);
       console.error('Error opening edit modal:', err);
       showErrorToast("Error opening edit form");
     }
@@ -628,8 +460,6 @@ async function saveEdit(retryCount = 0) {
       isAnonymous: editingReservation.isAnonymous || false
     };
     
-    logDebugInfo("Edit Update Data", { updateData, retryCount });
-    
     const url = `http://localhost:3000/reservations/${editingReservation.id}`;
     const response = await fetch(url, {
       method: 'PUT',
@@ -639,13 +469,6 @@ async function saveEdit(retryCount = 0) {
       body: JSON.stringify(updateData)
     });
     
-    logDebugInfo("PUT Response Details", {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    });
-
     if (!response.ok) {
       const contentType = response.headers.get('content-type');
       let errorDetails;
@@ -656,15 +479,8 @@ async function saveEdit(retryCount = 0) {
         errorDetails = await response.text();
       }
       
-      logDebugInfo("Server Error Details", {
-        status: response.status,
-        statusText: response.statusText,
-        errorDetails: errorDetails
-      }, true);
-      
       // Check if it's a retryable error (version conflict)
       if (response.status === 409 && errorDetails.retryable && retryCount < 3) {
-        logDebugInfo("Retrying update due to version conflict", { retryCount: retryCount + 1 });
         // Wait a bit before retrying
         await new Promise(resolve => setTimeout(resolve, 500 + (retryCount * 200)));
         return saveEdit(retryCount + 1);
@@ -674,7 +490,6 @@ async function saveEdit(retryCount = 0) {
     }
 
     const result = await response.json();
-    logDebugInfo("Update Success", result);
     
     // Close modal immediately after successful update
     showEditModal = false;
@@ -685,10 +500,6 @@ async function saveEdit(retryCount = 0) {
     await fetchReservations();
     
   } catch (err) {
-    logDebugInfo("Edit Error", { 
-      error: err.message,
-      retryCount: retryCount
-    }, true);
     showErrorToast("Error updating reservation: " + err.message);
     console.error('Full error:', err);
     
@@ -704,13 +515,11 @@ async function saveEdit(retryCount = 0) {
   // Helper functions for button clicks
   function handleEditClick(reservation) {
     console.log('Edit button clicked for reservation:', reservation.id);
-    logDebugInfo("Edit Button Click", { reservation });
     openEditModal(reservation);
   }
 
   function handleCancelClick(reservation) {
     console.log('Cancel button clicked for reservation:', reservation.id);
-    logDebugInfo("Cancel Button Click", { reservation });
     openCancelModal(reservation);
   }
 
@@ -742,36 +551,6 @@ async function saveEdit(retryCount = 0) {
   }
 </script>
 
-<div class="container mx-auto px-6 py-8 mt-16 bg-offwhite min-h-screen max-w-7xl">
-  <!-- DEBUG MARKER 11: Debug Panel (remove in production) -->
-  <div class="mb-4 p-4 bg-gray-100 border rounded-lg text-xs" style="display: none;">
-  <h4 class="font-bold mb-2">Debug Information:</h4>
-  <div class="grid grid-cols-2 gap-2">
-    <div><strong>User Load:</strong> {debugInfo.userLoadStatus}</div>
-    <div><strong>Reservations Load:</strong> {debugInfo.reservationLoadStatus}</div>
-    <div><strong>Auth Token:</strong> {debugInfo.authToken}</div>
-    <div><strong>Current User:</strong> {currentUser ? `${currentUser.name} (${currentUser.id})` : 'None'}</div>
-    <div><strong>Reservations Count:</strong> {reservations.length}</div>
-    <div><strong>Errors Count:</strong> {debugInfo.errors.length}</div>
-    <div class="col-span-2"><strong>Raw Reservations Count:</strong> {debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.dataLength || 'Not loaded'}</div>
-  </div>
-  {#if debugInfo.errors.length > 0}
-    <div class="mt-2">
-      <strong>Recent Errors:</strong>
-      {#each debugInfo.errors.slice(-3) as errorLog}
-        <div class="text-red-600 text-xs">[{errorLog.timestamp.slice(11, 19)}] {errorLog.stage}: {JSON.stringify(errorLog.data)}</div>
-      {/each}
-    </div>
-  {/if}
-  {#if debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')}
-    <div class="mt-2">
-      <strong>Sample Raw Reservation:</strong>
-      <div class="text-xs bg-gray-50 p-2 rounded">{JSON.stringify(debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.sampleData?.[0] || 'None', null, 2)}</div>
-    </div>
-  {/if}
-</div>
-
-  <!-- Toast notification -->
   {#if showToast}
     <div class="fixed top-4 right-4 z-50 bg-white border border-surface-200 rounded-lg shadow-lg p-4 max-w-sm">
       <div class="flex items-center">
@@ -785,7 +564,6 @@ async function saveEdit(retryCount = 0) {
     </div>
   {/if}
 
-  <!-- Background particles -->
   <div class="fixed inset-0 -z-50 pointer-events-none">
     <Particles className="absolute inset-0" refresh={true} {color} {staticity} quantity={qty} {size} {vx} {vy} />
   </div>
@@ -1238,4 +1016,3 @@ async function saveEdit(retryCount = 0) {
       </div>
     </div>
   {/if}
-</div>
