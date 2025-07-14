@@ -82,7 +82,7 @@
 
   
   let selectedInlineTime = $derived({ time: "12:00" });
-  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing, selectedDate) );
+  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 7) % 7].opening, schedule[(selectedDate.getDay() + 7) % 7 ].closing, selectedDate) );
 
   
 
