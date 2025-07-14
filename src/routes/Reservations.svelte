@@ -1,544 +1,54 @@
 <script>
-  import { Card, Button, Badge, Modal, Input, Label } from "flowbite-svelte";
-  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline, PlusOutline, EditOutline, TrashBinOutline } from "flowbite-svelte-icons";  import { cubicOut } from "svelte/easing";
+  import { Card, Button, Badge, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
+  // Using correct flowbite-svelte-icons imports
+  import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
+  import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
-  import { onMount } from "svelte";
-  import Particles from "../lib/components/Particles.svelte";
 
-  // State variables
-  let reservations = [];
-  let isLoading = true;
-  let error = null;
-  let showCancelModal = false;
-  let reservationToCancel = null;
-  let showEditModal = false;
-  let editingReservation = null;
-  let showCreateModal = false;
-  let newReservation = {
-    lab_id: '',
-    date: '',
-    time_in: '',
-    time_out: '',
-    seat: '',
-    isAnonymous: false
-  };
-  let availableLabs = [];
-  let availableSeats = [];
-  let toastMessage = "";
-  let showToast = false;
-  let currentUser = null;
-
-  // Particles settings
-  let qty = 35;
-  let vx = -1;
-  let vy = 1;
-  let size = 50;
-  let staticity = 20;
-  let color = "#bad6e9";
-
-  // Fetch user data and reservations on component mount
-  onMount(async () => {
-    
-    try {
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      
-      if (token) {
-        
-        const userResponse = await fetch('http://localhost:3000/users/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          
-          currentUser = {
-            id: userData._id || userData.id,
-            name: `${userData.first_name} ${userData.last_name}`,
-            email: userData.email,
-            original_id: userData.id,
-            original_id_type: typeof userData.id
-          };
-          
-          await fetchReservations();
-        } else {
-          error = `Failed to authenticate user (Status: ${userResponse.status})`;
-          isLoading = false;
-        }
-      } else {
-        // Set empty reservations instead of error for no token
-        reservations = [];
-        currentUser = null;
-        isLoading = false;
-      }
-    } catch (err) {
-      error = "Failed to load reservations: " + err.message;
-      console.error(err);
-      isLoading = false;
-    }
-  });
-
-  // Fetch reservations from API
-  async function fetchReservations() {
-    if (!currentUser) {
-      return;
-    }
-    
-    try {
-      isLoading = true;
-      
-      const response = await fetch('http://localhost:3000/reservations');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      const filteredReservations = data.filter(res => {
-        const userId = res.user_id?._id || res.user_id;
-        const currentUserId = currentUser.id;
-        const matches = userId === currentUserId || userId?.toString() === currentUserId?.toString();
-        
-        return matches;
-      });
-      
-      reservations = filteredReservations.map((res, index) => {
-        try {
-          const mapped = {
-            id: res._id,
-            labName: res.lab_id?.lab_name || 'Unknown Lab',
-            date: new Date(res.time_in).toLocaleDateString(),
-            time: `${new Date(res.time_in).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(res.time_out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`,
-            duration: calculateDuration(res.time_in, res.time_out),
-            status: res.status,
-            seat: res.seat || "N/A",
-            time_in: formatTimeForInput(res.time_in),
-            time_out: formatTimeForInput(res.time_out),
-            lab_id: res.lab_id?._id || res.lab_id,
-            user_id: res.user_id?._id || res.user_id,
-            createdOn: new Date(res.createdAt || res.time_in).toLocaleDateString(),
-            isAnonymous: res.isAnonymous || false,
-            rawDate: res.time_in
-          };
-
-          return mapped;
-        } catch (mapError) {
-          return {
-            id: res._id || `error-${index}`,
-            labName: 'Error Loading',
-            date: 'N/A',
-            time: 'N/A',
-            duration: 'N/A',
-            status: 'Error',
-            seat: 'N/A',
-            time_in: '00:00',
-            time_out: '00:00',
-            lab_id: '',
-            user_id: '',
-            createdOn: 'N/A',
-            isAnonymous: false
-          };
-        }
-      });
-      
-    } catch (err) {      
-      error = "Failed to fetch reservations: " + err.message;
-      console.error(err);
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  // Helper function to format time for input fields
-  function formatTimeForInput(dateString) {
-    try {
-      const date = new Date(dateString);
-      const formatted = date.toTimeString().slice(0, 5);
-      return formatted;
-    } catch (err) {
-      return '00:00';
-    }
-  }
-
-  // Calculate duration between two dates
-  function calculateDuration(start, end) {
-    try {
-      const startDate = new Date(start);
-      const endDate = new Date(end);
-      const diff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
-      
-      if (diff < 1) {
-        return `${Math.round(diff * 60)} minutes`;
-      } else if (diff % 1 === 0) {
-        return `${diff} hours`;
-      } else {
-        const hours = Math.floor(diff);
-        const minutes = Math.round((diff % 1) * 60);
-        return `${hours}h ${minutes}m`;
-      }
-    } catch (err) {
-      return "N/A";
-    }
-  }
-
-  async function fetchLabs() {
-    try {
-      const response = await fetch('http://localhost:3000/labs');
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const labs = await response.json();
-      
-      availableLabs = labs;
-    } catch (err) {
-      console.error('Failed to fetch labs:', err);
-      availableLabs = [];
-    }
-  }
-
-  // Fetch available seats when lab/time changes
-  async function fetchAvailableSeats() {
-    if (!newReservation.lab_id || !newReservation.date || !newReservation.time_in || !newReservation.time_out) {
-      availableSeats = [];
-      return;
+  // Sample reservation data - replace with actual data from your backend
+  let reservations = [
+    {
+      id: 1,
+      labName: "GK 211 Laboratory",
+      date: "2024-06-20",
+      time: "2:00 PM - 4:00 PM",
+      duration: "2 hours",
+      purpose: "Web Development Project",
+      status: "Confirmed",
+      seat: "C3"
+    },
+    {
+      id: 2,
+      labName: "GK 403 Network Laboratory",
+      date: "2024-06-22",
+      time: "10:00 AM - 12:00 PM",
+      duration: "2 hours",
+      purpose: "LBYITN4 Networking Activity",
+      status: "Ongoing",
+      seat: "C1"
+    },
+    {
+      id: 3,
+      labName: "AG 1703 Laboratory",
+      date: "2024-06-18",
+      time: "3:00 PM - 5:00 PM",
+      duration: "2 hours",
+      purpose: "CCAPDEV MC01 Presentation",
+      status: "Completed",
+      seat: "B5"
+    },
+    {
+      id: 4,
+      labName: "AG 1707 Laboratory",
+      date: "2024-06-18",
+      time: "3:00 PM - 8:30 PM",
+      duration: "5.5 hours",
+      purpose: "CCAPDEV MC01 Presentation",
+      status: "Cancelled",
+      seat: "A4"
     }
 
-    try {      
-      const response = await fetch(`http://localhost:3000/available-seats/${newReservation.lab_id}?date=${newReservation.date}&time_in=${newReservation.time_in}&time_out=${newReservation.time_out}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      availableSeats = data.available_seats || [];
-    } catch (err) {
-      console.error('Failed to fetch available seats:', err);
-      availableSeats = [];
-    }
-  }
-
-  // Fetch available seats for editing
-  async function fetchAvailableSeatsForEdit() {
-    if (!editingReservation?.lab_id || !editingReservation?.date || !editingReservation?.time_in || !editingReservation?.time_out) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/available-seats/${editingReservation.lab_id}?date=${editingReservation.date}&time_in=${editingReservation.time_in}&time_out=${editingReservation.time_out}&exclude_reservation=${editingReservation.id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      availableSeats = data.available_seats || [];
-      
-      // Add current seat to available seats if not already there
-      if (editingReservation.seat && !availableSeats.find(s => s.position === editingReservation.seat)) {
-        availableSeats.unshift({ position: editingReservation.seat });
-      }
-    } catch (err) {
-      console.error('Failed to fetch available seats for edit:', err);
-      availableSeats = [{ position: editingReservation.seat }]; // Fallback to current seat
-    }
-  }
-
-  // Create new reservation
-  async function createReservation() {
-    try {
-      const token = localStorage.getItem('accessToken');
-      
-      const response = await fetch('http://localhost:3000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          date: newReservation.date,
-          time_start: newReservation.time_in,
-          hours: calculateHoursFromTimes(newReservation.time_in, newReservation.time_out),
-          user_id: currentUser.id,
-          lab_id: newReservation.lab_id,
-          isAnonymous: newReservation.isAnonymous || false,
-          seats: [newReservation.seat]
-        })
-      });
-
-      if (response.ok) {
-        showSuccessToast("Reservation created successfully");
-        await fetchReservations();
-        resetNewReservation();
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create reservation");
-      }
-    } catch (err) {
-      showErrorToast("Error creating reservation: " + err.message);
-      console.error(err);
-    } finally {
-      showCreateModal = false;
-    }
-  }
-
-  // Helper function to calculate hours between two times
-  function calculateHoursFromTimes(startTime, endTime) {
-    try {
-      const [startHour, startMin] = startTime.split(':').map(Number);
-      const [endHour, endMin] = endTime.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-      return (endMinutes - startMinutes) / 60;
-    } catch (err) {
-      return 1; // Default to 1 hour
-    }
-  }
-
-  // Reset new reservation form
-  function resetNewReservation() {
-    newReservation = {
-      lab_id: '',
-      date: '',
-      time_in: '',
-      time_out: '',
-      seat: '',
-      isAnonymous: false
-    };
-    availableSeats = [];
-  }
-
-  // Open cancel confirmation modal
-   function openCancelModal(reservation) {
-    console.log("openCancelModal called with:", reservation);
-    reservationToCancel = reservation;
-    showCancelModal = true;
-    
-    console.log("showCancelModal set to:", showCancelModal);
-    console.log("reservationToCancel set to:", reservationToCancel);
-    
-    // Force reactivity update
-    showCancelModal = showCancelModal;
-  }
-
-  // Cancel reservation
-  async function confirmCancel() {
-    try {
-      const token = localStorage.getItem('accessToken');
-      
-      // Try different endpoints for cancellation
-      let response;
-      let url;
-      
-      // First try: POST to cancel endpoint
-      try {
-        url = `http://localhost:3000/reservations/${reservationToCancel.id}`;
-        response = await fetch(url, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({})
-        });
-        
-        if (!response.ok && response.status === 404) {
-          throw new Error('Cancel endpoint not found');
-        }
-      } catch (firstError) {
-        
-        // Second try: PATCH method
-        try {
-          url = `http://localhost:3000/reservations/${reservationToCancel.id}`;
-          response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ status: 'Cancelled' })
-          });
-          
-          if (!response.ok && response.status === 404) {
-            throw new Error('PATCH method not found');
-          }
-        } catch (secondError) {
-          
-          // Third try: POST to general cancel endpoint
-          url = `http://localhost:3000/reservations/cancel`;
-          response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              reservation_id: reservationToCancel.id,
-              status: 'Cancelled'
-            })
-          });
-        }
-      }
-
-      if (response.ok) {
-        showSuccessToast("Reservation cancelled successfully");
-        await fetchReservations();
-      } else {
-        // Handle non-JSON error responses
-        let errorMessage;
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || "Failed to cancel reservation";
-        } else {
-          errorMessage = `Server error: ${response.status} ${response.statusText}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-    } catch (err) {
-      showErrorToast("Error cancelling reservation: " + err.message);
-      console.error(err);
-    } finally {
-      showCancelModal = false;
-      reservationToCancel = null;
-    }
-  }
-
-  // Open edit modal
-  function openEditModal(reservation) {
-    try {
-      console.log("openEditModal called with:", reservation);
-      
-      // Fetch labs for dropdown
-      fetchLabs();
-      
-      editingReservation = {
-        ...reservation,
-        date: new Date(reservation.rawDate || reservation.time_in).toISOString().split('T')[0],
-        original_lab_id: reservation.lab_id,
-        isAnonymous: reservation.isAnonymous || false
-      };
-      
-      showEditModal = true;
-      
-      console.log("showEditModal set to:", showEditModal);
-      console.log("editingReservation set to:", editingReservation);
-      
-      // Force reactivity update
-      showEditModal = showEditModal;
-      
-      // Fetch available seats for the current lab and time
-      setTimeout(() => {
-        fetchAvailableSeatsForEdit();
-      }, 100);
-      
-    } catch (err) {
-      console.error('Error opening edit modal:', err);
-      showErrorToast("Error opening edit form");
-    }
-  }
-
-// Save edited reservation with retry logic
-async function saveEdit(retryCount = 0) {
-  if (!editingReservation) return;
-  
-  try {
-    
-    const updateData = {
-      date: editingReservation.date,
-      time_start: editingReservation.time_in,
-      hours: calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out),
-      lab_id: editingReservation.lab_id,
-      seats: [editingReservation.seat],
-      isAnonymous: editingReservation.isAnonymous || false
-    };
-    
-    const url = `http://localhost:3000/reservations/${editingReservation.id}`;
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData)
-    });
-    
-    if (!response.ok) {
-      const contentType = response.headers.get('content-type');
-      let errorDetails;
-      
-      if (contentType && contentType.includes('application/json')) {
-        errorDetails = await response.json();
-      } else {
-        errorDetails = await response.text();
-      }
-      
-      // Check if it's a retryable error (version conflict)
-      if (response.status === 409 && errorDetails.retryable && retryCount < 3) {
-        // Wait a bit before retrying
-        await new Promise(resolve => setTimeout(resolve, 500 + (retryCount * 200)));
-        return saveEdit(retryCount + 1);
-      }
-      
-      throw new Error(`Server error (${response.status}): ${JSON.stringify(errorDetails)}`);
-    }
-
-    const result = await response.json();
-    
-    // Close modal immediately after successful update
-    showEditModal = false;
-    editingReservation = null;
-    availableSeats = [];
-    
-    showSuccessToast("Reservation updated successfully");
-    await fetchReservations();
-    
-  } catch (err) {
-    showErrorToast("Error updating reservation: " + err.message);
-    console.error('Full error:', err);
-    
-    // Close modal on error too (unless it's a retry)
-    if (retryCount === 0) {
-      showEditModal = false;
-      editingReservation = null;
-      availableSeats = [];
-    }
-  }
-}
-
-  // Helper functions for button clicks
-  function handleEditClick(reservation) {
-    console.log('Edit button clicked for reservation:', reservation.id);
-    openEditModal(reservation);
-  }
-
-  function handleCancelClick(reservation) {
-    console.log('Cancel button clicked for reservation:', reservation.id);
-    openCancelModal(reservation);
-  }
-
-  // Toast functions
-  function showSuccessToast(message) {
-    toastMessage = message;
-    showToast = true;
-    setTimeout(() => {
-      showToast = false;
-    }, 3000);
-  }
-
-  function showErrorToast(message) {
-    toastMessage = message;
-    showToast = true;
-    setTimeout(() => {
-      showToast = false;
-    }, 5000);
-  }
+  ];
 
   function getStatusColor(status) {
     switch(status) {
@@ -549,476 +59,128 @@ async function saveEdit(retryCount = 0) {
       default: return 'gray';
     }
   }
+
+  function cancelReservation(id) {
+    reservations = reservations.map(res => 
+      res.id === id ? {...res, status: 'Cancelled'} : res
+    );
+  }
+
+  function editReservation(id) {
+    // Implement edit functionality
+    console.log('Edit reservation:', id);
+  }
 </script>
+
 <div class="container mx-auto px-6 py-8 mt-16 bg-offwhite min-h-screen max-w-7xl">
-  <!-- DEBUG MARKER 11: Debug Panel (remove in production) -->
-  <div class="mb-4 p-4 bg-gray-100 border rounded-lg text-xs" style="display: none;">
-  <h4 class="font-bold mb-2">Debug Information:</h4>
-</div>
-
-  {#if showToast}
-    <div class="fixed top-4 right-4 z-50 bg-white border border-surface-200 rounded-lg shadow-lg p-4 max-w-sm">
-      <div class="flex items-center">
-        <div class="flex-1">
-          <p class="text-sm text-surface-700">{toastMessage}</p>
-        </div>
-        <button onclick={() => showToast = false} class="ml-3 text-surface-400 hover:text-surface-600">
-          ✕
-        </button>
-      </div>
-    </div>
-  {/if}
-
-  <div class="fixed inset-0 -z-50 pointer-events-none">
-    <Particles className="absolute inset-0" refresh={true} {color} {staticity} quantity={qty} {size} {vx} {vy} />
-  </div>
-
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-surface-700 mb-2">My Lab Reservations</h1>
     <p class="text-surface-500">Manage your upcoming and past laboratory bookings</p>
   </div>
 
-  {#if isLoading}
-    <div class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      <p class="ml-4">Loading reservations...</p>
-    </div>
-  {:else if error}
-    <Card class="text-center py-12 border border-error-200 bg-error-50">
-      <FlaskOutline class="w-16 h-16 text-error-300 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-error-700 mb-2">Error Loading Reservations</h3>
-      <p class="text-error-500 mb-4">{error}</p>
-      <Button color="primary" onclick={fetchReservations}>Try Again</Button>
-    </Card>
-  {:else}
-    <div class="flex justify-between items-center mb-6 relative z-10">
-  {#if currentUser}
-    <button 
-      type="button"
-      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
-      onclick={() => {
-        console.log('Button clicked - navigating to labs');
-        window.location.href = '/?view=1';
-      }}
-    >
-      <PlusOutline class="w-4 h-4 mr-2" />
-      New Reservation
-    </button>
-  {:else}
-    <button 
-      type="button"
-      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
-      onclick={() => {
-        console.log('Button clicked - navigating to login');
-        window.location.href = '/login';
-      }}
-    >
-      <PlusOutline class="w-4 h-4 mr-2" />
-      Log In to Make Reservations
-    </button>
-  {/if}
-</div>
-
-    {#if reservations.length > 0}
-      <div class="grid gap-6">
-        {#each reservations as reservation, index}
-        <div in:fly|global={{ y: 50, duration: 1+index*100, delay: 200, easing: cubicOut }}>
-          <Card class="max-w-full border border-surface-200 shadow-md hover:shadow-lg transition-shadow p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-              <div class="flex items-center gap-3 mb-2 sm:mb-0">
-                <FlaskOutline class="w-6 h-6 text-primary-600" />
-                <h3 class="text-xl font-semibold text-surface-800">{reservation.labName}</h3>
-              </div>
-              <Badge color={getStatusColor(reservation.status)} class="w-fit">
-                {reservation.status}
-              </Badge>
+  {#if reservations.length > 0}
+    <div class="grid gap-6">
+      {#each reservations as reservation, index}
+      <div in:fly|global={{ y: 50, duration: 1+index*100, delay: 200, easing: cubicOut }}>
+        <Card class="max-w-full border border-surface-200 shadow-md hover:shadow-lg transition-shadow p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <div class="flex items-center gap-3 mb-2 sm:mb-0">
+              <FlaskOutline class="w-6 h-6 text-primary-600" />
+              <h3 class="text-xl font-semibold text-surface-800">{reservation.labName}</h3>
             </div>
-
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              <div class="flex items-center gap-2">
-                <CalendarMonthOutline class="w-4 h-4 text-surface-400" />
-                <span class="text-sm text-surface-600">{reservation.date}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <ClockOutline class="w-4 h-4 text-surface-400" />
-                <span class="text-sm text-surface-600">{reservation.time}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <UsersOutline class="w-4 h-4 text-surface-400" />
-                <span class="text-sm text-surface-600">{reservation.duration}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <ComputerSpeakerOutline class="w-4 h-4 text-surface-400" />
-                <span class="text-sm text-surface-600">{reservation.seat}</span>
-              </div>
-            </div>
-
-            <p class="text-xs text-surface-400 mt-2">Created on: {reservation.createdOn}</p>
-
-            {#if reservation.status === 'Confirmed' || reservation.status === 'Ongoing'}
-              <div class="flex gap-2 pt-2 border-t border-surface-200 mt-4">
-                <button 
-                  type="button"
-                  class="px-3 py-1 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors cursor-pointer"
-                  onclick={() => handleEditClick(reservation)}
-                >
-                  ✏️ Edit
-                </button>
-                <button 
-                  type="button"
-                  class="px-3 py-1 text-sm bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition-colors cursor-pointer"
-                  onclick={() => handleCancelClick(reservation)}
-                >
-                  🗑️ Cancel
-                </button>
-              </div>
-            {/if}
-          </Card>
+            <Badge color={getStatusColor(reservation.status)} class="w-fit">
+              {reservation.status}
+            </Badge>
           </div>
-        {/each}
-      </div>
 
-      <!-- Summary Statistics -->
-      <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card class="text-center border border-surface-200 bg-success-50">
-          <h4 class="text-2xl font-bold text-success-700">
-            {reservations.filter(r => r.status === 'Confirmed').length}
-          </h4>
-          <p class="text-sm text-success-600">Confirmed</p>
-        </Card>
-        <Card class="text-center border border-surface-200 bg-warning-50">
-          <h4 class="text-2xl font-bold text-warning-700">
-            {reservations.filter(r => r.status === 'Ongoing').length}
-          </h4>
-          <p class="text-sm text-warning-600">Current</p>
-        </Card>
-        <Card class="text-center border border-surface-200 bg-secondary-50">
-          <h4 class="text-2xl font-bold text-secondary-700">
-            {reservations.filter(r => r.status === 'Completed').length}
-          </h4>
-          <p class="text-sm text-secondary-600">Completed</p>
-        </Card>
-        <Card class="text-center border border-surface-200 bg-error-50">
-          <h4 class="text-2xl font-bold text-error-700">
-            {reservations.filter(r => r.status === 'Cancelled').length}
-          </h4>
-          <p class="text-sm text-error-600">Cancelled</p>
-        </Card>
-      </div>
-
-    {:else}
-  <Card class="text-center py-12 border border-surface-200 bg-surface-50">
-    <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
-    <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
-    {#if !currentUser}
-      <p class="text-surface-500 mb-4">Please log in to view your reservations.</p>
-      <button 
-        type="button"
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        onclick={() => {
-          console.log('Login button clicked');
-          window.location.href = '/login';
-        }}
-      >
-        Log In
-      </button>
-    {:else}
-      <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
-      <button 
-        type="button"
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        onclick={() => {
-          console.log('Make first reservation button clicked');
-          window.location.href = '/?view=1';
-        }}
-      >
-        Make Your First Reservation
-      </button>
-    {/if}
-  </Card>
-{/if}
-  {/if}
-
-  <!-- Create Reservation Modal -->
-  {#if showCreateModal}
-    <Modal bind:open={showCreateModal} autoclose outsideclose>
-      <div slot="header" class="text-lg font-semibold">Create New Reservation</div>
-      <div class="space-y-4">
-        <div>
-          <Label for="lab-select" class="mb-2">Lab</Label>
-          <select 
-            id="lab-select" 
-            class="w-full p-2 border border-surface-300 rounded-md"
-            bind:value={newReservation.lab_id}
-            onchange={fetchAvailableSeats}
-          >
-            <option value="">Select a lab</option>
-            {#each availableLabs as lab}
-              <option value={lab._id}>{lab.lab_name}</option>
-            {/each}
-          </select>
-        </div>
-        
-        <div>
-          <Label for="reservation-date" class="mb-2">Date</Label>
-          <Input 
-            id="reservation-date" 
-            type="date" 
-            bind:value={newReservation.date}
-            onchange={fetchAvailableSeats}
-            min={new Date().toISOString().split('T')[0]}
-          />
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <Label for="start-time" class="mb-2">Start Time</Label>
-            <Input 
-              id="start-time" 
-              type="time" 
-              bind:value={newReservation.time_in}
-              onchange={fetchAvailableSeats}
-            />
-          </div>
-          <div>
-            <Label for="end-time" class="mb-2">End Time</Label>
-            <Input 
-              id="end-time" 
-              type="time" 
-              bind:value={newReservation.time_out}
-              onchange={fetchAvailableSeats}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label for="seat-select" class="mb-2">Seat</Label>
-          <select 
-            id="seat-select" 
-            class="w-full p-2 border border-surface-300 rounded-md"
-            bind:value={newReservation.seat}
-            disabled={availableSeats.length === 0}
-          >
-            <option value="">Select a seat</option>
-            {#each availableSeats as seat}
-              <option value={seat.position}>{seat.position}</option>
-            {/each}
-          </select>
-          {#if availableSeats.length === 0 && newReservation.lab_id}
-            <p class="text-sm text-warning-600 mt-1">No seats available for selected time</p>
-          {/if}
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            id="anonymous-reservation"
-            bind:checked={newReservation.isAnonymous}
-            class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <Label for="anonymous-reservation" class="text-sm">Make this reservation anonymous</Label>
-        </div>
-
-        {#if newReservation.time_in && newReservation.time_out}
-          <div class="bg-surface-50 p-3 rounded-md">
-            <p class="text-sm text-surface-600">
-              <strong>Duration:</strong> {calculateHoursFromTimes(newReservation.time_in, newReservation.time_out)} hours
-            </p>
-          </div>
-        {/if}
-        
-        <div class="flex justify-end gap-3 pt-4">
-          <Button color="alternative" onclick={() => showCreateModal = false}>Cancel</Button>
-          <Button 
-            color="primary" 
-            onclick={createReservation} 
-            disabled={!newReservation.lab_id || !newReservation.date || !newReservation.time_in || !newReservation.time_out || !newReservation.seat}
-          >
-            Create Reservation
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  {/if}
-
-  <!-- Cancel Confirmation Modal -->
-  {#if showCancelModal && reservationToCancel}
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold text-surface-800">Cancel Reservation</h3>
-          <button 
-            onclick={() => showCancelModal = false}
-            class="text-surface-400 hover:text-surface-600"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div class="mb-6">
-          <p class="text-surface-700 mb-4">Are you sure you want to cancel your reservation?</p>
-          <div class="bg-surface-50 p-4 rounded-lg border">
-            <div class="flex items-center gap-2 mb-2">
-              <FlaskOutline class="w-4 h-4 text-surface-500" />
-              <span class="font-medium text-surface-700">{reservationToCancel.labName}</span>
-            </div>
-            <div class="flex items-center gap-2 mb-2">
-              <CalendarMonthOutline class="w-4 h-4 text-surface-500" />
-              <span class="text-sm text-surface-600">{reservationToCancel.date}</span>
-            </div>
-            <div class="flex items-center gap-2 mb-2">
-              <ClockOutline class="w-4 h-4 text-surface-500" />
-              <span class="text-sm text-surface-600">{reservationToCancel.time}</span>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div class="flex items-center gap-2">
+              <CalendarMonthOutline class="w-4 h-4 text-surface-400" />
+              <span class="text-sm text-surface-600">{reservation.date}</span>
             </div>
             <div class="flex items-center gap-2">
-              <ComputerSpeakerOutline class="w-4 h-4 text-surface-500" />
-              <span class="text-sm text-surface-600">Seat {reservationToCancel.seat}</span>
+              <ClockOutline class="w-4 h-4 text-surface-400" />
+              <span class="text-sm text-surface-600">{reservation.time}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <UsersOutline class="w-4 h-4 text-surface-400" />
+              <span class="text-sm text-surface-600">{reservation.duration}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ComputerSpeakerOutline class="w-4 h-4 text-surface-400" />
+              <span class="text-sm text-surface-600">{reservation.seat}</span>
             </div>
           </div>
-        </div>
-        
-        <div class="flex justify-end gap-3">
-          <button 
-            class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
-            onclick={() => showCancelModal = false}
-          >
-            Keep Reservation
-          </button>
-          <button 
-            class="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-            onclick={confirmCancel}
-          >
-            Cancel Reservation
-          </button>
-        </div>
-      </div>
-    </div>
-  {/if}
 
-  <!-- Edit Reservation Modal -->
-  {#if showEditModal && editingReservation}
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-bold text-surface-800">Edit Reservation</h3>
-            <button 
-              onclick={() => showEditModal = false}
-              class="text-surface-400 hover:text-surface-600"
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div class="space-y-6">
-            <!-- Lab Selection -->
-            <div>
-              <Label class="text-sm font-medium text-surface-700 mb-2">Laboratory</Label>
-              <select 
-                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                bind:value={editingReservation.lab_id}
-                onchange={fetchAvailableSeatsForEdit}
-              >
-                <option value="">Select a laboratory</option>
-                {#each availableLabs as lab}
-                  <option value={lab._id}>{lab.lab_name}</option>
+          <!-- {#if reservation.equipmentRequested.length > 0}
+            <div class="mb-4">
+              <p class="text-sm font-medium text-surface-700 mb-2 text-left">Equipment Requested:</p>
+              <div class="flex flex-wrap gap-2">
+                {#each reservation.equipmentRequested as equipment}
+                  <Badge class="text-xs bg-surface-100 text-surface-600 border border-surface-300">{equipment}</Badge>
                 {/each}
-              </select>
-            </div>
-
-            <!-- Date Selection -->
-            <div>
-              <Label class="text-sm font-medium text-surface-700 mb-2">Date</Label>
-              <Input 
-                type="date" 
-                bind:value={editingReservation.date}
-                onchange={fetchAvailableSeatsForEdit}
-                min={new Date().toISOString().split('T')[0]}
-                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-            </div>
-            
-            <!-- Time Selection -->
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <Label class="text-sm font-medium text-surface-700 mb-2">Start Time</Label>
-                <Input 
-                  type="time" 
-                  bind:value={editingReservation.time_in}
-                  onchange={fetchAvailableSeatsForEdit}
-                  class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
-              <div>
-                <Label class="text-sm font-medium text-surface-700 mb-2">End Time</Label>
-                <Input 
-                  type="time" 
-                  bind:value={editingReservation.time_out}
-                  onchange={fetchAvailableSeatsForEdit}
-                  class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
               </div>
             </div>
+          {/if} -->
 
-            <!-- Seat Selection -->
-            <div>
-              <Label class="text-sm font-medium text-surface-700 mb-2">Seat</Label>
-              <select 
-                class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                bind:value={editingReservation.seat}
+          {#if reservation.status === 'Confirmed' || reservation.status === 'Pending'}
+            <div class="flex gap-2 pt-2 border-t border-surface-200">
+              <Button 
+                size="sm" 
+                color="alternative" 
+                class="bg-surface-100 text-surface-700 border-surface-300 hover:bg-surface-200"
+                onclick={() => editReservation(reservation.id)}
               >
-                <option value="">Select a seat</option>
-                {#each availableSeats as seat}
-                  <option value={seat.position}>Seat {seat.position}</option>
-                {/each}
-              </select>
-              {#if availableSeats.length === 0 && editingReservation.lab_id}
-                <p class="text-sm text-warning-600 mt-2">No seats available for selected time</p>
-              {/if}
+                Edit
+              </Button>
+              <Button 
+                size="sm" 
+                color="red" 
+                onclick={() => cancelReservation(reservation.id)}
+              >
+                Cancel
+              </Button>
             </div>
-
-            <!-- Anonymous Option -->
-            <div class="flex items-center space-x-3">
-              <input 
-                type="checkbox" 
-                id="edit-anonymous"
-                bind:checked={editingReservation.isAnonymous}
-                class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-              />
-              <Label for="edit-anonymous" class="text-sm text-surface-700">Make this reservation anonymous</Label>
-            </div>
-
-            <!-- Duration Display -->
-            {#if editingReservation.time_in && editingReservation.time_out}
-              <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
-                <div class="flex items-center gap-2">
-                  <ClockOutline class="w-4 h-4 text-primary-600" />
-                  <span class="text-sm font-medium text-primary-700">
-                    Duration: {calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out)} hours
-                  </span>
-                </div>
-              </div>
-            {/if}
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-surface-200">
-            <button 
-              class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
-              onclick={() => showEditModal = false}
-            >
-              Cancel
-            </button>
-            <button 
-              class="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onclick={() => saveEdit(0)}
-              disabled={!editingReservation.lab_id || !editingReservation.date || !editingReservation.time_in || !editingReservation.time_out || !editingReservation.seat}
-            >
-              Save Changes
-            </button>
-          </div>
+          {/if}
+        </Card>
         </div>
-      </div>
+      {/each}
     </div>
+
+    <!-- Summary Statistics -->
+    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <Card class="text-center border border-surface-200 bg-success-50">
+        <h4 class="text-2xl font-bold text-success-700">
+          {reservations.filter(r => r.status === 'Confirmed').length}
+        </h4>
+        <p class="text-sm text-success-600">Confirmed</p>
+      </Card>
+      <Card class="text-center border border-surface-200 bg-warning-50">
+        <h4 class="text-2xl font-bold text-warning-700">
+          {reservations.filter(r => r.status === 'Ongoing').length}
+        </h4>
+        <p class="text-sm text-warning-600">Current</p>
+      </Card>
+      <Card class="text-center border border-surface-200 bg-secondary-50">
+        <h4 class="text-2xl font-bold text-secondary-700">
+          {reservations.filter(r => r.status === 'Completed').length}
+        </h4>
+        <p class="text-sm text-secondary-600">Completed</p>
+      </Card>
+      <Card class="text-center border border-surface-200 bg-error-50">
+        <h4 class="text-2xl font-bold text-error-700">
+          {reservations.filter(r => r.status === 'Cancelled').length}
+        </h4>
+        <p class="text-sm text-error-600">Cancelled</p>
+      </Card>
+    </div>
+
+  {:else}
+    <Card class="text-center py-12 border border-surface-200 bg-surface-50">
+      <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
+      <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
+      <Button color="primary" class="bg-primary-600 hover:bg-primary-700">Make Your First Reservation</Button>
+    </Card>
   {/if}
 </div>
