@@ -622,32 +622,50 @@
   }
 
   // Save edited reservation
-  async function saveEdit() {
-    if (!editingReservation) return;
+async function saveEdit() {
+  if (!editingReservation) return;
+  
+  try {
+    const token = localStorage.getItem('accessToken');
     
+    const updateData = {
+      date: editingReservation.date,
+      time_start: editingReservation.time_in,
+      hours: calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out),
+      lab_id: editingReservation.lab_id,
+      seats: [editingReservation.seat],
+      isAnonymous: editingReservation.isAnonymous || false
+    };
+    
+    logDebugInfo("Edit Update Data", updateData);
+    
+    // Try different endpoints/methods
+    let response;
+    let url;
+    
+    // First try: PUT method (this is the correct endpoint based on your API)
     try {
-      const token = localStorage.getItem('accessToken');
+      url = `http://localhost:3000/reservations/${editingReservation.id}`;
+      response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
       
-      const updateData = {
-        date: editingReservation.date,
-        time_start: editingReservation.time_in,
-        hours: calculateHoursFromTimes(editingReservation.time_in, editingReservation.time_out),
-        lab_id: editingReservation.lab_id,
-        seats: [editingReservation.seat],
-        isAnonymous: editingReservation.isAnonymous || false
-      };
+      if (!response.ok && response.status === 404) {
+        throw new Error('PUT endpoint not found');
+      }
+    } catch (firstError) {
+      logDebugInfo("First attempt failed", { url, error: firstError.message });
       
-      logDebugInfo("Edit Update Data", updateData);
-      
-      // Try different endpoints/methods
-      let response;
-      let url;
-      
-      // First try: POST to update endpoint
+      // Second try: PATCH method
       try {
-        url = `http://localhost:3000/reservations/${editingReservation.id}/update`;
+        url = `http://localhost:3000/reservations/${editingReservation.id}`;
         response = await fetch(url, {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -656,80 +674,62 @@
         });
         
         if (!response.ok && response.status === 404) {
-          throw new Error('Update endpoint not found');
+          throw new Error('PATCH method not found');
         }
-      } catch (firstError) {
-        logDebugInfo("First attempt failed", { url, error: firstError.message });
+      } catch (secondError) {
+        logDebugInfo("Second attempt failed", { url, error: secondError.message });
         
-        // Second try: PATCH method
-        try {
-          url = `http://localhost:3000/reservations/${editingReservation.id}`;
-          response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(updateData)
-          });
-          
-          if (!response.ok && response.status === 404) {
-            throw new Error('PATCH method not found');
-          }
-        } catch (secondError) {
-          logDebugInfo("Second attempt failed", { url, error: secondError.message });
-          
-          // Third try: POST to general reservations endpoint with ID in body
-          url = `http://localhost:3000/reservations/update`;
-          response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              ...updateData,
-              reservation_id: editingReservation.id
-            })
-          });
-        }
+        // Third try: DELETE and recreate (last resort)
+        url = `http://localhost:3000/reservations`;
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...updateData,
+            user_id: currentUser.id
+          })
+        });
       }
-
-      logDebugInfo("Final response", {
-        url,
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
-
-      if (response.ok) {
-        showSuccessToast("Reservation updated successfully");
-        await fetchReservations();
-      } else {
-        // Handle non-JSON error responses
-        let errorMessage;
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || "Failed to update reservation";
-        } else {
-          // If it's HTML or plain text, just use the status
-          errorMessage = `Server error: ${response.status} ${response.statusText}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-    } catch (err) {
-      logDebugInfo("Edit Error", { error: err.message }, true);
-      showErrorToast("Error updating reservation: " + err.message);
-      console.error(err);
-    } finally {
-      showEditModal = false;
-      editingReservation = null;
-      availableSeats = [];
     }
+
+    logDebugInfo("Final response", {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
+    if (response.ok) {
+      showSuccessToast("Reservation updated successfully");
+      await fetchReservations();
+    } else {
+      // Handle non-JSON error responses
+      let errorMessage;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || "Failed to update reservation";
+      } else {
+        // If it's HTML or plain text, just use the status
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+  } catch (err) {
+    logDebugInfo("Edit Error", { error: err.message }, true);
+    showErrorToast("Error updating reservation: " + err.message);
+    console.error(err);
+  } finally {
+    showEditModal = false;
+    editingReservation = null;
+    availableSeats = [];
   }
+}
 
   // Helper functions for button clicks
   function handleEditClick(reservation) {
