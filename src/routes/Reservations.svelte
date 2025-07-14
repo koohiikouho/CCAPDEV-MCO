@@ -89,13 +89,19 @@
     const r = reservations.find(res => res.id === id);
     if (!r) return;
 
-    editing = r;                               // opens the modal
-    editDate  = r.rawStart.slice(0, 10);        // "YYYY‑MM‑DD"
-    editStart = r.rawStart.slice(11, 16);       // "HH:MM"
-    editHours = (new Date(r.rawEnd).getTime() - new Date(r.rawStart).getTime()) / 3.6e6;
+    editing = r;
+
+    const start = new Date(r.rawStart);
+    const end   = new Date(r.rawEnd);
+
+    const pad = (n: number) => n.toString().padStart(2, "0");
+
+    editDate  = start.toISOString().slice(0, 10);
+    editStart = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    const halfHours = Math.round((end.getTime() - start.getTime()) / 1_800_000);
+    editHours = halfHours * 0.5;
     editSeats = r.rawSeats.join(", ");
   }
-
 
   async function deleteReservation() {
     if (!selectedReservationId) return;
@@ -287,7 +293,7 @@
         <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg p-8">
           <h2 class="text-2xl font-semibold text-surface-800 mb-6">Edit Reservation</h2>
 
-          <form class="space-y-5" on:submit|preventDefault={saveEdit}>
+          <form class="space-y-5" onsubmit={saveEdit}>
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="space-y-1">
                 <label for="edit-date" class="block text-sm font-medium text-surface-700">Date</label>
@@ -296,13 +302,20 @@
 
               <div class="space-y-1">
                 <label for="edit-time" class="block text-sm font-medium text-surface-700">Start&nbsp;time</label>
-                <input id="edit-time" type="time" bind:value={editStart} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
+                <input
+                  id="edit-time"
+                  type="time"
+                  step="1800"
+                  bind:value={editStart}
+                  class="w-full border-surface-300 rounded-lg px-3 py-2 …"
+                  required
+                />
               </div>
             </div>
 
             <div class="space-y-1">
               <label for="edit-hours" class="block text-sm font-medium text-surface-700">Duration&nbsp;(hours)</label>
-              <input id="edit-hours" type="number" min="1" bind:value={editHours} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
+              <input id="edit-hours" type="number" min="0.5" step="0.5" bind:value={editHours} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
             </div>
 
             <div class="space-y-1">
@@ -322,7 +335,7 @@
     {#if successMessage}
       <div class="fixed bottom-4 right-4 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded shadow z-50">
         {successMessage}
-        <button class="ml-2 text-green-900 hover:underline" on:click={() => successMessage = ""}>✕</button>
+        <button class="ml-2 text-green-900 hover:underline" onclick={() => successMessage = ""}>✕</button>
       </div>
     {/if}
 
