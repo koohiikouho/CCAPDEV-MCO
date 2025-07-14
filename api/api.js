@@ -17,6 +17,12 @@ export async function getLabData() {
   return data;
 }
 
+export async function getSuggestions() {
+  const response = await fetch('http://localhost:3000/suggestions');
+  const data = await response.json();
+  return data;
+}
+
 export async function verifyLogin(email, password) {
   const response = await fetch('http://localhost:3000/users/login', {
     method: 'POST',
