@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Added PATCH
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -40,25 +40,25 @@ mongoose
   .catch((err) => console.log("MongoDB error:", err));
 
 app.get("/labs", async (req, res) => {
-  console.log("---"); // Separator for requests
+  console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs`
   );
   try {
     console.log("Querying the database with Labs.find()...");
     const labs = await Labs.find().exec();
-    console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
+    console.log(`Database query finished. Found ${labs.length} documents.`);
 
     res.status(200).json(labs);
     console.log("Successfully sent JSON response.");
   } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
+    console.error("!!! AN ERROR OCCURRED while fetching labs:", err);
     res.status(500).send("Error fetching labs");
   }
 });
 
 app.get("/labs/:id", async (req, res) => {
-  console.log("---"); // Separator for requests
+  console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs/${req.params.id}`
   );
@@ -66,7 +66,6 @@ app.get("/labs/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
-    // Validate the ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid lab ID format" });
     }
@@ -95,13 +94,12 @@ app.get("/reservations/:labId", async (req, res) => {
   try {
     const labId = req.params.labId;
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
+    today.setHours(0, 0, 0, 0);
 
-    // Get lab with populated reservations
     const lab = await Labs.findById(labId).populate({
       path: "seats.reservations",
       match: {
-        time_out: { $gte: today }, // Only reservations that end today or later
+        time_out: { $gte: today },
       },
       populate: [
         { path: "user_id", select: "name email id_number" },
@@ -113,16 +111,13 @@ app.get("/reservations/:labId", async (req, res) => {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Format date as MM-DD HH:MM
     const formatDateTime = (date) => {
       const d = new Date(date);
       return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
 
-    // Process all reservations
     const formattedReservations = lab.seats.flatMap((seat) =>
       seat.reservations
-        // Additional filtering in case any old reservations slipped through
         .filter((reservation) => new Date(reservation.time_out) >= today)
         .map((reservation) => {
           const isAnonymous = reservation.isAnonymous;
@@ -155,7 +150,6 @@ app.get("/reservations/:labId", async (req, res) => {
         })
     );
 
-    // Sort by time_in (earliest first)
     formattedReservations.sort((a, b) => a.timestamp_in - b.timestamp_in);
 
     res.status(200).json(formattedReservations);
@@ -175,7 +169,7 @@ app.use((err, req, res, _next) => {
 });
 
 app.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
-  console.log("---"); // Separator for requests
+  console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs/:id/:date/:timein/:timeout`
   );
@@ -185,35 +179,34 @@ app.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
     const labs = await Labs.find({
       _id: labID,
     }).exec();
-    console.log(`Database query finished. Found ${labs.length} documents.`); // This tells us if the query worked and how much data it found.
+    console.log(`Database query finished. Found ${labs.length} documents.`);
 
     res.status(200).json(labs);
     console.log("Successfully sent JSON response.");
   } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching labs:", err); // This will print the full error object
+    console.error("!!! AN ERROR OCCURRED while fetching labs:", err);
     res.status(500).send("Error fetching labs");
   }
 });
 
 app.get("/users", async (req, res) => {
-  console.log("---"); // Separator for requests
+  console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /users`
   );
   try {
     console.log("Querying the database with Users.find()...");
     const users = await Users.find().exec();
-    console.log(`Database query finished. Found ${users.length} documents.`); // This tells us if the query worked and how much data it found.
+    console.log(`Database query finished. Found ${users.length} documents.`);
 
     res.status(200).json(users);
     console.log("Successfully sent JSON response.");
   } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching users:", err); // This will print the full error object
+    console.error("!!! AN ERROR OCCURRED while fetching users:", err);
     res.status(500).send("Error fetching users");
   }
 });
 
-// Used to verify login credentials w/ db
 app.post("/users/login", async (req, res) => {
   console.log("---");
   console.log(
@@ -233,10 +226,9 @@ app.post("/users/login", async (req, res) => {
       console.log("Password matched");
       console.log("Successfully logged in.");
 
-      // No expiration yet
       const accessToken = jwt.sign(
         {
-          id: user._id.toString(), // User OID to convert to string
+          id: user._id.toString(),
         },
         process.env.ACCESS_TOKEN_SECRET
       );
@@ -257,21 +249,18 @@ app.post("/users/login", async (req, res) => {
   }
 });
 
-// Sign up function
 app.post("/users/signup", async (req, res) => {
   console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`
   );
 
-  // Check if ID number is already used
   const existingID = await Users.findOne({ id_number: req.body.idNumber });
   if (existingID) {
     console.log("!! ID number is already in use");
     return res.status(409).json({ error: "ID number already in use." });
   }
 
-  // Check if email is already used
   const existingEmail = await Users.findOne({ email: req.body.email });
   if (existingEmail) {
     console.log("!! Email is already in use");
@@ -295,7 +284,7 @@ app.post("/users/signup", async (req, res) => {
 
     const accessToken = jwt.sign(
       {
-        id: newUser._id.toString(), // User OID to convert to string
+        id: newUser._id.toString(),
       },
       process.env.ACCESS_TOKEN_SECRET
     );
@@ -312,19 +301,16 @@ app.get("/lab-seats/:labId", async (req, res) => {
   try {
     const { labId } = req.params;
 
-    // Validate lab ID
     if (!mongoose.Types.ObjectId.isValid(labId)) {
       return res.status(400).json({ error: "Invalid lab ID format" });
     }
 
-    // Find the lab and select only the seats
     const lab = await Labs.findById(labId).select("seats lab_name");
 
     if (!lab) {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Format the seats into the required {value, name} pairs
     const formattedSeats = lab.seats.map((seat) => ({
       value: `${seat.col}${seat.row}`,
       name: `${seat.col}${seat.row}`,
@@ -345,10 +331,9 @@ app.get("/lab-seats/:labId", async (req, res) => {
   }
 });
 
-// Used to fetch user info of current user
 app.get("/users/me", async (req, res) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ error: "No token provided" });
@@ -381,49 +366,55 @@ app.get("/users/me", async (req, res) => {
 app.get("/available-seats/:labId", async (req, res) => {
   try {
     const { labId } = req.params;
-    const { date, time_in, time_out } = req.query;
+    const { date, time_in, time_out, exclude_reservation } = req.query; // Added exclude_reservation
 
-    // Validate inputs
     if (!mongoose.Types.ObjectId.isValid(labId)) {
       return res.status(400).json({ error: "Invalid lab ID" });
     }
 
-    // Create full datetime objects
     const startDateTime = new Date(`${date}T${time_in}:00`);
     const endDateTime = new Date(`${date}T${time_out}:00`);
 
-    // 1. Get the lab with all seats and their reservations populated
+    console.log(`[DEBUG] Available seats query: lab=${labId}, exclude=${exclude_reservation}`);
+
+    // Build match criteria for reservations
+    const reservationMatch = {
+      $or: [
+        {
+          time_in: { $lt: endDateTime },
+          time_out: { $gt: startDateTime },
+        },
+      ],
+    };
+
+    // Exclude specific reservation if provided
+    if (exclude_reservation && mongoose.Types.ObjectId.isValid(exclude_reservation)) {
+      reservationMatch._id = { $ne: new mongoose.Types.ObjectId(exclude_reservation) };
+      console.log(`[DEBUG] Excluding reservation: ${exclude_reservation}`);
+    }
+
     const lab = await Labs.findById(labId).populate({
       path: "seats.reservations",
-      match: {
-        $or: [
-          {
-            time_in: { $lt: endDateTime },
-            time_out: { $gt: startDateTime },
-          },
-        ],
-      },
+      match: reservationMatch,
     });
 
     if (!lab) {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // 2. Find available seats (seats with no conflicting reservations)
     const availableSeats = lab.seats.filter((seat) => {
-      // A seat is available if either:
-      // - It has no reservations at all, or
-      // - None of its reservations conflict with our time range
       return !seat.reservations || seat.reservations.length === 0;
     });
 
-    // 3. Format response
+    console.log(`[DEBUG] Found ${availableSeats.length} available seats out of ${lab.seats.length} total`);
+
     const response = {
       lab_id: labId,
       lab_name: lab.lab_name,
       date: date,
       time_in: time_in,
       time_out: time_out,
+      excluded_reservation: exclude_reservation || null,
       available_seats: availableSeats.map((seat) => ({
         seat_id: seat._id,
         position: `${seat.col}${seat.row}`,
@@ -455,7 +446,7 @@ app.get("/reservations", async (req, res) => {
       "Querying the database with Reservations.find() and populating..."
     );
     const reservations = await Reservations.find()
-      .populate("lab_id", "lab_name seats") // make sure seats are populated
+      .populate("lab_id", "lab_name seats")
       .populate("user_id", "email name avatar role");
 
     const formatted = reservations.map((r) => {
@@ -492,6 +483,71 @@ app.get("/reservations", async (req, res) => {
   }
 });
 
+// NEW ENDPOINT: Get user-specific reservations
+app.get("/user-reservations", async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.id;
+
+    console.log(`[DEBUG] Fetching reservations for user: ${userId}`);
+
+    const labs = await Labs.find()
+      .populate({
+        path: 'seats.reservations',
+        populate: {
+          path: 'user_id',
+          select: 'name email'
+        }
+      })
+      .exec();
+
+    const userReservations = [];
+
+    labs.forEach(lab => {
+      lab.seats.forEach(seat => {
+        seat.reservations.forEach(reservation => {
+          if (reservation.user_id && reservation.user_id._id.toString() === userId) {
+            console.log(`[DEBUG] Found reservation ${reservation._id} in seat ${seat.col}${seat.row}`);
+            userReservations.push({
+              _id: reservation._id,
+              lab_id: {
+                _id: lab._id,
+                lab_name: lab.lab_name
+              },
+              user_id: reservation.user_id,
+              time_in: reservation.time_in,
+              time_out: reservation.time_out,
+              status: reservation.status,
+              seat: `${seat.col}${seat.row}`,
+              isAnonymous: reservation.isAnonymous,
+              createdAt: reservation.createdAt,
+              updatedAt: reservation.updatedAt,
+            });
+          }
+        });
+      });
+    });
+
+    console.log(`[DEBUG] Returning ${userReservations.length} reservations`);
+    console.log(`[DEBUG] Sample reservation seats:`, userReservations.slice(0, 3).map(r => ({ id: r._id, seat: r.seat })));
+
+    res.status(200).json(userReservations);
+  } catch (err) {
+    console.error("Error fetching user reservations:", err);
+    res.status(500).json({
+      error: "Error fetching user reservations",
+      details: err.message,
+    });
+  }
+});
+
 app.post("/reservations", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -507,7 +563,6 @@ app.post("/reservations", async (req, res) => {
       seats,
     } = req.body;
 
-    // Validate required fields
     if (
       !date ||
       !time_start ||
@@ -522,7 +577,6 @@ app.post("/reservations", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Validate ID formats
     if (
       !mongoose.Types.ObjectId.isValid(lab_id) ||
       !mongoose.Types.ObjectId.isValid(user_id)
@@ -532,12 +586,10 @@ app.post("/reservations", async (req, res) => {
       return res.status(400).json({ error: "Invalid ID format" });
     }
 
-    // Calculate time range
     const startDateTime = new Date(`${date}T${time_start}:00`);
     const endDateTime = new Date(startDateTime);
     endDateTime.setMinutes(endDateTime.getMinutes() + hours * 60);
 
-    // Get day of week (0=Sunday, 6=Saturday)
     const dayOfWeek = startDateTime.getDay();
     const days = [
       "Sunday",
@@ -550,7 +602,6 @@ app.post("/reservations", async (req, res) => {
     ];
     const reservationDay = days[dayOfWeek];
 
-    // Get the full lab document with schedule
     const lab = await Labs.findById(lab_id).session(session);
 
     if (!lab) {
@@ -559,7 +610,6 @@ app.post("/reservations", async (req, res) => {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Check lab schedule for the day
     const daySchedule = lab.schedule.find((s) => s.day === reservationDay);
     if (!daySchedule || !daySchedule.opening || !daySchedule.closing) {
       await session.abortTransaction();
@@ -570,7 +620,6 @@ app.post("/reservations", async (req, res) => {
       });
     }
 
-    // Parse opening and closing times
     const [openingHour, openingMinute] = daySchedule.opening
       .split(":")
       .map(Number);
@@ -578,14 +627,12 @@ app.post("/reservations", async (req, res) => {
       .split(":")
       .map(Number);
 
-    // Create Date objects for opening and closing times
     const openingTime = new Date(startDateTime);
     openingTime.setHours(openingHour, openingMinute, 0, 0);
 
     const closingTime = new Date(startDateTime);
     closingTime.setHours(closingHour, closingMinute, 0, 0);
 
-    // Validate against operating hours
     if (startDateTime < openingTime || endDateTime > closingTime) {
       await session.abortTransaction();
       session.endSession();
@@ -599,7 +646,6 @@ app.post("/reservations", async (req, res) => {
       });
     }
 
-    // Validate user exists
     const userExists = await Users.exists({ _id: user_id }).session(session);
     if (!userExists) {
       await session.abortTransaction();
@@ -607,13 +653,11 @@ app.post("/reservations", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Create a map of all available seats
     const seatMap = new Map();
     lab.seats.forEach((seat) => {
       seatMap.set(`${seat.col}${seat.row}`, seat);
     });
 
-    // Validate requested seats
     const invalidSeats = [];
     const validSeatData = [];
 
@@ -639,7 +683,6 @@ app.post("/reservations", async (req, res) => {
       });
     }
 
-    // Check for time conflicts
     const conflictingReservations = await Reservations.find({
       lab_id,
       $or: [
@@ -670,7 +713,6 @@ app.post("/reservations", async (req, res) => {
       });
     }
 
-    // Create reservations and update seats
     const createdReservations = [];
     for (const { position, seatDoc } of validSeatData) {
       const reservation = new Reservations({
@@ -684,7 +726,6 @@ app.post("/reservations", async (req, res) => {
 
       await reservation.save({ session });
 
-      // Find the specific seat in the lab's seats array
       const seatIndex = lab.seats.findIndex(
         (s) => s.col === seatDoc.col && s.row === seatDoc.row
       );
@@ -693,7 +734,6 @@ app.post("/reservations", async (req, res) => {
         throw new Error(`Seat ${position} not found in lab document`);
       }
 
-      // Add the reservation to the correct seat
       lab.seats[seatIndex].reservations.push(reservation._id);
       createdReservations.push({
         id: reservation._id,
@@ -706,7 +746,6 @@ app.post("/reservations", async (req, res) => {
       });
     }
 
-    // Save the updated lab document
     await lab.save({ session });
     await session.commitTransaction();
     session.endSession();
@@ -752,14 +791,12 @@ app.put("/users/me", async (req, res) => {
     const allowedFields = ["name", "bio", "avatar"];
     const updateData = {};
 
-    // Filter only the allowed fields to update
     for (const key of allowedFields) {
       if (updates[key]) {
         updateData[key] = updates[key];
       }
     }
 
-    // Handle name as string → split to first and last name if needed
     if (updateData.name && typeof updateData.name === "string") {
       const parts = updateData.name.trim().split(" ");
       updateData.name = {
@@ -816,13 +853,12 @@ app.delete('/users/me', async (req, res) => {
 
     await Users.findByIdAndDelete(userId);
     console.log(`User ${user.email} deleted.`);
-    res.status(204).send(); // No content
+    res.status(204).send();
   } catch (err) {
     console.error("Error deleting user:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
@@ -889,14 +925,14 @@ app.get("/admin/reservations", async (req, res) => {
 app.get("/admin/students", async (req, res) => {
   try {
     const students = await Users.find(
-      { role: "student" }, // Only get students
+      { role: "student" },
       {
         id_number: 1,
         "name.first_name": 1,
         "name.last_name": 1,
-        _id: 0, // Exclude MongoDB's default _id
+        _id: 0,
       }
-    ).sort({ "name.last_name": 1 }); // Sort alphabetically by last name
+    ).sort({ "name.last_name": 1 });
 
     const formattedStudents = students.map((student) => ({
       id_number: student.id_number,
@@ -922,13 +958,12 @@ app.post("/admin/reservations", async (req, res) => {
       date,
       time_start,
       hours,
-      user_id: id_number, // Receiving ID number from request
+      user_id: id_number,
       lab_id,
       isAnonymous,
       seats,
     } = req.body;
 
-    // Validate inputs
     if (
       !date ||
       !time_start ||
@@ -943,7 +978,6 @@ app.post("/admin/reservations", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Convert ID number to user ObjectId
     const user = await Users.findOne({ id_number }).session(session);
     if (!user) {
       await session.abortTransaction();
@@ -953,12 +987,10 @@ app.post("/admin/reservations", async (req, res) => {
         .json({ error: "User not found with this ID number" });
     }
 
-    // Calculate time range
     const startDateTime = new Date(`${date}T${time_start}:00`);
     const endDateTime = new Date(startDateTime);
     endDateTime.setMinutes(endDateTime.getMinutes() + hours * 60);
 
-    // Get lab with seats
     const lab = await Labs.findById(lab_id).session(session);
     if (!lab) {
       await session.abortTransaction();
@@ -966,7 +998,6 @@ app.post("/admin/reservations", async (req, res) => {
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Check lab schedule
     const reservationDay = startDateTime.toLocaleDateString("en-US", {
       weekday: "long",
     });
@@ -980,7 +1011,6 @@ app.post("/admin/reservations", async (req, res) => {
         .json({ error: "Lab is closed on " + reservationDay });
     }
 
-    // Validate against operating hours
     const [openingHour, openingMinute] = labSchedule.opening
       .split(":")
       .map(Number);
@@ -1014,13 +1044,11 @@ app.post("/admin/reservations", async (req, res) => {
       });
     }
 
-    // Process each seat reservation
     const createdReservations = [];
     for (const seatPos of seats) {
       const [col, rowStr] = [seatPos[0].toUpperCase(), seatPos.slice(1)];
       const row = parseInt(rowStr);
 
-      // Find the seat in lab's seats array
       const seat = lab.seats.find((s) => s.col === col && s.row === row);
       if (!seat) {
         await session.abortTransaction();
@@ -1030,7 +1058,6 @@ app.post("/admin/reservations", async (req, res) => {
           .json({ error: `Seat ${seatPos} not found in lab` });
       }
 
-      // Check for existing reservations in this seat
       const existingReservations = await Reservations.find({
         _id: { $in: seat.reservations },
         $or: [
@@ -1051,9 +1078,8 @@ app.post("/admin/reservations", async (req, res) => {
         });
       }
 
-      // Create reservation (using user._id as required by schema)
       const reservation = new Reservations({
-        user_id: user._id, // Using the ObjectId reference
+        user_id: user._id,
         lab_id: lab._id,
         time_in: startDateTime,
         time_out: endDateTime,
@@ -1063,23 +1089,20 @@ app.post("/admin/reservations", async (req, res) => {
 
       await reservation.save({ session });
 
-      // Update seat's reservations array
       seat.reservations.push(reservation._id);
       createdReservations.push(reservation);
     }
 
-    // Save the lab with updated seat reservations
     await lab.save({ session });
     await session.commitTransaction();
     session.endSession();
 
-    // Format response
     res.status(201).json({
       message: "Reservations created successfully",
       reservations: createdReservations.map((r, index) => ({
         id: r._id,
         student: {
-          id_number: user.id_number, // Return original ID number
+          id_number: user.id_number,
           name: isAnonymous
             ? "Anonymous"
             : `${user.name.first_name} ${user.name.last_name}`,
@@ -1102,168 +1125,240 @@ app.post("/admin/reservations", async (req, res) => {
   }
 });
 
-app.put("/reservations/:reservationId", async (req, res) => {
+// Cancel reservation endpoint (PATCH method for status update)
+app.patch("/reservations/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
+
+    const reservation = await Reservations.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!reservation) {
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    res.status(200).json({
+      message: "Reservation updated successfully",
+      reservation
+    });
+  } catch (err) {
+    console.error("Error updating reservation:", err);
+    res.status(500).json({
+      error: "Error updating reservation",
+      details: err.message
+    });
+  }
+});
+
+// UPDATED PUT endpoint that handles both formats
+app.put("/reservations/:id", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { reservationId } = req.params;
-    const { time_in, time_out, column, row } = req.body;
+    const { id } = req.params;
+    const { date, time_start, hours, lab_id, seats, isAnonymous, time_in, time_out, column, row } = req.body;
 
-    // 1. Validate Inputs
-    if (!time_in || !time_out || column === undefined || row === undefined) {
+    console.log(`[DEBUG] Updating reservation ${id} with data:`, req.body);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: "Invalid reservation ID" });
     }
 
-    // 2. Validate Seat Format
-    const col = String(column).toUpperCase();
-    const rowNum = Number(row);
-    if (
-      !["A", "B", "C", "D", "E"].includes(col) ||
-      isNaN(rowNum) ||
-      rowNum <= 0
-    ) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ error: "Invalid seat format (e.g., A1, B2)" });
-    }
-
-    // 3. Find Reservation with Lab
-    const reservation = await Reservations.findById(reservationId)
-      .populate("lab_id")
-      .session(session);
-    if (!reservation) {
+    const existingReservation = await Reservations.findById(id).session(session);
+    if (!existingReservation) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // 4. Get Lab with Seats
-    const lab = await Labs.findById(reservation.lab_id._id)
-      .select("seats schedule")
-      .session(session);
-    if (!lab) {
+    console.log(`[DEBUG] Found existing reservation in lab: ${existingReservation.lab_id}`);
+
+    // Handle different input formats
+    let startDateTime, endDateTime, newLabId, newSeat;
+    
+    if (date && time_start && hours) {
+      // Format from Svelte frontend
+      startDateTime = new Date(`${date}T${time_start}:00`);
+      endDateTime = new Date(startDateTime);
+      endDateTime.setMinutes(endDateTime.getMinutes() + hours * 60);
+      newLabId = lab_id;
+      newSeat = seats?.[0];
+    } else if (time_in && time_out && column !== undefined && row !== undefined) {
+      // Alternative format
+      startDateTime = new Date(time_in);
+      endDateTime = new Date(time_out);
+      newLabId = existingReservation.lab_id;
+      newSeat = `${String(column).toUpperCase()}${row}`;
+    } else {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid request format. Provide either (date, time_start, hours, lab_id, seats) or (time_in, time_out, column, row)" });
+    }
+
+    console.log(`[DEBUG] Parsed values - newSeat: ${newSeat}, newLabId: ${newLabId}`);
+
+    if (startDateTime >= endDateTime) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "End time must be after start time" });
+    }
+
+    const oldLab = await Labs.findById(existingReservation.lab_id).session(session);
+    const newLab = await Labs.findById(newLabId).session(session);
+
+    if (!newLab) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // 5. Find New Seat
-    const newSeat = lab.seats.find((s) => s.col === col && s.row === rowNum);
-    if (!newSeat) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(404)
-        .json({ error: `Seat ${col}${rowNum} not found in this lab` });
-    }
-
-    // 6. Convert and Validate Times
-    const newStartTime = new Date(time_in);
-    const newEndTime = new Date(time_out);
-    if (newStartTime >= newEndTime) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ error: "End time must be after start time" });
-    }
-
-    // 7. Check Lab Hours
-    const reservationDay = newStartTime.toLocaleDateString("en-US", {
+    // Check lab schedule
+    const reservationDay = startDateTime.toLocaleDateString("en-US", {
       weekday: "long",
     });
-    const labSchedule = lab.schedule.find((s) => s.day === reservationDay);
-    if (!labSchedule?.opening || !labSchedule?.closing) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ error: `Lab is closed on ${reservationDay}` });
+    const labSchedule = newLab.schedule?.find((s) => s.day === reservationDay);
+    
+    if (labSchedule && labSchedule.opening && labSchedule.closing) {
+      const [openHour, openMin] = labSchedule.opening.split(":").map(Number);
+      const [closeHour, closeMin] = labSchedule.closing.split(":").map(Number);
+      const openingTime = new Date(startDateTime);
+      openingTime.setHours(openHour, openMin, 0, 0);
+      const closingTime = new Date(startDateTime);
+      closingTime.setHours(closeHour, closeMin, 0, 0);
+
+      if (startDateTime < openingTime || endDateTime > closingTime) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          error: "Outside lab hours",
+          lab_hours: `${labSchedule.opening} - ${labSchedule.closing}`,
+        });
+      }
     }
 
-    const [openHour, openMin] = labSchedule.opening.split(":").map(Number);
-    const [closeHour, closeMin] = labSchedule.closing.split(":").map(Number);
-    const openingTime = new Date(newStartTime);
-    openingTime.setHours(openHour, openMin, 0, 0);
-    const closingTime = new Date(newStartTime);
-    closingTime.setHours(closeHour, closeMin, 0, 0);
-
-    if (newStartTime < openingTime || newEndTime > closingTime) {
+    const [col, rowStr] = [newSeat[0].toUpperCase(), newSeat.slice(1)];
+    const rowNum = parseInt(rowStr);
+    
+    console.log(`[DEBUG] Looking for seat col: ${col}, row: ${rowNum} in lab ${newLabId}`);
+    
+    const targetSeat = newLab.seats.find(s => s.col === col && s.row === rowNum);
+    if (!targetSeat) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({
-        error: "Outside lab hours",
-        lab_hours: `${labSchedule.opening} - ${labSchedule.closing}`,
-      });
+      return res.status(400).json({ error: `Seat ${newSeat} not found in lab` });
     }
 
-    // 8. Check Seat Availability
-    const conflicts = await Reservations.find({
-      _id: { $ne: reservationId },
-      lab_id: reservation.lab_id._id,
-      $or: [{ time_in: { $lt: newEndTime }, time_out: { $gt: newStartTime } }],
+    console.log(`[DEBUG] Found target seat: ${targetSeat.col}${targetSeat.row}`);
+
+    const conflicting = await Reservations.find({
+      _id: { $ne: id },
+      lab_id: newLabId,
+      $or: [
+        { time_in: { $lt: endDateTime }, time_out: { $gt: startDateTime } },
+      ],
     }).session(session);
 
-    const seatConflicts = conflicts.filter((c) =>
-      newSeat.reservations.some((resId) => resId.equals(c._id))
+    const seatConflicts = conflicting.filter((c) =>
+      targetSeat.reservations.some((resId) => resId.equals(c._id))
     );
 
     if (seatConflicts.length > 0) {
       await session.abortTransaction();
       session.endSession();
       return res.status(409).json({
-        error: "Seat already reserved",
-        conflicts: seatConflicts.map((c) => ({
+        error: `Seat ${newSeat} already reserved for this time`,
+        conflicts: seatConflicts.map(c => ({
           from: c.time_in,
-          to: c.time_out,
-        })),
+          to: c.time_out
+        }))
       });
     }
 
-    // 9. Find Current Seat and Remove Reference
-    const currentSeat = lab.seats.find((s) =>
-      s.reservations.some((resId) => resId.equals(reservationId))
-    );
-    if (currentSeat) {
-      currentSeat.reservations = currentSeat.reservations.filter(
-        (resId) => !resId.equals(reservationId)
-      );
+    // Remove reservation from old seat(s) in old lab
+    if (oldLab) {
+      console.log(`[DEBUG] Removing reservation ${id} from old lab seats`);
+      let removedFromOldSeat = false;
+      oldLab.seats.forEach((seat, seatIndex) => {
+        const originalLength = seat.reservations.length;
+        seat.reservations = seat.reservations.filter(
+          resId => !resId.equals(existingReservation._id)
+        );
+        if (seat.reservations.length < originalLength) {
+          console.log(`[DEBUG] Removed reservation from old seat ${seat.col}${seat.row}`);
+          removedFromOldSeat = true;
+        }
+      });
+      
+      if (removedFromOldSeat) {
+        await oldLab.save({ session });
+        console.log(`[DEBUG] Saved old lab after removing reservation`);
+      }
     }
 
-    // 10. Update Reservation and Add to New Seat
-    reservation.time_in = newStartTime;
-    reservation.time_out = newEndTime;
-    await reservation.save({ session });
+    // If different lab, also remove from new lab's seats first (cleanup)
+    if (oldLab && newLab._id.toString() !== oldLab._id.toString()) {
+      console.log(`[DEBUG] Different labs - cleaning up new lab seats first`);
+      newLab.seats.forEach(seat => {
+        seat.reservations = seat.reservations.filter(
+          resId => !resId.equals(existingReservation._id)
+        );
+      });
+    }
 
-    newSeat.reservations.push(reservation._id);
-    await lab.save({ session });
+    existingReservation.time_in = startDateTime;
+    existingReservation.time_out = endDateTime;
+    existingReservation.lab_id = newLabId;
+    if (isAnonymous !== undefined) {
+      existingReservation.isAnonymous = isAnonymous;
+    }
+    await existingReservation.save({ session });
+    console.log(`[DEBUG] Updated reservation document`);
+
+    if (!targetSeat.reservations.includes(existingReservation._id)) {
+      targetSeat.reservations.push(existingReservation._id);
+      console.log(`[DEBUG] Added reservation to new seat ${targetSeat.col}${targetSeat.row}`);
+    } else {
+      console.log(`[DEBUG] Reservation already in target seat ${targetSeat.col}${targetSeat.row}`);
+    }
+    
+    await newLab.save({ session });
+    console.log(`[DEBUG] Saved new lab with updated seat assignments`);
 
     await session.commitTransaction();
     session.endSession();
 
-    return res.status(200).json({
+    console.log(`[DEBUG] Transaction committed successfully. Final seat: ${newSeat}`);
+
+    res.status(200).json({
       message: "Reservation updated successfully",
       reservation: {
-        id: reservation._id,
-        lab: reservation.lab_id._id,
-        seat: `${col}${rowNum}`,
-        time_in: reservation.time_in,
-        time_out: reservation.time_out,
-        status: reservation.status,
-      },
+        id: existingReservation._id,
+        lab_id: existingReservation.lab_id,
+        seat: newSeat,
+        time_in: existingReservation.time_in,
+        time_out: existingReservation.time_out,
+        status: existingReservation.status,
+        isAnonymous: existingReservation.isAnonymous
+      }
     });
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Update error:", err);
-    return res.status(500).json({
-      error: "Failed to update reservation",
-      details: err.message,
+    console.error("Error updating reservation:", err);
+    res.status(500).json({
+      error: "Error updating reservation",
+      details: err.message
     });
   }
 });
@@ -1275,14 +1370,12 @@ app.delete("/reservations/:reservationId", async (req, res) => {
   try {
     const { reservationId } = req.params;
 
-    // Validate reservation ID format
     if (!mongoose.Types.ObjectId.isValid(reservationId)) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ error: "Invalid reservation ID format" });
     }
 
-    // Find and populate the reservation with lab reference
     const reservation = await Reservations.findById(reservationId)
       .populate("lab_id")
       .session(session);
@@ -1293,7 +1386,6 @@ app.delete("/reservations/:reservationId", async (req, res) => {
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // Get the lab containing the reservation
     const lab = await Labs.findById(reservation.lab_id._id).session(session);
 
     if (!lab) {
@@ -1302,7 +1394,6 @@ app.delete("/reservations/:reservationId", async (req, res) => {
       return res.status(404).json({ error: "Associated lab not found" });
     }
 
-    // Find and remove reservation reference from the seat
     let seatFound = false;
     for (const seat of lab.seats) {
       const reservationIndex = seat.reservations.findIndex((resId) =>
@@ -1324,7 +1415,6 @@ app.delete("/reservations/:reservationId", async (req, res) => {
         .json({ error: "Reservation not found in any seat" });
     }
 
-    // Save the updated lab and delete the reservation
     await lab.save({ session });
     await Reservations.deleteOne({ _id: reservationId }).session(session);
 
@@ -1356,16 +1446,13 @@ app.get("/reservations/upcoming/:labId", async (req, res) => {
   try {
     const { labId } = req.params;
 
-    // Validate lab ID
     if (!mongoose.Types.ObjectId.isValid(labId)) {
       return res.status(400).json({ error: "Invalid lab ID format" });
     }
 
-    // Calculate time range
     const now = new Date();
     const tenMinutesFromNow = new Date(now.getTime() + 10 * 60000);
 
-    // Find upcoming reservations
     const reservations = await Reservations.find({
       lab_id: labId,
       time_in: {
@@ -1391,11 +1478,9 @@ app.get("/reservations/upcoming/:labId", async (req, res) => {
         },
       });
 
-    // Format response
     const formattedReservations = [];
 
     for (const reservation of reservations) {
-      // Find which seat this reservation belongs to
       const lab = await Labs.findById(labId)
         .select("seats")
         .populate({
