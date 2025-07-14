@@ -622,7 +622,7 @@
     }
   }
 
-  // Save edited reservation with retry logic
+// Save edited reservation with retry logic
 async function saveEdit(retryCount = 0) {
   if (!editingReservation) return;
   
@@ -687,6 +687,11 @@ async function saveEdit(retryCount = 0) {
     const result = await response.json();
     logDebugInfo("Update Success", result);
     
+    // Close modal immediately after successful update
+    showEditModal = false;
+    editingReservation = null;
+    availableSeats = [];
+    
     showSuccessToast("Reservation updated successfully");
     await fetchReservations();
     
@@ -697,8 +702,9 @@ async function saveEdit(retryCount = 0) {
     }, true);
     showErrorToast("Error updating reservation: " + err.message);
     console.error('Full error:', err);
-  } finally {
-    if (retryCount === 0) { // Only close modal on the original call, not retries
+    
+    // Close modal on error too (unless it's a retry)
+    if (retryCount === 0) {
       showEditModal = false;
       editingReservation = null;
       availableSeats = [];
