@@ -156,7 +156,7 @@
     <TableBody class="divide-y">
       {#each currentPageItems as item (item)}
         <TableBodyRow>
-          {#if (item.student.name != "Anonymous")}
+          {#if (item.student_name && item.student_name !== "Anonymous") || (item.student?.name && !item.is_anonymous)}
             <a href={`/src/routes/profiles/viewProfile.html?userCode=${item.user_id}`}>
               <TableBodyCell class="px-1 md:px-4 py-3">
                 {item.student.name}

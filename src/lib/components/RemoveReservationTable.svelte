@@ -80,7 +80,7 @@
 
 	async function delReservation(resId){
 		const res = await axios.delete('http://localhost:3000/reservations/'.concat(resId));
-    	alert("Reservation".concat(resId).concat("Removed Successfully!"));
+    	alert("Reservation ".concat(resId).concat(" Removed Successfully!"));
 	}
 
 </script>
