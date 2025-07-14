@@ -450,7 +450,6 @@ async function saveEdit(retryCount = 0) {
   if (!editingReservation) return;
   
   try {
-    const token = localStorage.getItem('accessToken');
     
     const updateData = {
       date: editingReservation.date,
@@ -466,7 +465,6 @@ async function saveEdit(retryCount = 0) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(updateData)
     });
