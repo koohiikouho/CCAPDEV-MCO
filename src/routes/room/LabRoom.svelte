@@ -26,6 +26,7 @@
     const data = await res.json();
     return data;
   };
+  
   const getStudentData = async () =>{
     const res = await fetch("http://localhost:3000/admin/students");
     const data = await res.json();
