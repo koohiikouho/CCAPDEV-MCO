@@ -782,6 +782,37 @@ app.put("/users/me", async (req, res) => {
   }
 });
 
+app.delete('/users/me', async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.id;
+    const { password } = req.body;
+
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (password !== user.password) {
+      return res.status(401).json({ message: "Incorrect password. Please try again." });
+    }
+
+    await Users.findByIdAndDelete(userId);
+    console.log(`User ${user.email} deleted.`);
+    res.status(204).send(); // No content
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/users", userUploadRoutes);
