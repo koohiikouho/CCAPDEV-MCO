@@ -1168,6 +1168,8 @@ app.put("/reservations/:id", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  console.log(`Updating reservation ${req.params.id} with data:`, req.body);
+
   try {
     const { date, time_start, hours, lab_id, seats, isAnonymous } = req.body;
     const reservationId = req.params.id;

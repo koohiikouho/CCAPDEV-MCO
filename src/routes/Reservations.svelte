@@ -37,22 +37,29 @@
 
     // validation — no split/join any more
     if (!editSeats.trim()) return alert("Seat is required");
-    const seatMatch = editSeats.trim().toUpperCase().match(/^([A-Z])(\d+)$/);
-    if (!seatMatch)        return alert("Seat must look like A1, B3 …");
 
-    const [, column, rowStr] = seatMatch;
-    const row = Number(rowStr);
+    const seat = editSeats.trim().toUpperCase();
+    if (!seat) return alert("Seat is required");
+    if (!/^[A-Z]\d+$/.test(seat)) return alert("Seat must look like A1, B3 …");
 
     const [h, m]   = editStart.split(":").map(Number);
     const startISO = new Date(`${editDate}T${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:00`).toISOString();
     const endISO   = new Date(new Date(startISO).getTime() + editHours*60*60*1000).toISOString();
 
-    const payload = { time_in: startISO, time_out: endISO, column, row };
+    const payload = {
+      date       : editDate,
+      time_start : editStart,
+      hours      : editHours,
+      lab_id     : editing.rawLabId,
+      seats      : [seat],
+      isAnonymous: false
+    };
 
-    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
+    const token = localStorage.getItem("accessToken") ?? sessionStorage.getItem("accessToken");
     const res   = await fetch(`http://localhost:3000/reservations/${editing.id}`, {
       method : "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body   : JSON.stringify(payload)
     });
 
@@ -69,7 +76,8 @@
           seat    : r.seat,
           rawStart: r.time_in,
           rawEnd  : r.time_out,
-          rawSeats: [r.seat]
+          rawSeats: [r.seat],
+          rawLabId : r.lab_id?._id || r.lab_id,
         } : item
       );
 
@@ -109,8 +117,7 @@
   function editReservation(id: string) {
     const r = reservations.find(res => res.id === id);
     if (!r) return;
-
-    editing = r;
+    editing = r;     
 
     const start = new Date(r.rawStart);
     const end   = new Date(r.rawEnd);
