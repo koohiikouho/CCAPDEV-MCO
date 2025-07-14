@@ -1163,39 +1163,6 @@ app.post("/admin/reservations", async (req, res) => {
   }
 });
 
-// Cancel reservation endpoint (PATCH method for status update)
-app.patch("/reservations/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid reservation ID" });
-    }
-
-    const reservation = await Reservations.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
-
-    if (!reservation) {
-      return res.status(404).json({ error: "Reservation not found" });
-    }
-
-    res.status(200).json({
-      message: "Reservation updated successfully",
-      reservation,
-    });
-  } catch (err) {
-    console.error("Error updating reservation:", err);
-    res.status(500).json({
-      error: "Error updating reservation",
-      details: err.message,
-    });
-  }
-});
-
 // PUT /reservations/:id - Update reservation with proper transaction handling
 app.put("/reservations/:id", async (req, res) => {
   const session = await mongoose.startSession();

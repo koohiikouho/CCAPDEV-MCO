@@ -1,54 +1,22 @@
-<script>
+<script lang="ts">
   import { Card, Button, Badge, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
   // Using correct flowbite-svelte-icons imports
   import { CalendarMonthOutline, ClockOutline, UsersOutline, FlaskOutline, ComputerSpeakerOutline } from "flowbite-svelte-icons";
   import { cubicOut } from "svelte/easing";
   import { fly } from "svelte/transition";
+  import { onMount } from "svelte";
 
-  // Sample reservation data - replace with actual data from your backend
-  let reservations = [
-    {
-      id: 1,
-      labName: "GK 211 Laboratory",
-      date: "2024-06-20",
-      time: "2:00 PM - 4:00 PM",
-      duration: "2 hours",
-      purpose: "Web Development Project",
-      status: "Confirmed",
-      seat: "C3"
-    },
-    {
-      id: 2,
-      labName: "GK 403 Network Laboratory",
-      date: "2024-06-22",
-      time: "10:00 AM - 12:00 PM",
-      duration: "2 hours",
-      purpose: "LBYITN4 Networking Activity",
-      status: "Ongoing",
-      seat: "C1"
-    },
-    {
-      id: 3,
-      labName: "AG 1703 Laboratory",
-      date: "2024-06-18",
-      time: "3:00 PM - 5:00 PM",
-      duration: "2 hours",
-      purpose: "CCAPDEV MC01 Presentation",
-      status: "Completed",
-      seat: "B5"
-    },
-    {
-      id: 4,
-      labName: "AG 1707 Laboratory",
-      date: "2024-06-18",
-      time: "3:00 PM - 8:30 PM",
-      duration: "5.5 hours",
-      purpose: "CCAPDEV MC01 Presentation",
-      status: "Cancelled",
-      seat: "A4"
-    }
+  let currentUser = null;
+  let reservations = [];
+  
+  let showDeleteModal = false;
+  let selectedReservationId = null;
+  let successMessage = "";
 
-  ];
+  function confirmCancel(id: string) {
+    selectedReservationId = id;
+    showDeleteModal = true;
+  }
 
   function getStatusColor(status) {
     switch(status) {
@@ -70,6 +38,86 @@
     // Implement edit functionality
     console.log('Edit reservation:', id);
   }
+
+  function formatDuration(ms: number): string {
+    const totalMinutes = Math.round(ms / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+    if (hours > 0) return `${hours}h`;
+    return `${minutes}m`;
+  }
+
+  async function deleteReservation() {
+    if (!selectedReservationId) return;
+
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
+    try {
+      const response = await fetch(`http://localhost:3000/reservations/${selectedReservationId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        reservations = reservations.map(res =>
+          res.id === selectedReservationId ? { ...res, status: 'Cancelled' } : res
+        );
+        successMessage = "Reservation cancelled successfully.";
+      } else {
+        console.error("Delete failed:", result.error || result.message);
+      }
+    } catch (error) {
+      console.error("Error deleting reservation:", error);
+    } finally {
+      showDeleteModal = false;
+      selectedReservationId = null;
+    }
+  }
+
+
+  onMount(async () => {
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
+    if (!token) return console.error("No access token found");
+
+    try {
+      const resUser = await fetch("http://localhost:3000/users/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!resUser.ok) throw new Error("Failed to fetch user data");
+
+      const user = await resUser.json();
+      currentUser = {
+        _id: user.id,
+      };
+
+      const resReservations = await fetch("http://localhost:3000/reservations");
+      const all = await resReservations.json();
+
+      reservations = all
+        .filter(r => String(r.user_id?._id || r.user_id) === currentUser._id)
+        .map((r, index) => ({
+          id: r._id,
+          labName: r.lab_id?.lab_name || "Unknown Lab",
+          date: new Date(r.time_in).toLocaleDateString(),
+          time: new Date(r.time_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          duration:
+            r.time_in && r.time_out &&
+            new Date(r.time_out).getTime() > new Date(r.time_in).getTime()
+              ? formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime())
+              : "Invalid time",
+          seat: r.seat || "N/A",
+          status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
+          createdOn: new Date(r.createdAt).toLocaleString(),
+        }));
+    } catch (err) {
+      console.error("Error loading profile:", err);
+    }
+  });
 </script>
 
 <div class="container mx-auto px-6 py-8 mt-16 bg-offwhite min-h-screen max-w-7xl">
@@ -112,17 +160,6 @@
             </div>
           </div>
 
-          <!-- {#if reservation.equipmentRequested.length > 0}
-            <div class="mb-4">
-              <p class="text-sm font-medium text-surface-700 mb-2 text-left">Equipment Requested:</p>
-              <div class="flex flex-wrap gap-2">
-                {#each reservation.equipmentRequested as equipment}
-                  <Badge class="text-xs bg-surface-100 text-surface-600 border border-surface-300">{equipment}</Badge>
-                {/each}
-              </div>
-            </div>
-          {/if} -->
-
           {#if reservation.status === 'Confirmed' || reservation.status === 'Pending'}
             <div class="flex gap-2 pt-2 border-t border-surface-200">
               <Button 
@@ -136,7 +173,7 @@
               <Button 
                 size="sm" 
                 color="red" 
-                onclick={() => cancelReservation(reservation.id)}
+                onclick={() => confirmCancel(reservation.id)}
               >
                 Cancel
               </Button>
@@ -175,12 +212,42 @@
       </Card>
     </div>
 
+    {#if showDeleteModal}
+      <div class="fixed inset-0 flex justify-center items-center z-50">
+        <div class="bg-white border border-surface-200 shadow-xl rounded-xl p-8 max-w-md w-full text-center">
+          <h2 class="text-2xl font-semibold text-surface-800 mb-4">Cancel Reservation?</h2>
+          <p class="text-surface-600 mb-6">This action cannot be undone. Are you sure you want to cancel this reservation?</p>
+          <div class="flex justify-center gap-4">
+            <Button color="red" class="px-6" onclick={deleteReservation}>Yes, Cancel</Button>
+            <Button color="alternative" class="px-6" onclick={() => showDeleteModal = false}>No, Go Back</Button>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    {#if successMessage}
+      <div class="fixed bottom-4 right-4 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded shadow z-50">
+        {successMessage}
+        <button class="ml-2 text-green-900 hover:underline" on:click={() => successMessage = ""}>✕</button>
+      </div>
+    {/if}
+
+
   {:else}
-    <Card class="text-center py-12 border border-surface-200 bg-surface-50">
-      <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
-      <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
-      <Button color="primary" class="bg-primary-600 hover:bg-primary-700">Make Your First Reservation</Button>
-    </Card>
+    <div class="flex items-center justify-center min-h-[60vh]">
+      <Card class="text-center py-12 px-6 border border-surface-200 bg-surface-50 shadow-md max-w-md w-full">
+        <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
+        <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
+        <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
+        <Button
+          href="../index.html?view=1"
+          tag="a"
+          color="primary"
+          class="bg-primary-600 hover:bg-primary-700"
+        >
+          Make Your First Reservation
+        </Button>
+      </Card>
+    </div>
   {/if}
 </div>
