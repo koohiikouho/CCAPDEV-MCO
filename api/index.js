@@ -1164,33 +1164,60 @@ app.post("/admin/reservations", async (req, res) => {
 });
 
 // PUT /reservations/:id - Update reservation with proper transaction handling
-app.put("/reservations/:id", async (req, res) => {
+app.put("/reservations/:reservationId", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   console.log(`Updating reservation ${req.params.id} with data:`, req.body);
 
   try {
-    const { date, time_start, hours, lab_id, seats, isAnonymous } = req.body;
-    const reservationId = req.params.id;
+    const { time_in, time_out, column, row } = req.body;
+    const reservationId = req.params.reservationId;
 
     // Validate required fields
-    if (
-      !date ||
-      !time_start ||
-      !hours ||
-      !lab_id ||
-      !seats ||
-      !Array.isArray(seats) ||
-      seats.length === 0
-    ) {
+    if (!time_in || !time_out || !column || row === undefined) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Round hours to nearest 30 minutes (minimum 30 minutes)
-    const roundedHours = Math.max(0.5, Math.floor(hours * 2) / 2);
+    // Convert input to Date objects
+    const newStartTime = new Date(time_in);
+    const newEndTime = new Date(time_out);
+
+    // Validate time_in and time_out are valid dates
+    if (isNaN(newStartTime.getTime())) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid time_in format" });
+    }
+
+    if (isNaN(newEndTime.getTime())) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid time_out format" });
+    }
+
+    // Ensure minimum 30 minute duration
+    const durationMinutes = (newEndTime - newStartTime) / (1000 * 60);
+    if (durationMinutes < 30) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(400)
+        .json({ error: "Minimum reservation duration is 30 minutes" });
+    }
+
+    // Round times to nearest 30 minutes
+    const roundTo30Minutes = (date) => {
+      const minutes = date.getMinutes();
+      const roundedMinutes = minutes >= 30 ? 30 : 0;
+      date.setMinutes(roundedMinutes, 0, 0);
+      return date;
+    };
+
+    const roundedStartTime = roundTo30Minutes(new Date(newStartTime));
+    const roundedEndTime = roundTo30Minutes(new Date(newEndTime));
 
     // Find the existing reservation
     const existingReservation =
@@ -1201,33 +1228,8 @@ app.put("/reservations/:id", async (req, res) => {
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // Check if user owns this reservation
-    if (existingReservation.user_id.toString() !== req.user.id) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(403)
-        .json({ error: "Unauthorized to update this reservation" });
-    }
-
-    // Create new time objects with 30-minute precision
-    const [startHour, startMinute] = time_start.split(":").map(Number);
-    const roundedMinutes = startMinute >= 30 ? 30 : 0;
-    const newStartTime = new Date(date);
-    newStartTime.setHours(startHour, roundedMinutes, 0, 0);
-
-    // Calculate end time with rounded hours
-    const newEndTime = new Date(
-      newStartTime.getTime() + roundedHours * 60 * 60 * 1000
-    );
-
-    // Ensure minimum 30 minute duration
-    if (newStartTime.getTime() === newEndTime.getTime()) {
-      newEndTime.setMinutes(newEndTime.getMinutes() + 30);
-    }
-
     // Get day of week (0=Sunday, 6=Saturday)
-    const dayOfWeek = newStartTime.getDay();
+    const dayOfWeek = roundedStartTime.getDay();
     const days = [
       "Sunday",
       "Monday",
@@ -1240,7 +1242,9 @@ app.put("/reservations/:id", async (req, res) => {
     const reservationDay = days[dayOfWeek];
 
     // Get lab with schedule
-    const targetLab = await Labs.findById(lab_id).session(session);
+    const targetLab = await Labs.findById(existingReservation.lab_id).session(
+      session
+    );
     if (!targetLab) {
       await session.abortTransaction();
       session.endSession();
@@ -1269,14 +1273,14 @@ app.put("/reservations/:id", async (req, res) => {
       .map(Number);
 
     // Create Date objects for opening and closing times
-    const openingTime = new Date(newStartTime);
+    const openingTime = new Date(roundedStartTime);
     openingTime.setHours(openingHour, openingMinute, 0, 0);
 
-    const closingTime = new Date(newStartTime);
+    const closingTime = new Date(roundedStartTime);
     closingTime.setHours(closingHour, closingMinute, 0, 0);
 
     // Validate against operating hours
-    if (newStartTime < openingTime || newEndTime > closingTime) {
+    if (roundedStartTime < openingTime || roundedEndTime > closingTime) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({
@@ -1284,58 +1288,27 @@ app.put("/reservations/:id", async (req, res) => {
         details: {
           day: reservationDay,
           lab_hours: `${daySchedule.opening} - ${daySchedule.closing}`,
-          requested_time: `${time_start} - ${newEndTime.toTimeString().slice(0, 5)}`,
+          requested_time: `${roundedStartTime.toISOString()} - ${roundedEndTime.toISOString()}`,
         },
       });
     }
 
-    const newSeat = seats[0];
-
-    // Parse seat position
-    const seatMatch = newSeat.match(/^([A-Z])(\d+)$/);
-    if (!seatMatch) {
+    // Validate seat position
+    const newSeat = `${column}${row}`;
+    if (!["A", "B", "C", "D", "E"].includes(column) || isNaN(row) || row <= 0) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ error: "Invalid seat format" });
+      return res.status(400).json({ error: "Invalid seat position" });
     }
 
-    const [, newCol, newRowStr] = seatMatch;
-    const newRow = parseInt(newRowStr);
-
-    // Find current seat in old lab
-    const oldLab = await Labs.findById(existingReservation.lab_id).session(
-      session
+    // Find current seat in lab
+    const currentSeatIndex = targetLab.seats.findIndex((seat) =>
+      seat.reservations.some((resId) => resId.toString() === reservationId)
     );
-    let currentSeat = null;
-    let currentSeatIndex = -1;
-
-    if (oldLab) {
-      currentSeatIndex = oldLab.seats.findIndex((seat) =>
-        seat.reservations.some((resId) => resId.toString() === reservationId)
-      );
-
-      if (currentSeatIndex !== -1) {
-        currentSeat = `${oldLab.seats[currentSeatIndex].col}${oldLab.seats[currentSeatIndex].row}`;
-      }
-    }
-
-    // Check if we're moving to a different lab or seat
-    const isLabChange = existingReservation.lab_id.toString() !== lab_id;
-    const isSeatChange = currentSeat !== newSeat;
-
-    if (isLabChange || isSeatChange) {
-      // Remove from old lab/seat first
-      if (oldLab && currentSeatIndex !== -1) {
-        oldLab.seats[currentSeatIndex].reservations = oldLab.seats[
-          currentSeatIndex
-        ].reservations.filter((r) => r.toString() !== reservationId);
-        await oldLab.save({ session });
-      }
-    }
 
     // Find target seat
     const targetSeatIndex = targetLab.seats.findIndex(
-      (s) => s.col === newCol && s.row === newRow
+      (s) => s.col === column && s.row === row
     );
     if (targetSeatIndex === -1) {
       await session.abortTransaction();
@@ -1345,11 +1318,28 @@ app.put("/reservations/:id", async (req, res) => {
         .json({ error: `Seat ${newSeat} not found in lab` });
     }
 
+    // Check if we're moving to a different seat
+    const isSeatChange = currentSeatIndex !== targetSeatIndex;
+
+    if (isSeatChange) {
+      // Remove from old seat first
+      if (currentSeatIndex !== -1) {
+        targetLab.seats[currentSeatIndex].reservations = targetLab.seats[
+          currentSeatIndex
+        ].reservations.filter((r) => r.toString() !== reservationId);
+      }
+    }
+
     // Check for time conflicts (excluding current reservation)
     const conflictingReservations = await Reservations.find({
       _id: { $ne: reservationId },
-      $or: [{ time_in: { $lt: newEndTime }, time_out: { $gt: newStartTime } }],
-      lab_id,
+      $or: [
+        {
+          time_in: { $lt: roundedEndTime },
+          time_out: { $gt: roundedStartTime },
+        },
+      ],
+      lab_id: existingReservation.lab_id,
       status: { $in: ["Confirmed", "Ongoing"] },
     }).session(session);
 
@@ -1374,21 +1364,19 @@ app.put("/reservations/:id", async (req, res) => {
     }
 
     // Update the reservation
-    existingReservation.time_in = newStartTime;
-    existingReservation.time_out = newEndTime;
-    existingReservation.lab_id = lab_id;
-    existingReservation.isAnonymous = isAnonymous || false;
+    existingReservation.time_in = roundedStartTime;
+    existingReservation.time_out = roundedEndTime;
 
     await existingReservation.save({ session });
 
     // Add to new seat if it changed
-    if (isLabChange || isSeatChange) {
+    if (isSeatChange) {
       if (
         !targetLab.seats[targetSeatIndex].reservations.includes(reservationId)
       ) {
         targetLab.seats[targetSeatIndex].reservations.push(reservationId);
-        await targetLab.save({ session });
       }
+      await targetLab.save({ session });
     }
 
     await session.commitTransaction();
@@ -1401,7 +1389,6 @@ app.put("/reservations/:id", async (req, res) => {
 
     res.json({
       ...updatedReservation.toObject(),
-      duration_hours: roundedHours,
       seat: newSeat,
       schedule_info: {
         day: reservationDay,
