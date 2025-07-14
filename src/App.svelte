@@ -4,7 +4,6 @@
   import Home from './routes/Home.svelte';
   import Lab from './routes/Labs.svelte';
   import Users from './routes/Users.svelte';
-  // import Labs from './routs/Labs.svelte';
   import Reservations from './routes/Reservations.svelte';
   import MyProfile from './routes/profiles/MyProfile.svelte';
   import { fade } from 'svelte/transition';

@@ -194,7 +194,7 @@
               {#snippet titleSlot()}
                 <span class="">Reservations</span>
               {/snippet}
-              {#if userRole == "student"}
+              {#if userRole != "Admin"}
                 <Reservations seatData={seatdata}/>
               {:else if userRole == "Admin"}
                 <ReservationsAdmin seatData={seatdata} />

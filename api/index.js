@@ -94,12 +94,17 @@ app.get("/labs/:id", async (req, res) => {
 app.get("/reservations/:labId", async (req, res) => {
   try {
     const labId = req.params.labId;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
 
     // Get lab with populated reservations
     const lab = await Labs.findById(labId).populate({
       path: "seats.reservations",
+      match: {
+        time_out: { $gte: today }, // Only reservations that end today or later
+      },
       populate: [
-        { path: "user_id", select: "name email id_number" }, // Include id_number
+        { path: "user_id", select: "name email id_number" },
         { path: "lab_id", select: "lab_name" },
       ],
     });
@@ -116,36 +121,42 @@ app.get("/reservations/:labId", async (req, res) => {
 
     // Process all reservations
     const formattedReservations = lab.seats.flatMap((seat) =>
-      seat.reservations.map((reservation) => {
-        const isAnonymous = reservation.isAnonymous;
-        const user = reservation.user_id;
+      seat.reservations
+        // Additional filtering in case any old reservations slipped through
+        .filter((reservation) => new Date(reservation.time_out) >= today)
+        .map((reservation) => {
+          const isAnonymous = reservation.isAnonymous;
+          const user = reservation.user_id;
 
-        return {
-          reservation_id: reservation._id,
-          user_id: user?._id, // Always include user_id
-          student: {
-            id_number: isAnonymous ? null : user?.id_number, // Hide if anonymous
-            name: isAnonymous
-              ? "Anonymous"
-              : user?.name
-                ? `${user.name.first_name} ${user.name.last_name}`
-                : "Unknown",
-            email: isAnonymous ? null : user?.email, // Hide if anonymous
-          },
-          time_in: formatDateTime(reservation.time_in),
-          time_out: formatDateTime(reservation.time_out),
-          timestamp_in: reservation.time_in,
-          timestamp_out: reservation.time_out,
-          column: seat.col,
-          row: seat.row,
-          lab_name: reservation.lab_id?.lab_name || "N/A",
-          status: reservation.status,
-          is_anonymous: isAnonymous,
-          created_at: reservation.createdAt,
-          updated_at: reservation.updatedAt,
-        };
-      })
+          return {
+            reservation_id: reservation._id,
+            user_id: user?._id,
+            student: {
+              id_number: isAnonymous ? null : user?.id_number,
+              name: isAnonymous
+                ? "Anonymous"
+                : user?.name
+                  ? `${user.name.first_name} ${user.name.last_name}`
+                  : "Unknown",
+              email: isAnonymous ? null : user?.email,
+            },
+            time_in: formatDateTime(reservation.time_in),
+            time_out: formatDateTime(reservation.time_out),
+            timestamp_in: reservation.time_in,
+            timestamp_out: reservation.time_out,
+            column: seat.col,
+            row: seat.row,
+            lab_name: reservation.lab_id?.lab_name || "N/A",
+            status: reservation.status,
+            is_anonymous: isAnonymous,
+            created_at: reservation.createdAt,
+            updated_at: reservation.updatedAt,
+          };
+        })
     );
+
+    // Sort by time_in (earliest first)
+    formattedReservations.sort((a, b) => a.timestamp_in - b.timestamp_in);
 
     res.status(200).json(formattedReservations);
   } catch (err) {
@@ -781,6 +792,37 @@ app.put("/users/me", async (req, res) => {
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
+
+app.delete('/users/me', async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.id;
+    const { password } = req.body;
+
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (password !== user.password) {
+      return res.status(401).json({ message: "Incorrect password. Please try again." });
+    }
+
+    await Users.findByIdAndDelete(userId);
+    console.log(`User ${user.email} deleted.`);
+    res.status(204).send(); // No content
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

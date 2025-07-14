@@ -16,7 +16,7 @@
 	let passwordConfirmInput = $state("");
 	let errors: string[] = $state([]);
 
-async function handleSignUp(e: Event) {
+	async function handleSignUp(e: Event) {
 		e.preventDefault();
 		errors = [];
 

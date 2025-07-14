@@ -500,20 +500,79 @@
   async function confirmCancel() {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:3000/reservations/${reservationToCancel.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: 'Cancelled' })
-      });
+      
+      // Try different endpoints for cancellation
+      let response;
+      let url;
+      
+      // First try: POST to cancel endpoint
+      try {
+        url = `http://localhost:3000/reservations/${reservationToCancel.id}/cancel`;
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({})
+        });
+        
+        if (!response.ok && response.status === 404) {
+          throw new Error('Cancel endpoint not found');
+        }
+      } catch (firstError) {
+        logDebugInfo("Cancel first attempt failed", { url, error: firstError.message });
+        
+        // Second try: PATCH method
+        try {
+          url = `http://localhost:3000/reservations/${reservationToCancel.id}`;
+          response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: 'Cancelled' })
+          });
+          
+          if (!response.ok && response.status === 404) {
+            throw new Error('PATCH method not found');
+          }
+        } catch (secondError) {
+          logDebugInfo("Cancel second attempt failed", { url, error: secondError.message });
+          
+          // Third try: POST to general cancel endpoint
+          url = `http://localhost:3000/reservations/cancel`;
+          response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              reservation_id: reservationToCancel.id,
+              status: 'Cancelled'
+            })
+          });
+        }
+      }
 
       if (response.ok) {
         showSuccessToast("Reservation cancelled successfully");
         await fetchReservations();
       } else {
-        throw new Error("Failed to cancel reservation");
+        // Handle non-JSON error responses
+        let errorMessage;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || "Failed to cancel reservation";
+        } else {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (err) {
       logDebugInfo("Cancel Error", { error: err.message }, true);
@@ -580,21 +639,86 @@
       
       logDebugInfo("Edit Update Data", updateData);
       
-      const response = await fetch(`http://localhost:3000/reservations/${editingReservation.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateData)
+      // Try different endpoints/methods
+      let response;
+      let url;
+      
+      // First try: POST to update endpoint
+      try {
+        url = `http://localhost:3000/reservations/${editingReservation.id}/update`;
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updateData)
+        });
+        
+        if (!response.ok && response.status === 404) {
+          throw new Error('Update endpoint not found');
+        }
+      } catch (firstError) {
+        logDebugInfo("First attempt failed", { url, error: firstError.message });
+        
+        // Second try: PATCH method
+        try {
+          url = `http://localhost:3000/reservations/${editingReservation.id}`;
+          response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updateData)
+          });
+          
+          if (!response.ok && response.status === 404) {
+            throw new Error('PATCH method not found');
+          }
+        } catch (secondError) {
+          logDebugInfo("Second attempt failed", { url, error: secondError.message });
+          
+          // Third try: POST to general reservations endpoint with ID in body
+          url = `http://localhost:3000/reservations/update`;
+          response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              ...updateData,
+              reservation_id: editingReservation.id
+            })
+          });
+        }
+      }
+
+      logDebugInfo("Final response", {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
       });
 
       if (response.ok) {
         showSuccessToast("Reservation updated successfully");
         await fetchReservations();
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update reservation");
+        // Handle non-JSON error responses
+        let errorMessage;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || "Failed to update reservation";
+        } else {
+          // If it's HTML or plain text, just use the status
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (err) {
       logDebugInfo("Edit Error", { error: err.message }, true);
