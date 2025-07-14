@@ -291,7 +291,7 @@
     try {
       const startDate = new Date(start);
       const endDate = new Date(end);
-      const diff = (endDate - startDate) / (1000 * 60 * 60); // hours
+      const diff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
       
       if (diff < 1) {
         return `${Math.round(diff * 60)} minutes`;
@@ -499,9 +499,9 @@
       
       // First try: POST to cancel endpoint
       try {
-        url = `http://localhost:3000/reservations/${reservationToCancel.id}/cancel`;
+        url = `http://localhost:3000/reservations/${reservationToCancel.id}`;
         response = await fetch(url, {
-          method: 'POST',
+          method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -780,7 +780,7 @@ async function saveEdit(retryCount = 0) {
         <div class="flex-1">
           <p class="text-sm text-surface-700">{toastMessage}</p>
         </div>
-        <button on:click={() => showToast = false} class="ml-3 text-surface-400 hover:text-surface-600">
+        <button onclick={() => showToast = false} class="ml-3 text-surface-400 hover:text-surface-600">
           ✕
         </button>
       </div>
@@ -807,7 +807,7 @@ async function saveEdit(retryCount = 0) {
       <FlaskOutline class="w-16 h-16 text-error-300 mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-error-700 mb-2">Error Loading Reservations</h3>
       <p class="text-error-500 mb-4">{error}</p>
-      <Button color="primary" on:click={fetchReservations}>Try Again</Button>
+      <Button color="primary" onclick={fetchReservations}>Try Again</Button>
     </Card>
   {:else}
     <div class="flex justify-between items-center mb-6 relative z-10">
@@ -815,7 +815,7 @@ async function saveEdit(retryCount = 0) {
     <button 
       type="button"
       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
-      on:click={() => {
+      onclick={() => {
         console.log('Button clicked - navigating to labs');
         window.location.href = '/?view=1';
       }}
@@ -827,7 +827,7 @@ async function saveEdit(retryCount = 0) {
     <button 
       type="button"
       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
-      on:click={() => {
+      onclick={() => {
         console.log('Button clicked - navigating to login');
         window.location.href = '/login';
       }}
@@ -879,14 +879,14 @@ async function saveEdit(retryCount = 0) {
                 <button 
                   type="button"
                   class="px-3 py-1 text-sm bg-blue-100 text-blue-700 border border-blue-300 rounded hover:bg-blue-200 transition-colors cursor-pointer"
-                  on:click={() => handleEditClick(reservation)}
+                  onclick={() => handleEditClick(reservation)}
                 >
                   ✏️ Edit
                 </button>
                 <button 
                   type="button"
                   class="px-3 py-1 text-sm bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200 transition-colors cursor-pointer"
-                  on:click={() => handleCancelClick(reservation)}
+                  onclick={() => handleCancelClick(reservation)}
                 >
                   🗑️ Cancel
                 </button>
@@ -934,7 +934,7 @@ async function saveEdit(retryCount = 0) {
       <button 
         type="button"
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        on:click={() => {
+        onclick={() => {
           console.log('Login button clicked');
           window.location.href = '/login';
         }}
@@ -946,7 +946,7 @@ async function saveEdit(retryCount = 0) {
       <button 
         type="button"
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        on:click={() => {
+        onclick={() => {
           console.log('Make first reservation button clicked');
           window.location.href = '/?view=1';
         }}
@@ -969,7 +969,7 @@ async function saveEdit(retryCount = 0) {
             id="lab-select" 
             class="w-full p-2 border border-surface-300 rounded-md"
             bind:value={newReservation.lab_id}
-            on:change={fetchAvailableSeats}
+            onchange={fetchAvailableSeats}
           >
             <option value="">Select a lab</option>
             {#each availableLabs as lab}
@@ -984,7 +984,7 @@ async function saveEdit(retryCount = 0) {
             id="reservation-date" 
             type="date" 
             bind:value={newReservation.date}
-            on:change={fetchAvailableSeats}
+            onchange={fetchAvailableSeats}
             min={new Date().toISOString().split('T')[0]}
           />
         </div>
@@ -996,7 +996,7 @@ async function saveEdit(retryCount = 0) {
               id="start-time" 
               type="time" 
               bind:value={newReservation.time_in}
-              on:change={fetchAvailableSeats}
+              onchange={fetchAvailableSeats}
             />
           </div>
           <div>
@@ -1005,7 +1005,7 @@ async function saveEdit(retryCount = 0) {
               id="end-time" 
               type="time" 
               bind:value={newReservation.time_out}
-              on:change={fetchAvailableSeats}
+              onchange={fetchAvailableSeats}
             />
           </div>
         </div>
@@ -1047,10 +1047,10 @@ async function saveEdit(retryCount = 0) {
         {/if}
         
         <div class="flex justify-end gap-3 pt-4">
-          <Button color="alternative" on:click={() => showCreateModal = false}>Cancel</Button>
+          <Button color="alternative" onclick={() => showCreateModal = false}>Cancel</Button>
           <Button 
             color="primary" 
-            on:click={createReservation} 
+            onclick={createReservation} 
             disabled={!newReservation.lab_id || !newReservation.date || !newReservation.time_in || !newReservation.time_out || !newReservation.seat}
           >
             Create Reservation
@@ -1067,7 +1067,7 @@ async function saveEdit(retryCount = 0) {
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-bold text-surface-800">Cancel Reservation</h3>
           <button 
-            on:click={() => showCancelModal = false}
+            onclick={() => showCancelModal = false}
             class="text-surface-400 hover:text-surface-600"
           >
             ✕
@@ -1099,13 +1099,13 @@ async function saveEdit(retryCount = 0) {
         <div class="flex justify-end gap-3">
           <button 
             class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
-            on:click={() => showCancelModal = false}
+            onclick={() => showCancelModal = false}
           >
             Keep Reservation
           </button>
           <button 
             class="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-            on:click={confirmCancel}
+            onclick={confirmCancel}
           >
             Cancel Reservation
           </button>
@@ -1122,7 +1122,7 @@ async function saveEdit(retryCount = 0) {
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-surface-800">Edit Reservation</h3>
             <button 
-              on:click={() => showEditModal = false}
+              onclick={() => showEditModal = false}
               class="text-surface-400 hover:text-surface-600"
             >
               ✕
@@ -1136,7 +1136,7 @@ async function saveEdit(retryCount = 0) {
               <select 
                 class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 bind:value={editingReservation.lab_id}
-                on:change={fetchAvailableSeatsForEdit}
+                onchange={fetchAvailableSeatsForEdit}
               >
                 <option value="">Select a laboratory</option>
                 {#each availableLabs as lab}
@@ -1151,7 +1151,7 @@ async function saveEdit(retryCount = 0) {
               <Input 
                 type="date" 
                 bind:value={editingReservation.date}
-                on:change={fetchAvailableSeatsForEdit}
+                onchange={fetchAvailableSeatsForEdit}
                 min={new Date().toISOString().split('T')[0]}
                 class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
@@ -1164,7 +1164,7 @@ async function saveEdit(retryCount = 0) {
                 <Input 
                   type="time" 
                   bind:value={editingReservation.time_in}
-                  on:change={fetchAvailableSeatsForEdit}
+                  onchange={fetchAvailableSeatsForEdit}
                   class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -1173,7 +1173,7 @@ async function saveEdit(retryCount = 0) {
                 <Input 
                   type="time" 
                   bind:value={editingReservation.time_out}
-                  on:change={fetchAvailableSeatsForEdit}
+                  onchange={fetchAvailableSeatsForEdit}
                   class="w-full p-3 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -1224,13 +1224,13 @@ async function saveEdit(retryCount = 0) {
           <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-surface-200">
             <button 
               class="px-4 py-2 text-sm border border-surface-300 rounded-md hover:bg-surface-50 transition-colors"
-              on:click={() => showEditModal = false}
+              onclick={() => showEditModal = false}
             >
               Cancel
             </button>
             <button 
               class="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              on:click={saveEdit}
+              onclick={() => saveEdit(0)}
               disabled={!editingReservation.lab_id || !editingReservation.date || !editingReservation.time_in || !editingReservation.time_out || !editingReservation.seat}
             >
               Save Changes
