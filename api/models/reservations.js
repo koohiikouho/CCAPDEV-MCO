@@ -23,7 +23,7 @@ const reservationSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["Confirmed", "Ongoing", "Completed", "Cancelled"],
+      enum: ["Confirmed", "Ongoing", "Completed"],
     },
     isAnonymous: {
       type: Boolean,
