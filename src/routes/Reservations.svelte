@@ -32,26 +32,46 @@
     };
   }
 
-  async function saveEdit() {
-    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-    const payload = {
-      date: editDate,
-      time_start: editStart,
-      hours: editHours,
-      seats: editSeats.split(",").map(s => s.trim()).filter(Boolean)
-    };
+  async function saveEdit(e?: Event) {
+    e?.preventDefault();
 
-    const res  = await fetch(`http://localhost:3000/reservations/${editing.id}`, {
-      method: "PUT",
-      headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
-      body: JSON.stringify(payload)
+    if (!editSeats.trim())                 return alert("Seat is required");
+    const seatMatch = editSeats.trim().match(/^([A-Z])(\d+)$/);
+    if (!seatMatch)                        return alert("Seat must look like A1, B3 …");
+
+    const [, column, rowStr] = seatMatch;
+    const row = +rowStr;
+
+    const [h, m]   = editStart.split(":").map(Number);
+    const startISO = new Date(`${editDate}T${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:00`).toISOString();
+    const endISO   = new Date(new Date(startISO).getTime() + editHours*60*60*1000).toISOString();
+
+    const payload  = { time_in: startISO, time_out: endISO, column, row };
+
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    const res   = await fetch(`http://localhost:3000/reservations/${editing.id}`, {
+      method : "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body   : JSON.stringify(payload)
     });
 
     if (res.ok) {
-      const { reservation } = await res.json();
-      reservations = reservations.map(r => r.id === reservation._id
-        ? { ...r, ...mapToCard(reservation) }
-        : r);
+      const r = await res.json();
+
+      reservations = reservations.map(item =>
+        item.id === r._id ? {
+          ...item,
+          labName : r.lab_id?.lab_name || item.labName,
+          date    : new Date(r.time_in).toLocaleDateString(),
+          time    : new Date(r.time_in).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }),
+          duration: formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime()),
+          seat    : r.seat,
+          rawStart: r.time_in,
+          rawEnd  : r.time_out,
+          rawSeats: [r.seat]
+        } : item
+      );
+
       successMessage = "Reservation updated.";
       editing = null;
     } else {
