@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
+import Suggestions from "./models/suggestions.js";
 import { idText } from "typescript";
 import dotenv from "dotenv";
 import path from "path";
@@ -1517,3 +1518,23 @@ app.get("/reservations/upcoming/:labId", async (req, res) => {
     });
   }
 });
+
+app.post("/users/suggestions", async (req, res) => {
+  console.log("---");
+  console.log(
+    `[${new Date().toLocaleTimeString()}] POST /users/suggestions`
+  );
+
+  try {
+    const newSuggestion = await Suggestions.create({
+      email: req.body.email,
+      subject: req.body.subject,
+      message: req.body.message
+    })
+    console.log("New suggestion sent:");
+    res.status(201).json({ message: "Suggestion submitted successfully." });
+  } catch(err) {
+    console.error("Suggestion error:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+})

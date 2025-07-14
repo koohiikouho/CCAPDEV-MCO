@@ -52,3 +52,14 @@ export async function updateUserProfile(payload, token) {
   const data = await response.json();
   return data;
 }
+
+export async function sendSuggestion(email, subject, message) {
+  const response = await fetch('http://localhost:3000/users/suggestions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, subject, message })
+  });
+
+  const data = await response.json();
+  return data;
+}

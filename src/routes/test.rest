@@ -1,0 +1,8 @@
+POST http://localhost:3000/users/suggestions
+Content-Type: application/json
+
+{
+    "email" : "pogi@dlsu.edu.ph",
+    "subject": "awioajfnio",
+    "message": "I miss u"
+}
