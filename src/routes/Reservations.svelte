@@ -218,7 +218,8 @@
             lab_id: res.lab_id?._id || res.lab_id,
             user_id: res.user_id?._id || res.user_id,
             createdOn: new Date(res.createdAt || res.time_in).toLocaleDateString(),
-            isAnonymous: res.isAnonymous || false
+            isAnonymous: res.isAnonymous || false,
+            rawDate: res.time_in
           };
           
           if (index === 0) {
@@ -595,7 +596,7 @@
       
       editingReservation = {
         ...reservation,
-        date: new Date(reservation.date).toISOString().split('T')[0], // Format for date input
+        date: new Date(reservation.rawDate || reservation.time_in).toISOString().split('T')[0],
         original_lab_id: reservation.lab_id,
         isAnonymous: reservation.isAnonymous || false
       };
@@ -621,8 +622,8 @@
     }
   }
 
-  // Save edited reservation
-async function saveEdit() {
+  // Save edited reservation with retry logic
+async function saveEdit(retryCount = 0) {
   if (!editingReservation) return;
   
   try {
@@ -637,97 +638,71 @@ async function saveEdit() {
       isAnonymous: editingReservation.isAnonymous || false
     };
     
-    logDebugInfo("Edit Update Data", updateData);
+    logDebugInfo("Edit Update Data", { updateData, retryCount });
     
-    // Try different endpoints/methods
-    let response;
-    let url;
+    const url = `http://localhost:3000/reservations/${editingReservation.id}`;
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updateData)
+    });
     
-    // First try: PUT method (this is the correct endpoint based on your API)
-    try {
-      url = `http://localhost:3000/reservations/${editingReservation.id}`;
-      response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateData)
-      });
-      
-      if (!response.ok && response.status === 404) {
-        throw new Error('PUT endpoint not found');
-      }
-    } catch (firstError) {
-      logDebugInfo("First attempt failed", { url, error: firstError.message });
-      
-      // Second try: PATCH method
-      try {
-        url = `http://localhost:3000/reservations/${editingReservation.id}`;
-        response = await fetch(url, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(updateData)
-        });
-        
-        if (!response.ok && response.status === 404) {
-          throw new Error('PATCH method not found');
-        }
-      } catch (secondError) {
-        logDebugInfo("Second attempt failed", { url, error: secondError.message });
-        
-        // Third try: DELETE and recreate (last resort)
-        url = `http://localhost:3000/reservations`;
-        response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            ...updateData,
-            user_id: currentUser.id
-          })
-        });
-      }
-    }
-
-    logDebugInfo("Final response", {
+    logDebugInfo("PUT Response Details", {
       url,
       status: response.status,
       statusText: response.statusText,
       ok: response.ok
     });
 
-    if (response.ok) {
-      showSuccessToast("Reservation updated successfully");
-      await fetchReservations();
-    } else {
-      // Handle non-JSON error responses
-      let errorMessage;
+    if (!response.ok) {
       const contentType = response.headers.get('content-type');
+      let errorDetails;
       
       if (contentType && contentType.includes('application/json')) {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorData.message || "Failed to update reservation";
+        errorDetails = await response.json();
       } else {
-        // If it's HTML or plain text, just use the status
-        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        errorDetails = await response.text();
       }
       
-      throw new Error(errorMessage);
+      logDebugInfo("Server Error Details", {
+        status: response.status,
+        statusText: response.statusText,
+        errorDetails: errorDetails
+      }, true);
+      
+      // Check if it's a retryable error (version conflict)
+      if (response.status === 409 && errorDetails.retryable && retryCount < 3) {
+        logDebugInfo("Retrying update due to version conflict", { retryCount: retryCount + 1 });
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 500 + (retryCount * 200)));
+        return saveEdit(retryCount + 1);
+      }
+      
+      throw new Error(`Server error (${response.status}): ${JSON.stringify(errorDetails)}`);
     }
+
+    const result = await response.json();
+    logDebugInfo("Update Success", result);
+    
+    showSuccessToast("Reservation updated successfully");
+    await fetchReservations();
+    
   } catch (err) {
-    logDebugInfo("Edit Error", { error: err.message }, true);
+    logDebugInfo("Edit Error", { 
+      error: err.message,
+      retryCount: retryCount
+    }, true);
     showErrorToast("Error updating reservation: " + err.message);
-    console.error(err);
+    console.error('Full error:', err);
   } finally {
-    showEditModal = false;
-    editingReservation = null;
-    availableSeats = [];
+    if (retryCount === 0) { // Only close modal on the original call, not retries
+      showEditModal = false;
+      editingReservation = null;
+      availableSeats = [];
+    }
   }
 }
 
