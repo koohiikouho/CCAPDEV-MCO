@@ -1169,15 +1169,26 @@ app.put("/reservations/:id", async (req, res) => {
   session.startTransaction();
 
   try {
-    const { time_in, time_out, column, row } = req.body;
+    const { date, time_start, hours, lab_id, seats, isAnonymous } = req.body;
     const reservationId = req.params.id;
 
     // Validate required fields
-    if (!time_in || !time_out || !column || !row) {
+    if (
+      !date ||
+      !time_start ||
+      !hours ||
+      !lab_id ||
+      !seats ||
+      !Array.isArray(seats) ||
+      seats.length === 0
+    ) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    // Round hours to nearest 30 minutes (minimum 30 minutes)
+    const roundedHours = Math.max(0.5, Math.floor(hours * 2) / 2);
 
     // Find the existing reservation
     const existingReservation =
@@ -1188,60 +1199,142 @@ app.put("/reservations/:id", async (req, res) => {
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // Round times to nearest 30 minutes
-    const roundTo30Minutes = (date) => {
-      const roundedDate = new Date(date);
-      const minutes = roundedDate.getMinutes();
-      roundedDate.setMinutes(Math.floor(minutes / 30) * 30);
-      roundedDate.setSeconds(0);
-      roundedDate.setMilliseconds(0);
-      return roundedDate;
-    };
+    // Check if user owns this reservation
+    if (existingReservation.user_id.toString() !== req.user.id) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to update this reservation" });
+    }
 
-    const newStartTime = roundTo30Minutes(new Date(time_in));
-    const newEndTime = roundTo30Minutes(new Date(time_out));
+    // Create new time objects with 30-minute precision
+    const [startHour, startMinute] = time_start.split(":").map(Number);
+    const roundedMinutes = startMinute >= 30 ? 30 : 0;
+    const newStartTime = new Date(date);
+    newStartTime.setHours(startHour, roundedMinutes, 0, 0);
+
+    // Calculate end time with rounded hours
+    const newEndTime = new Date(
+      newStartTime.getTime() + roundedHours * 60 * 60 * 1000
+    );
 
     // Ensure minimum 30 minute duration
-    if (newEndTime.getTime() <= newStartTime.getTime()) {
-      newEndTime.setTime(newStartTime.getTime() + 30 * 60 * 1000); // Add minimum 30 minutes
+    if (newStartTime.getTime() === newEndTime.getTime()) {
+      newEndTime.setMinutes(newEndTime.getMinutes() + 30);
     }
 
-    // Validate times
-    if (isNaN(newStartTime.getTime())) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "Invalid start time" });
-    }
+    // Get day of week (0=Sunday, 6=Saturday)
+    const dayOfWeek = newStartTime.getDay();
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const reservationDay = days[dayOfWeek];
 
-    if (isNaN(newEndTime.getTime())) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "Invalid end time" });
-    }
-
-    // Create seat identifier
-    const newSeat = `${column.toUpperCase()}${row}`;
-
-    // Find current lab and seat
-    const lab = await Labs.findById(existingReservation.lab_id).session(
-      session
-    );
-    if (!lab) {
+    // Get lab with schedule
+    const targetLab = await Labs.findById(lab_id).session(session);
+    if (!targetLab) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: "Lab not found" });
     }
 
-    // Find current seat index
-    const currentSeatIndex = lab.seats.findIndex((seat) =>
-      seat.reservations.some((resId) => resId.toString() === reservationId)
+    // Check lab schedule for the day
+    const daySchedule = targetLab.schedule.find(
+      (s) => s.day === reservationDay
     );
+    if (!daySchedule || !daySchedule.opening || !daySchedule.closing) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        error: `Lab is closed on ${reservationDay}`,
+        lab_schedule: targetLab.schedule,
+      });
+    }
 
-    // Find target seat index
-    const targetSeatIndex = lab.seats.findIndex(
-      (s) => s.col === column.toUpperCase() && s.row === row
+    // Parse opening and closing times
+    const [openingHour, openingMinute] = daySchedule.opening
+      .split(":")
+      .map(Number);
+    const [closingHour, closingMinute] = daySchedule.closing
+      .split(":")
+      .map(Number);
+
+    // Create Date objects for opening and closing times
+    const openingTime = new Date(newStartTime);
+    openingTime.setHours(openingHour, openingMinute, 0, 0);
+
+    const closingTime = new Date(newStartTime);
+    closingTime.setHours(closingHour, closingMinute, 0, 0);
+
+    // Validate against operating hours
+    if (newStartTime < openingTime || newEndTime > closingTime) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        error: "Reservation outside lab hours",
+        details: {
+          day: reservationDay,
+          lab_hours: `${daySchedule.opening} - ${daySchedule.closing}`,
+          requested_time: `${time_start} - ${newEndTime.toTimeString().slice(0, 5)}`,
+        },
+      });
+    }
+
+    const newSeat = seats[0];
+
+    // Parse seat position
+    const seatMatch = newSeat.match(/^([A-Z])(\d+)$/);
+    if (!seatMatch) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid seat format" });
+    }
+
+    const [, newCol, newRowStr] = seatMatch;
+    const newRow = parseInt(newRowStr);
+
+    // Find current seat in old lab
+    const oldLab = await Labs.findById(existingReservation.lab_id).session(
+      session
     );
+    let currentSeat = null;
+    let currentSeatIndex = -1;
 
+    if (oldLab) {
+      currentSeatIndex = oldLab.seats.findIndex((seat) =>
+        seat.reservations.some((resId) => resId.toString() === reservationId)
+      );
+
+      if (currentSeatIndex !== -1) {
+        currentSeat = `${oldLab.seats[currentSeatIndex].col}${oldLab.seats[currentSeatIndex].row}`;
+      }
+    }
+
+    // Check if we're moving to a different lab or seat
+    const isLabChange = existingReservation.lab_id.toString() !== lab_id;
+    const isSeatChange = currentSeat !== newSeat;
+
+    if (isLabChange || isSeatChange) {
+      // Remove from old lab/seat first
+      if (oldLab && currentSeatIndex !== -1) {
+        oldLab.seats[currentSeatIndex].reservations = oldLab.seats[
+          currentSeatIndex
+        ].reservations.filter((r) => r.toString() !== reservationId);
+        await oldLab.save({ session });
+      }
+    }
+
+    // Find target seat
+    const targetSeatIndex = targetLab.seats.findIndex(
+      (s) => s.col === newCol && s.row === newRow
+    );
     if (targetSeatIndex === -1) {
       await session.abortTransaction();
       session.endSession();
@@ -1250,75 +1343,81 @@ app.put("/reservations/:id", async (req, res) => {
         .json({ error: `Seat ${newSeat} not found in lab` });
     }
 
-    // Check for time conflicts in target seat (excluding current reservation)
+    // Check for time conflicts (excluding current reservation)
     const conflictingReservations = await Reservations.find({
       _id: { $ne: reservationId },
-      lab_id: existingReservation.lab_id,
-      $or: [
-        {
-          time_in: { $lt: newEndTime },
-          time_out: { $gt: newStartTime },
-        },
-      ],
+      $or: [{ time_in: { $lt: newEndTime }, time_out: { $gt: newStartTime } }],
+      lab_id,
+      status: { $in: ["Confirmed", "Ongoing"] },
     }).session(session);
 
-    const targetSeat = lab.seats[targetSeatIndex];
-    const hasConflict = conflictingReservations.some((conflict) =>
-      targetSeat.reservations.some((resId) => resId.equals(conflict._id))
+    // Check if any conflicting reservations are in the target seat
+    const targetSeat = targetLab.seats[targetSeatIndex];
+    const seatConflicts = conflictingReservations.filter((conflict) =>
+      targetSeat.reservations.some(
+        (resId) => resId.toString() === conflict._id.toString()
+      )
     );
 
-    if (hasConflict) {
+    if (seatConflicts.length > 0) {
       await session.abortTransaction();
       session.endSession();
       return res.status(409).json({
         error: "Seat is already reserved for the selected time",
-        conflicting_times: conflictingReservations.map((c) => ({
+        conflicting_times: seatConflicts.map((c) => ({
           from: c.time_in,
           to: c.time_out,
-          seat: `${targetSeat.col}${targetSeat.row}`,
         })),
       });
     }
 
-    // Update reservation times
+    // Update the reservation
     existingReservation.time_in = newStartTime;
     existingReservation.time_out = newEndTime;
+    existingReservation.lab_id = lab_id;
+    existingReservation.isAnonymous = isAnonymous || false;
+
     await existingReservation.save({ session });
 
-    // Handle seat change if needed
-    if (currentSeatIndex !== targetSeatIndex) {
-      // Remove from old seat
-      if (currentSeatIndex !== -1) {
-        lab.seats[currentSeatIndex].reservations = lab.seats[
-          currentSeatIndex
-        ].reservations.filter((r) => r.toString() !== reservationId);
+    // Add to new seat if it changed
+    if (isLabChange || isSeatChange) {
+      if (
+        !targetLab.seats[targetSeatIndex].reservations.includes(reservationId)
+      ) {
+        targetLab.seats[targetSeatIndex].reservations.push(reservationId);
+        await targetLab.save({ session });
       }
-
-      // Add to new seat
-      if (!targetSeat.reservations.some((r) => r.equals(reservationId))) {
-        targetSeat.reservations.push(existingReservation._id);
-      }
-      await lab.save({ session });
     }
 
     await session.commitTransaction();
     session.endSession();
 
-    // Return updated reservation
+    // Populate and return the updated reservation
     const updatedReservation = await Reservations.findById(reservationId)
       .populate("user_id", "name email")
       .populate("lab_id", "lab_name");
 
     res.json({
       ...updatedReservation.toObject(),
+      duration_hours: roundedHours,
       seat: newSeat,
-      rounded_start: newStartTime,
-      rounded_end: newEndTime,
+      schedule_info: {
+        day: reservationDay,
+        opening_time: daySchedule.opening,
+        closing_time: daySchedule.closing,
+      },
     });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
     console.error("Error updating reservation:", error);
+
+    if (error.name === "VersionError") {
+      return res.status(409).json({
+        error: "Update conflict detected. Please try again.",
+        retryable: true,
+      });
+    }
 
     res.status(500).json({
       error: "Internal server error",
