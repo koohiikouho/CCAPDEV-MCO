@@ -394,7 +394,9 @@ app.get("/available-seats/:labId", async (req, res) => {
     const startDateTime = new Date(`${date}T${time_in}:00`);
     const endDateTime = new Date(`${date}T${time_out}:00`);
 
-    console.log(`[DEBUG] Available seats query: lab=${labId}, exclude=${exclude_reservation}`);
+    console.log(
+      `[DEBUG] Available seats query: lab=${labId}, exclude=${exclude_reservation}`
+    );
 
     // Build match criteria for reservations
     const reservationMatch = {
@@ -407,8 +409,13 @@ app.get("/available-seats/:labId", async (req, res) => {
     };
 
     // Exclude specific reservation if provided
-    if (exclude_reservation && mongoose.Types.ObjectId.isValid(exclude_reservation)) {
-      reservationMatch._id = { $ne: new mongoose.Types.ObjectId(exclude_reservation) };
+    if (
+      exclude_reservation &&
+      mongoose.Types.ObjectId.isValid(exclude_reservation)
+    ) {
+      reservationMatch._id = {
+        $ne: new mongoose.Types.ObjectId(exclude_reservation),
+      };
       console.log(`[DEBUG] Excluding reservation: ${exclude_reservation}`);
     }
 
@@ -425,7 +432,9 @@ app.get("/available-seats/:labId", async (req, res) => {
       return !seat.reservations || seat.reservations.length === 0;
     });
 
-    console.log(`[DEBUG] Found ${availableSeats.length} available seats out of ${lab.seats.length} total`);
+    console.log(
+      `[DEBUG] Found ${availableSeats.length} available seats out of ${lab.seats.length} total`
+    );
 
     const response = {
       lab_id: labId,
@@ -519,26 +528,31 @@ app.get("/user-reservations", async (req, res) => {
 
     const labs = await Labs.find()
       .populate({
-        path: 'seats.reservations',
+        path: "seats.reservations",
         populate: {
-          path: 'user_id',
-          select: 'name email'
-        }
+          path: "user_id",
+          select: "name email",
+        },
       })
       .exec();
 
     const userReservations = [];
 
-    labs.forEach(lab => {
-      lab.seats.forEach(seat => {
-        seat.reservations.forEach(reservation => {
-          if (reservation.user_id && reservation.user_id._id.toString() === userId) {
-            console.log(`[DEBUG] Found reservation ${reservation._id} in seat ${seat.col}${seat.row}`);
+    labs.forEach((lab) => {
+      lab.seats.forEach((seat) => {
+        seat.reservations.forEach((reservation) => {
+          if (
+            reservation.user_id &&
+            reservation.user_id._id.toString() === userId
+          ) {
+            console.log(
+              `[DEBUG] Found reservation ${reservation._id} in seat ${seat.col}${seat.row}`
+            );
             userReservations.push({
               _id: reservation._id,
               lab_id: {
                 _id: lab._id,
-                lab_name: lab.lab_name
+                lab_name: lab.lab_name,
               },
               user_id: reservation.user_id,
               time_in: reservation.time_in,
@@ -555,7 +569,10 @@ app.get("/user-reservations", async (req, res) => {
     });
 
     console.log(`[DEBUG] Returning ${userReservations.length} reservations`);
-    console.log(`[DEBUG] Sample reservation seats:`, userReservations.slice(0, 3).map(r => ({ id: r._id, seat: r.seat })));
+    console.log(
+      `[DEBUG] Sample reservation seats:`,
+      userReservations.slice(0, 3).map((r) => ({ id: r._id, seat: r.seat }))
+    );
 
     res.status(200).json(userReservations);
   } catch (err) {
@@ -849,7 +866,7 @@ app.put("/users/me", async (req, res) => {
   }
 });
 
-app.delete('/users/me', async (req, res) => {
+app.delete("/users/me", async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -867,7 +884,9 @@ app.delete('/users/me', async (req, res) => {
     }
 
     if (password !== user.password) {
-      return res.status(401).json({ message: "Incorrect password. Please try again." });
+      return res
+        .status(401)
+        .json({ message: "Incorrect password. Please try again." });
     }
 
     await Users.findByIdAndDelete(userId);
@@ -1166,194 +1185,232 @@ app.patch("/reservations/:id", async (req, res) => {
 
     res.status(200).json({
       message: "Reservation updated successfully",
-      reservation
+      reservation,
     });
   } catch (err) {
     console.error("Error updating reservation:", err);
     res.status(500).json({
       error: "Error updating reservation",
-      details: err.message
+      details: err.message,
     });
   }
 });
 
 // PUT /reservations/:id - Update reservation with proper transaction handling
-app.put('/reservations/:id', authenticateJWT, async (req, res) => {
+app.put("/reservations/:id", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
-    console.log(`[DEBUG] Updating reservation ${req.params.id} with data:`, req.body);
-    
+    console.log(
+      `[DEBUG] Updating reservation ${req.params.id} with data:`,
+      req.body
+    );
+
     const { date, time_start, hours, lab_id, seats, isAnonymous } = req.body;
     const reservationId = req.params.id;
-    
+
     // Validate required fields
-    if (!date || !time_start || !hours || !lab_id || !seats || !Array.isArray(seats) || seats.length === 0) {
+    if (
+      !date ||
+      !time_start ||
+      !hours ||
+      !lab_id ||
+      !seats ||
+      !Array.isArray(seats) ||
+      seats.length === 0
+    ) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({ error: "Missing required fields" });
     }
-    
+
     // Find the existing reservation
-    const existingReservation = await Reservations.findById(reservationId).session(session);
+    const existingReservation =
+      await Reservations.findById(reservationId).session(session);
     if (!existingReservation) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ error: 'Reservation not found' });
+      return res.status(404).json({ error: "Reservation not found" });
     }
-    
+
     // Check if user owns this reservation
     if (existingReservation.user_id.toString() !== req.user.id) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(403).json({ error: 'Unauthorized to update this reservation' });
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to update this reservation" });
     }
-    
-    console.log(`[DEBUG] Found existing reservation in lab:`, existingReservation.lab_id);
-    
+
+    console.log(
+      `[DEBUG] Found existing reservation in lab:`,
+      existingReservation.lab_id
+    );
+
     // Create new time objects
     const newStartTime = new Date(`${date}T${time_start}:00`);
-    const newEndTime = new Date(newStartTime.getTime() + (hours * 60 * 60 * 1000));
+    const newEndTime = new Date(
+      newStartTime.getTime() + hours * 60 * 60 * 1000
+    );
     const newSeat = seats[0];
     const newLabId = lab_id;
-    
-    console.log(`[DEBUG] Parsed values - newSeat: ${newSeat}, newLabId: ${newLabId}`);
-    
+
+    console.log(
+      `[DEBUG] Parsed values - newSeat: ${newSeat}, newLabId: ${newLabId}`
+    );
+
     // Parse seat position
     const seatMatch = newSeat.match(/^([A-Z])(\d+)$/);
     if (!seatMatch) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ error: 'Invalid seat format' });
+      return res.status(400).json({ error: "Invalid seat format" });
     }
-    
+
     const [, newCol, newRowStr] = seatMatch;
     const newRow = parseInt(newRowStr);
-    
-    console.log(`[DEBUG] Looking for seat col: ${newCol}, row: ${newRow} in lab ${newLabId}`);
-    
+
+    console.log(
+      `[DEBUG] Looking for seat col: ${newCol}, row: ${newRow} in lab ${newLabId}`
+    );
+
     // Find current seat in old lab (since reservation doesn't store seat directly)
-    const oldLab = await Labs.findById(existingReservation.lab_id).session(session);
+    const oldLab = await Labs.findById(existingReservation.lab_id).session(
+      session
+    );
     let currentSeat = null;
     let currentSeatIndex = -1;
-    
+
     if (oldLab) {
-      currentSeatIndex = oldLab.seats.findIndex(seat => 
-        seat.reservations.some(resId => resId.toString() === reservationId)
+      currentSeatIndex = oldLab.seats.findIndex((seat) =>
+        seat.reservations.some((resId) => resId.toString() === reservationId)
       );
-      
+
       if (currentSeatIndex !== -1) {
         currentSeat = `${oldLab.seats[currentSeatIndex].col}${oldLab.seats[currentSeatIndex].row}`;
         console.log(`[DEBUG] Found current seat: ${currentSeat}`);
       }
     }
-    
+
     // Check if we're moving to a different lab or seat
     const isLabChange = existingReservation.lab_id.toString() !== newLabId;
     const isSeatChange = currentSeat !== newSeat;
-    
+
     if (isLabChange || isSeatChange) {
       // Remove from old lab/seat first
-      console.log(`[DEBUG] Removing reservation ${reservationId} from old lab seats`);
-      
+      console.log(
+        `[DEBUG] Removing reservation ${reservationId} from old lab seats`
+      );
+
       if (oldLab && currentSeatIndex !== -1) {
         // Remove from old seat
-        oldLab.seats[currentSeatIndex].reservations = oldLab.seats[currentSeatIndex].reservations.filter(
-          r => r.toString() !== reservationId
-        );
+        oldLab.seats[currentSeatIndex].reservations = oldLab.seats[
+          currentSeatIndex
+        ].reservations.filter((r) => r.toString() !== reservationId);
         await oldLab.save({ session });
         console.log(`[DEBUG] Removed reservation from old seat ${currentSeat}`);
       }
     }
-    
+
     // Find target lab and seat
     const targetLab = await Labs.findById(newLabId).session(session);
     if (!targetLab) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ error: 'Lab not found' });
+      return res.status(404).json({ error: "Lab not found" });
     }
-    
+
     // Find target seat using col and row
-    const targetSeatIndex = targetLab.seats.findIndex(s => s.col === newCol && s.row === newRow);
+    const targetSeatIndex = targetLab.seats.findIndex(
+      (s) => s.col === newCol && s.row === newRow
+    );
     if (targetSeatIndex === -1) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ error: `Seat ${newSeat} not found in lab` });
+      return res
+        .status(404)
+        .json({ error: `Seat ${newSeat} not found in lab` });
     }
-    
-    console.log(`[DEBUG] Found target seat: ${newSeat} at index ${targetSeatIndex}`);
-    
+
+    console.log(
+      `[DEBUG] Found target seat: ${newSeat} at index ${targetSeatIndex}`
+    );
+
     // Check for conflicts (excluding current reservation)
     const conflictingReservations = await Reservations.find({
       _id: { $ne: reservationId },
       $or: [
         {
           time_in: { $lt: newEndTime },
-          time_out: { $gt: newStartTime }
-        }
+          time_out: { $gt: newStartTime },
+        },
       ],
       lab_id: newLabId,
-      status: { $in: ['Confirmed', 'Ongoing'] }
+      status: { $in: ["Confirmed", "Ongoing"] },
     }).session(session);
-    
+
     // Check if any conflicting reservations are in the target seat
     const targetSeat = targetLab.seats[targetSeatIndex];
-    const seatConflicts = conflictingReservations.filter(conflict =>
-      targetSeat.reservations.some(resId => resId.toString() === conflict._id.toString())
+    const seatConflicts = conflictingReservations.filter((conflict) =>
+      targetSeat.reservations.some(
+        (resId) => resId.toString() === conflict._id.toString()
+      )
     );
-    
+
     if (seatConflicts.length > 0) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(409).json({ error: 'Seat is already reserved for the selected time' });
+      return res
+        .status(409)
+        .json({ error: "Seat is already reserved for the selected time" });
     }
-    
+
     // Update the reservation
     existingReservation.time_in = newStartTime;
     existingReservation.time_out = newEndTime;
     existingReservation.lab_id = newLabId;
     existingReservation.isAnonymous = isAnonymous || false;
-    
+
     await existingReservation.save({ session });
     console.log(`[DEBUG] Updated reservation document`);
-    
+
     // Add to new seat if it changed
     if (isLabChange || isSeatChange) {
-      if (!targetLab.seats[targetSeatIndex].reservations.includes(reservationId)) {
+      if (
+        !targetLab.seats[targetSeatIndex].reservations.includes(reservationId)
+      ) {
         targetLab.seats[targetSeatIndex].reservations.push(reservationId);
         await targetLab.save({ session });
         console.log(`[DEBUG] Added reservation to new seat ${newSeat}`);
       }
     }
-    
+
     // Commit the transaction
     await session.commitTransaction();
     session.endSession();
-    
+
     // Populate and return the updated reservation
     const updatedReservation = await Reservations.findById(reservationId)
-      .populate('user_id', 'first_name last_name email')
-      .populate('lab_id', 'lab_name');
-    
+      .populate("user_id", "first_name last_name email")
+      .populate("lab_id", "lab_name");
+
     console.log(`[DEBUG] Successfully updated reservation ${reservationId}`);
     res.json(updatedReservation);
-    
   } catch (error) {
-    console.error('Error updating reservation:', error);
+    console.error("Error updating reservation:", error);
     await session.abortTransaction();
     session.endSession();
-    
-    if (error.name === 'VersionError') {
-      console.log('[DEBUG] Version conflict detected, retrying...');
-      return res.status(409).json({ 
-        error: 'Update conflict detected. Please try again.',
-        retryable: true 
+
+    if (error.name === "VersionError") {
+      console.log("[DEBUG] Version conflict detected, retrying...");
+      return res.status(409).json({
+        error: "Update conflict detected. Please try again.",
+        retryable: true,
       });
     }
-    
-    res.status(500).json({ error: 'Internal server error' });
+
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1520,7 +1577,9 @@ app.get("/suggestions", async (req, res) => {
   try {
     console.log("Querying the database with Suggestions.find()...");
     const suggestions = await Suggestions.find().exec();
-    console.log(`Database query finished. Found ${suggestions.length} documents.`);
+    console.log(
+      `Database query finished. Found ${suggestions.length} documents.`
+    );
 
     res.status(200).json(suggestions);
     console.log("Successfully sent JSON response.");
@@ -1532,20 +1591,18 @@ app.get("/suggestions", async (req, res) => {
 
 app.post("/users/suggestions", async (req, res) => {
   console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] POST /users/suggestions`
-  );
+  console.log(`[${new Date().toLocaleTimeString()}] POST /users/suggestions`);
 
   try {
     const newSuggestion = await Suggestions.create({
       email: req.body.email,
       subject: req.body.subject,
-      message: req.body.message
-    })
+      message: req.body.message,
+    });
     console.log("New suggestion sent:");
     res.status(201).json({ message: "Suggestion submitted successfully." });
-  } catch(err) {
+  } catch (err) {
     console.error("Suggestion error:", err);
     res.status(500).json({ message: "Internal server error." });
   }
-})
+});
