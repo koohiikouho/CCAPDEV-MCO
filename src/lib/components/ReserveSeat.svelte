@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio, Modal } from "flowbite-svelte";
+    import { Label, Datepicker, Timepicker, Button, Accordion, AccordionItem, Avatar, Input, Range, Radio, Modal, select } from "flowbite-svelte";
     import { CalendarMonthSolid, ClockSolid, MapPinSolid, TheatreOutline, UserCircleOutline } from "flowbite-svelte-icons";
     import axios from 'axios';
     let {userName = "Unknown", id = "Unknown", schedule, labCode} = $props();
@@ -19,49 +19,64 @@
       isAnonymousVar = false;
     }
 
-function timeIntervalFunc(opening, closing) {
-  // Helper function to parse time string (e.g., "7:30", "15:00") into minutes
-  function parseTime(timeStr) {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + minutes;
-  }
-
-  // Helper function to format minutes back to time string
-  function formatTime(totalMinutes) {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
-  }
-
-  // Get current time in minutes
-  function getCurrentTimeInMinutes() {
-    const now = new Date();
-    return now.getHours() * 60 + now.getMinutes();
-  }
-
-  // Convert opening and closing times to minutes
-  const openingMinutes = parseTime(opening);
-  const closingMinutes = parseTime(closing);
-  const currentMinutes = getCurrentTimeInMinutes();
-
-  // Generate array of time intervals
-  const intervals = [];
-  
-  // Start from opening time and add 30-minute intervals until closing time
-  for (let time = openingMinutes; time <= closingMinutes; time += 30) {
-    // Only add intervals that are current time or later
-    if (time >= currentMinutes) {
-      intervals.push(formatTime(time));
+  function timeIntervalFunc(opening, closing, date = null) {
+    // Helper function to parse time string (e.g., "7:30", "15:00") into minutes
+    function parseTime(timeStr) {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
     }
+
+    // Helper function to format minutes back to time string
+    function formatTime(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    // Get current time in minutes
+    function getCurrentTimeInMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    // Check if the provided date is today
+    function isToday(dateStr) {
+      if (!dateStr) return true; // If no date provided, assume today
+      
+      const today = new Date();
+      const providedDate = new Date(dateStr);
+      
+      return today.getFullYear() === providedDate.getFullYear() &&
+            today.getMonth() === providedDate.getMonth() &&
+            today.getDate() === providedDate.getDate();
+    }
+
+    // Convert opening and closing times to minutes
+    const openingMinutes = parseTime(opening);
+    const closingMinutes = parseTime(closing);
+    const currentMinutes = getCurrentTimeInMinutes();
+    const checkCurrentTime = isToday(date);
+
+    // Generate array of time intervals
+    const intervals = [];
+    
+    // Start from opening time and add 30-minute intervals until closing time
+    for (let time = openingMinutes; time <= closingMinutes; time += 30) {
+      // Only filter by current time if the date is today
+      if (!checkCurrentTime || time >= currentMinutes) {
+        intervals.push(formatTime(time));
+      }
+    }
+    
+    // Remove the last interval (closing time)
+    intervals.pop();
+    
+    return intervals;
   }
-  
-  // Remove the last interval (closing time)
-  intervals.pop();
-  
-  return intervals;
-}
+
+
   let selectedInlineTime = $derived({ time: "12:00" });
-  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing) );
+  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing, selectedDate) );
 
   
 

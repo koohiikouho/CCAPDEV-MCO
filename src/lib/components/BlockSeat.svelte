@@ -7,9 +7,9 @@
     let paginationData = studentData;
 
 
-    let selectedDate = $state(new Date("2024-06-30"));
+    let selectedDate = $state(new Date());
     let idNumberVar = $state("");
-
+    let availableFrom = new Date();
 
 
     let eventDuration = $state("0.5");
@@ -25,38 +25,64 @@
       isAnonymousVar = false;
     }
 
-  function timeIntervalFunc(opening, closing) {
-
+  function timeIntervalFunc(opening, closing, date = null) {
     // Helper function to parse time string (e.g., "7:30", "15:00") into minutes
     function parseTime(timeStr) {
       const [hours, minutes] = timeStr.split(':').map(Number);
       return hours * 60 + minutes;
     }
-    
+
     // Helper function to format minutes back to time string
     function formatTime(totalMinutes) {
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
       return `${hours}:${minutes.toString().padStart(2, '0')}`;
     }
-    
+
+    // Get current time in minutes
+    function getCurrentTimeInMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    // Check if the provided date is today
+    function isToday(dateStr) {
+      if (!dateStr) return true; // If no date provided, assume today
+      
+      const today = new Date();
+      const providedDate = new Date(dateStr);
+      
+      return today.getFullYear() === providedDate.getFullYear() &&
+            today.getMonth() === providedDate.getMonth() &&
+            today.getDate() === providedDate.getDate();
+    }
+
     // Convert opening and closing times to minutes
     const openingMinutes = parseTime(opening);
     const closingMinutes = parseTime(closing);
-    
+    const currentMinutes = getCurrentTimeInMinutes();
+    const checkCurrentTime = isToday(date);
+
     // Generate array of time intervals
     const intervals = [];
     
     // Start from opening time and add 30-minute intervals until closing time
     for (let time = openingMinutes; time <= closingMinutes; time += 30) {
-      intervals.push(formatTime(time));
+      // Only filter by current time if the date is today
+      if (!checkCurrentTime || time >= currentMinutes) {
+        intervals.push(formatTime(time));
+      }
     }
     
+    // Remove the last interval (closing time)
     intervals.pop();
+    
     return intervals;
   }
+
+  
   let selectedInlineTime = $derived({ time: "12:00" });
-  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing) );
+  let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing, selectedDate) );
 
   
 
@@ -180,7 +206,7 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label class="mb-2">Select Date</Label>
-            <Datepicker bind:value={selectedDate} inline />
+            <Datepicker bind:value={selectedDate} {availableFrom} inline />
           </div>
           <div>
             <Label class="mb-2">Select Time</Label>
