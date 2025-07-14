@@ -28,7 +28,7 @@
   let isLoggedIn: boolean = $state(false);
 
   onMount(async () => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (token) {
       console.log('Token found');
 
@@ -109,6 +109,8 @@
 
     localStorage.removeItem('accessToken');
     localStorage.clear();
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.clear();
 
     window.location.href = "/src/routes/login/login.html";
   }
