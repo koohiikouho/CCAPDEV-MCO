@@ -253,10 +253,20 @@ app.post("/users/signup", async (req, res) => {
     `[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`
   );
 
-  const existingUser = await Users.findOne({ email: req.body.email });
-  if (existingUser) {
+  // Check if ID number is already used
+  const existingID = await Users.findOne({ id_number: req.body.idNumber });
+  if (existingID) {
+    console.log("!! ID number is already in use");
+    return res.status(409).json({ error: "ID number already in use." });
+  }
+
+  // Check if email is already used
+  const existingEmail = await Users.findOne({ email: req.body.email });
+  if (existingEmail) {
+    console.log("!! Email is already in use");
     return res.status(409).json({ error: "Email already in use." });
   }
+
   try {
     const fullName = `${req.body.firstName} ${req.body.lastName}`;
     const newUser = await Users.create({
