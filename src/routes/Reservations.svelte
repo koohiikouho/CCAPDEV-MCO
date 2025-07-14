@@ -13,6 +13,54 @@
   let selectedReservationId = null;
   let successMessage = "";
 
+  let editing = null; 
+  let editDate = "";
+  let editStart = "";
+  let editHours = 1;
+  let editSeats = "";
+
+  function mapToCard(r) {
+    return {
+      id: r._id,
+      labName: r.lab_id?.lab_name || "Unknown Lab",
+      date: new Date(r.time_in).toLocaleDateString(),
+      time: new Date(r.time_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      duration: formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime()),
+      seat: r.seat || "N/A",
+      status: r.status.charAt(0).toUpperCase() + r.status.slice(1),
+      createdOn: new Date(r.createdAt).toLocaleString(),
+    };
+  }
+
+  async function saveEdit() {
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    const payload = {
+      date: editDate,
+      time_start: editStart,
+      hours: editHours,
+      seats: editSeats.split(",").map(s => s.trim()).filter(Boolean)
+    };
+
+    const res  = await fetch(`http://localhost:3000/reservations/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const { reservation } = await res.json();
+      reservations = reservations.map(r => r.id === reservation._id
+        ? { ...r, ...mapToCard(reservation) }
+        : r);
+      successMessage = "Reservation updated.";
+      editing = null;
+    } else {
+      const err = await res.json();
+      alert(err.error || "Update failed");
+    }
+  }
+
+
   function confirmCancel(id: string) {
     selectedReservationId = id;
     showDeleteModal = true;
@@ -28,17 +76,6 @@
     }
   }
 
-  function cancelReservation(id) {
-    reservations = reservations.map(res => 
-      res.id === id ? {...res, status: 'Cancelled'} : res
-    );
-  }
-
-  function editReservation(id) {
-    // Implement edit functionality
-    console.log('Edit reservation:', id);
-  }
-
   function formatDuration(ms: number): string {
     const totalMinutes = Math.round(ms / 60000);
     const hours = Math.floor(totalMinutes / 60);
@@ -47,6 +84,18 @@
     if (hours > 0) return `${hours}h`;
     return `${minutes}m`;
   }
+
+  function editReservation(id: string) {
+    const r = reservations.find(res => res.id === id);
+    if (!r) return;
+
+    editing = r;                               // opens the modal
+    editDate  = r.rawStart.slice(0, 10);        // "YYYY‑MM‑DD"
+    editStart = r.rawStart.slice(11, 16);       // "HH:MM"
+    editHours = (new Date(r.rawEnd).getTime() - new Date(r.rawStart).getTime()) / 3.6e6;
+    editSeats = r.rawSeats.join(", ");
+  }
+
 
   async function deleteReservation() {
     if (!selectedReservationId) return;
@@ -79,7 +128,6 @@
     }
   }
 
-
   onMount(async () => {
     const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
     if (!token) return console.error("No access token found");
@@ -100,20 +148,20 @@
 
       reservations = all
         .filter(r => String(r.user_id?._id || r.user_id) === currentUser._id)
-        .map((r, index) => ({
+        .map(r => ({
           id: r._id,
           labName: r.lab_id?.lab_name || "Unknown Lab",
           date: new Date(r.time_in).toLocaleDateString(),
           time: new Date(r.time_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          duration:
-            r.time_in && r.time_out &&
-            new Date(r.time_out).getTime() > new Date(r.time_in).getTime()
-              ? formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime())
-              : "Invalid time",
-          seat: r.seat || "N/A",
+          duration: formatDuration(new Date(r.time_out).getTime() - new Date(r.time_in).getTime()),
+          seat: Array.isArray(r.seat) ? r.seat.join(", ") : r.seat || "N/A",
           status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "Unknown",
           createdOn: new Date(r.createdAt).toLocaleString(),
+          rawStart : r.time_in,
+          rawEnd   : r.time_out,
+          rawSeats : Array.isArray(r.seat) ? r.seat : (r.seat ? r.seat.split(",") : []),
         }));
+
     } catch (err) {
       console.error("Error loading profile:", err);
     }
@@ -213,14 +261,60 @@
     </div>
 
     {#if showDeleteModal}
-      <div class="fixed inset-0 flex justify-center items-center z-50">
-        <div class="bg-white border border-surface-200 shadow-xl rounded-xl p-8 max-w-md w-full text-center">
+      <div class="fixed inset-0 z-50 flex justify-center items-center">
+        <!-- BACKDROP LAYER -->
+        <div class="absolute inset-0 bg-surface-900/10 backdrop-blur-sm"></div>
+
+        <!-- MODAL BOX -->
+        <div class="relative bg-white border border-surface-200 shadow-xl rounded-xl p-8 max-w-md w-full text-center">
           <h2 class="text-2xl font-semibold text-surface-800 mb-4">Cancel Reservation?</h2>
-          <p class="text-surface-600 mb-6">This action cannot be undone. Are you sure you want to cancel this reservation?</p>
+          <p class="text-surface-600 mb-6">
+            This action cannot be undone. Are you sure you want to cancel this reservation?
+          </p>
           <div class="flex justify-center gap-4">
             <Button color="red" class="px-6" onclick={deleteReservation}>Yes, Cancel</Button>
             <Button color="alternative" class="px-6" onclick={() => showDeleteModal = false}>No, Go Back</Button>
           </div>
+        </div>
+      </div>
+    {/if}
+
+
+    {#if editing}
+      <div class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-surface-900/10 backdrop-blur-sm"></div>
+
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg p-8">
+          <h2 class="text-2xl font-semibold text-surface-800 mb-6">Edit Reservation</h2>
+
+          <form class="space-y-5" on:submit|preventDefault={saveEdit}>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label for="edit-date" class="block text-sm font-medium text-surface-700">Date</label>
+                <input id="edit-date" type="date" bind:value={editDate} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
+              </div>
+
+              <div class="space-y-1">
+                <label for="edit-time" class="block text-sm font-medium text-surface-700">Start&nbsp;time</label>
+                <input id="edit-time" type="time" bind:value={editStart} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="edit-hours" class="block text-sm font-medium text-surface-700">Duration&nbsp;(hours)</label>
+              <input id="edit-hours" type="number" min="1" bind:value={editHours} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" required />
+            </div>
+
+            <div class="space-y-1">
+              <label for="edit-seats" class="block text-sm font-medium text-surface-700">Seat(s)&nbsp;(comma‑separated)</label>
+              <input id="edit-seats" type="text" bind:value={editSeats} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" />
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <Button type="button" color="alternative" onclick={() => editing = null}>Cancel</Button>
+              <Button type="submit" color="primary">Save</Button>
+            </div>
+          </form>
         </div>
       </div>
     {/if}

@@ -866,6 +866,99 @@ app.put("/users/me", async (req, res) => {
   }
 });
 
+app.patch("/reservations/:id", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid reservation ID");
+    }
+
+    const reservation = await Reservations.findById(id)
+      .populate("lab_id")
+      .session(session);
+    if (!reservation) throw new Error("Reservation not found");
+
+    const lab = reservation.lab_id;
+
+
+    const {
+      date,     
+      time_start,   
+      hours, 
+      seats 
+    } = req.body;
+
+    let nextStart = reservation.time_in;
+    let nextEnd   = reservation.time_out;
+    if (date || time_start || hours) {
+      if (!date || !time_start || !hours)
+        throw new Error("date, time_start and hours must travel together");
+
+      nextStart = new Date(`${date}T${time_start}:00`);
+      nextEnd   = new Date(nextStart);
+      nextEnd.setMinutes(nextEnd.getMinutes() + hours * 60);
+    }
+
+    const nextSeats = seats
+      ? seats.map(s => s[0].toUpperCase() + s.slice(1))
+      : null;
+
+    if (["Completed", "Cancelled"].includes(reservation.status)) {
+      throw new Error("Cannot edit a completed / cancelled reservation");
+    }
+
+    const conflicting = await Reservations.find({
+      _id: { $ne: reservation._id },
+      lab_id: lab._id,
+      $or: [
+        { time_in: { $lt: nextEnd }, time_out: { $gt: nextStart } }
+      ]
+    }).session(session);
+
+    if (nextSeats) {
+      const seatIdSet = new Set(nextSeats);
+      for (const res of conflicting) {
+        const seatHit = lab.seats.some(seat =>
+          seatIdSet.has(`${seat.col}${seat.row}`) &&
+          seat.reservations.some(rId => rId.equals(res._id))
+        );
+        if (seatHit) {
+          throw new Error("Time conflict on one or more chosen seats");
+        }
+      }
+    }
+
+    if (nextSeats) {
+      lab.seats.forEach(s => {
+        s.reservations = s.reservations.filter(rId => !rId.equals(reservation._id));
+      });
+      lab.seats.forEach(s => {
+        if (nextSeats.includes(`${s.col}${s.row}`)) {
+          s.reservations.push(reservation._id);
+        }
+      });
+    }
+
+    reservation.time_in = nextStart;
+    reservation.time_out = nextEnd;
+    if (nextSeats) reservation.seat = nextSeats.join(",");
+
+    await reservation.save({ session });
+    await lab.save({ session });
+
+    await session.commitTransaction();
+    res.json({ message: "Reservation updated", reservation });
+  } catch (err) {
+    await session.abortTransaction();
+    res.status(400).json({ error: err.message });
+  } finally {
+    session.endSession();
+  }
+});
+
+
 app.delete("/users/me", async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
