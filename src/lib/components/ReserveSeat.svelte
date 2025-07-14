@@ -19,36 +19,47 @@
       isAnonymousVar = false;
     }
 
-  function timeIntervalFunc(opening, closing) {
+function timeIntervalFunc(opening, closing) {
+  // Helper function to parse time string (e.g., "7:30", "15:00") into minutes
+  function parseTime(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
 
-    // Helper function to parse time string (e.g., "7:30", "15:00") into minutes
-    function parseTime(timeStr) {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours * 60 + minutes;
-    }
-    
-    // Helper function to format minutes back to time string
-    function formatTime(totalMinutes) {
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      return `${hours}:${minutes.toString().padStart(2, '0')}`;
-    }
-    
-    // Convert opening and closing times to minutes
-    const openingMinutes = parseTime(opening);
-    const closingMinutes = parseTime(closing);
-    
-    // Generate array of time intervals
-    const intervals = [];
-    
-    // Start from opening time and add 30-minute intervals until closing time
-    for (let time = openingMinutes; time <= closingMinutes; time += 30) {
+  // Helper function to format minutes back to time string
+  function formatTime(totalMinutes) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  // Get current time in minutes
+  function getCurrentTimeInMinutes() {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
+  // Convert opening and closing times to minutes
+  const openingMinutes = parseTime(opening);
+  const closingMinutes = parseTime(closing);
+  const currentMinutes = getCurrentTimeInMinutes();
+
+  // Generate array of time intervals
+  const intervals = [];
+  
+  // Start from opening time and add 30-minute intervals until closing time
+  for (let time = openingMinutes; time <= closingMinutes; time += 30) {
+    // Only add intervals that are current time or later
+    if (time >= currentMinutes) {
       intervals.push(formatTime(time));
     }
-    
-    intervals.pop();
-    return intervals;
   }
+  
+  // Remove the last interval (closing time)
+  intervals.pop();
+  
+  return intervals;
+}
   let selectedInlineTime = $derived({ time: "12:00" });
   let timeIntervals = $derived( timeIntervalFunc(schedule[ (selectedDate.getDay() + 6) % 7].opening, schedule[(selectedDate.getDay() + 6) % 7 ].closing) );
 
@@ -137,7 +148,7 @@
     
     let failModal = $state(false);
     let successModal = $state(false);
-
+    let availableFrom = new Date();
   </script>
   
   <div class="mx-auto rounded-lg bg-white shadow-md dark:bg-gray-800">
@@ -163,7 +174,7 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label class="mb-2">Select Date</Label>
-            <Datepicker bind:value={selectedDate} inline />
+            <Datepicker bind:value={selectedDate} {availableFrom} inline />
           </div>
           <div>
             <Label class="mb-2">Select Time</Label>
