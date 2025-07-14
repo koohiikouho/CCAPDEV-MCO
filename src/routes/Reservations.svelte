@@ -552,6 +552,11 @@ async function saveEdit(retryCount = 0) {
     }
   }
 </script>
+<div class="container mx-auto px-6 py-8 mt-16 bg-offwhite min-h-screen max-w-7xl">
+  <!-- DEBUG MARKER 11: Debug Panel (remove in production) -->
+  <div class="mb-4 p-4 bg-gray-100 border rounded-lg text-xs" style="display: none;">
+  <h4 class="font-bold mb-2">Debug Information:</h4>
+</div>
 
   {#if showToast}
     <div class="fixed top-4 right-4 z-50 bg-white border border-surface-200 rounded-lg shadow-lg p-4 max-w-sm">
@@ -1018,3 +1023,4 @@ async function saveEdit(retryCount = 0) {
       </div>
     </div>
   {/if}
+</div>
