@@ -73,7 +73,7 @@
 
   async function deleteUser() {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
       if (!token) throw new Error("No access token");
 
       const res = await fetch("http://localhost:3000/users/me", {
@@ -106,7 +106,7 @@
   }
 
   onMount(async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
     if (!token) return console.error("No access token found");
 
     try {
