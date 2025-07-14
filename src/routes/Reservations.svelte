@@ -473,15 +473,6 @@
     availableSeats = [];
   }
 
-  // Open create modal
-  function openCreateModal() {
-    console.log("openCreateModal called");
-    logDebugInfo("Modal Open", "Create modal opening");
-    resetNewReservation();
-    fetchLabs();
-    showCreateModal = true;
-  }
-
   // Open cancel confirmation modal
    function openCancelModal(reservation) {
     console.log("openCancelModal called with:", reservation);
@@ -755,32 +746,32 @@ async function saveEdit(retryCount = 0) {
 
 <div class="container mx-auto px-6 py-8 mt-16 bg-offwhite min-h-screen max-w-7xl">
   <!-- DEBUG MARKER 11: Debug Panel (remove in production) -->
-  <div class="mb-4 p-4 bg-gray-100 border rounded-lg text-xs">
-    <h4 class="font-bold mb-2">Debug Information:</h4>
-    <div class="grid grid-cols-2 gap-2">
-      <div><strong>User Load:</strong> {debugInfo.userLoadStatus}</div>
-      <div><strong>Reservations Load:</strong> {debugInfo.reservationLoadStatus}</div>
-      <div><strong>Auth Token:</strong> {debugInfo.authToken}</div>
-      <div><strong>Current User:</strong> {currentUser ? `${currentUser.name} (${currentUser.id})` : 'None'}</div>
-      <div><strong>Reservations Count:</strong> {reservations.length}</div>
-      <div><strong>Errors Count:</strong> {debugInfo.errors.length}</div>
-      <div class="col-span-2"><strong>Raw Reservations Count:</strong> {debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.dataLength || 'Not loaded'}</div>
-    </div>
-    {#if debugInfo.errors.length > 0}
-      <div class="mt-2">
-        <strong>Recent Errors:</strong>
-        {#each debugInfo.errors.slice(-3) as errorLog}
-          <div class="text-red-600 text-xs">[{errorLog.timestamp.slice(11, 19)}] {errorLog.stage}: {JSON.stringify(errorLog.data)}</div>
-        {/each}
-      </div>
-    {/if}
-    {#if debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')}
-      <div class="mt-2">
-        <strong>Sample Raw Reservation:</strong>
-        <div class="text-xs bg-gray-50 p-2 rounded">{JSON.stringify(debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.sampleData?.[0] || 'None', null, 2)}</div>
-      </div>
-    {/if}
+  <div class="mb-4 p-4 bg-gray-100 border rounded-lg text-xs" style="display: none;">
+  <h4 class="font-bold mb-2">Debug Information:</h4>
+  <div class="grid grid-cols-2 gap-2">
+    <div><strong>User Load:</strong> {debugInfo.userLoadStatus}</div>
+    <div><strong>Reservations Load:</strong> {debugInfo.reservationLoadStatus}</div>
+    <div><strong>Auth Token:</strong> {debugInfo.authToken}</div>
+    <div><strong>Current User:</strong> {currentUser ? `${currentUser.name} (${currentUser.id})` : 'None'}</div>
+    <div><strong>Reservations Count:</strong> {reservations.length}</div>
+    <div><strong>Errors Count:</strong> {debugInfo.errors.length}</div>
+    <div class="col-span-2"><strong>Raw Reservations Count:</strong> {debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.dataLength || 'Not loaded'}</div>
   </div>
+  {#if debugInfo.errors.length > 0}
+    <div class="mt-2">
+      <strong>Recent Errors:</strong>
+      {#each debugInfo.errors.slice(-3) as errorLog}
+        <div class="text-red-600 text-xs">[{errorLog.timestamp.slice(11, 19)}] {errorLog.stage}: {JSON.stringify(errorLog.data)}</div>
+      {/each}
+    </div>
+  {/if}
+  {#if debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')}
+    <div class="mt-2">
+      <strong>Sample Raw Reservation:</strong>
+      <div class="text-xs bg-gray-50 p-2 rounded">{JSON.stringify(debugInfo.apiResponses.find(r => r.stage === 'Reservations Raw Data')?.data?.sampleData?.[0] || 'None', null, 2)}</div>
+    </div>
+  {/if}
+</div>
 
   <!-- Toast notification -->
   {#if showToast}
@@ -820,22 +811,32 @@ async function saveEdit(retryCount = 0) {
     </Card>
   {:else}
     <div class="flex justify-between items-center mb-6 relative z-10">
-      {#if currentUser}
-        <Button color="primary" on:click={openCreateModal} class="relative z-20">
-          <PlusOutline class="w-4 h-4 mr-2" />
-          New Reservation
-        </Button>
-        <!-- TEST BUTTON -->
-        <Button color="secondary" on:click={() => alert('Test button works!')} class="relative z-20">
-          Test Click
-        </Button>
-      {:else}
-        <Button color="primary" on:click={() => window.location.href = '/login'} class="relative z-20">
-          <PlusOutline class="w-4 h-4 mr-2" />
-          Log In to Make Reservations
-        </Button>
-      {/if}
-    </div>
+  {#if currentUser}
+    <button 
+      type="button"
+      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
+      on:click={() => {
+        console.log('Button clicked - navigating to labs');
+        window.location.href = '/?view=1';
+      }}
+    >
+      <PlusOutline class="w-4 h-4 mr-2" />
+      New Reservation
+    </button>
+  {:else}
+    <button 
+      type="button"
+      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative z-20"
+      on:click={() => {
+        console.log('Button clicked - navigating to login');
+        window.location.href = '/login';
+      }}
+    >
+      <PlusOutline class="w-4 h-4 mr-2" />
+      Log In to Make Reservations
+    </button>
+  {/if}
+</div>
 
     {#if reservations.length > 0}
       <div class="grid gap-6">
@@ -925,18 +926,36 @@ async function saveEdit(retryCount = 0) {
       </div>
 
     {:else}
-      <Card class="text-center py-12 border border-surface-200 bg-surface-50">
-        <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
-        <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
-        {#if !currentUser}
-          <p class="text-surface-500 mb-4">Please log in to view your reservations.</p>
-          <Button color="primary" class="bg-primary-600 hover:bg-primary-700 relative z-20" on:click={() => window.location.href = '/login'}>Log In</Button>
-        {:else}
-          <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
-          <Button color="primary" class="bg-primary-600 hover:bg-primary-700 relative z-20" on:click={openCreateModal}>Make Your First Reservation</Button>
-        {/if}
-      </Card>
+  <Card class="text-center py-12 border border-surface-200 bg-surface-50">
+    <FlaskOutline class="w-16 h-16 text-surface-300 mx-auto mb-4" />
+    <h3 class="text-xl font-semibold text-surface-700 mb-2">No Reservations Found</h3>
+    {#if !currentUser}
+      <p class="text-surface-500 mb-4">Please log in to view your reservations.</p>
+      <button 
+        type="button"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        on:click={() => {
+          console.log('Login button clicked');
+          window.location.href = '/login';
+        }}
+      >
+        Log In
+      </button>
+    {:else}
+      <p class="text-surface-500 mb-4">You haven't made any lab reservations yet.</p>
+      <button 
+        type="button"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        on:click={() => {
+          console.log('Make first reservation button clicked');
+          window.location.href = '/?view=1';
+        }}
+      >
+        Make Your First Reservation
+      </button>
     {/if}
+  </Card>
+{/if}
   {/if}
 
   <!-- Create Reservation Modal -->
