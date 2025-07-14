@@ -52,7 +52,7 @@
       You're now loged in to <span class="font-semibold">Lab Club</span> - your all-in-one<br/> lab reservation platform.
 	</p>
 
-    <button on:click={() => (defaultModal = false)} class="px-6 py-2 text-white font-medium rounded-full text-lg shadow-sm bg-blue-400 border-2 border-red-300 hover:bg-blue-500 transition-all">
+    <button onclick={() => (defaultModal = false)} class="px-6 py-2 text-white font-medium rounded-full text-lg shadow-sm bg-blue-400 border-2 border-red-300 hover:bg-blue-500 transition-all">
       Let’s get started
     </button>
 </Modal>

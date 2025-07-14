@@ -6,7 +6,6 @@
 	import { verifySignUp } from '../../../api/api.js';
 
 	let checked = $state(false);
-	let regex = /^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/
 	let defaultModal = $state(false);
 
 	let firstNameInput = $state("");
@@ -21,14 +20,15 @@
 		e.preventDefault();
 		errors = [];
 
-		if (!regex.test(emailInput)) {
+		// 0-9 only valid input & length should be 8 chars long
+		if (!/^\d{8}$/.test(idNumberInput)) {
+			errors.push("Please enter a valid 8-digit ID number.");
+			console.log("Invalid ID number format.");
+		}
+
+		if (!/^[a-zA-Z0-9._%+-]+@dlsu\.edu\.ph$/.test(emailInput)) {
 			errors.push("Please enter a valid email address.");
 			console.log("Invalid email address format: " + emailInput);
-		}
-		
-		if (idNumberInput.length < 8) {
-			errors.push("Please enter a valid ID number address.");
-			console.log("Invalid ID number length.");
 		}
 
 		if (passwordInput.length < 8) {

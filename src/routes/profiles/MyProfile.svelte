@@ -15,9 +15,11 @@
   let currentUser = null;
   let reservations = [];
   let showEditModal = false;
+  let showDeleteModal = false;
   let editableUser = null;
   let avatarUploading = false;
-
+  let confirmPassword = "";
+  let deleteErrorMessage = "";
 
   function getAvatar(avatar: string): string {
     return avatar && avatar !== "" ? avatar : "/src/assets/default_avatar.png";
@@ -66,6 +68,40 @@
       showEditModal = false;
     } catch (err) {
       console.error("Unexpected error:", err);
+    }
+  }
+
+  async function deleteUser() {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("No access token");
+
+      const res = await fetch("http://localhost:3000/users/me", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ password: confirmPassword })
+      });
+
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const errorData = await res.json();
+          deleteErrorMessage = errorData.message || "Failed to delete user.";
+        } else {
+          const errorText = await res.text();
+          deleteErrorMessage = errorText || "Something went wrong.";
+        }
+        return;
+      }
+
+      localStorage.removeItem("accessToken");
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      deleteErrorMessage = "Something went wrong. Please try again.";
     }
   }
 
@@ -138,6 +174,15 @@
         >
           Edit Profile
         </Button>
+
+        <Button
+          color="red"
+          class="mt-3"
+          onclick={() => showDeleteModal = true}
+        >
+          Delete Account
+        </Button>
+
       </div>
 
 
@@ -298,6 +343,59 @@
     </div>
   </div>
 </Modal>
+
+<Modal
+  open={showDeleteModal}
+  onclose={() => {
+    confirmPassword = "";
+    deleteErrorMessage = "";
+    showDeleteModal = false;
+  }}
+  class="z-50"
+>
+  <div class="p-6 space-y-6">
+    <h3 class="text-xl font-bold text-red-700">Confirm Account Deletion</h3>
+    <p class="text-surface-600">
+      Are you sure you want to delete your account? This action is
+      <span class="font-bold text-red-600"> irreversible</span>.
+    </p>
+
+    <div class="space-y-2">
+      <Label for="confirm-password" class="text-surface-700">Enter your password to confirm:</Label>
+      <Input
+        id="confirm-password"
+        type="password"
+        bind:value={confirmPassword}
+        class={`rounded-md border-2 ${confirmPassword.trim() === "" ? 'border-red-500' : 'border-gray-300'} focus:ring-red-500 focus:border-red-500`}
+        placeholder="Your password"
+      />
+      {#if deleteErrorMessage}
+        <p class="text-sm text-red-600">{deleteErrorMessage}</p>
+      {/if}
+    </div>
+
+    <div class="flex justify-end gap-4 pt-6">
+      <Button
+        color="gray"
+        onclick={() => {
+          confirmPassword = "";
+          showDeleteModal = false;
+        }}
+      >
+        Cancel
+      </Button>
+      <Button
+        color="red"
+        onclick={deleteUser}
+        disabled={confirmPassword.trim() === ""}
+      >
+        Yes, Delete
+      </Button>
+    </div>
+  </div>
+</Modal>
+
+
 {:else}
   <main class="min-h-screen flex items-center justify-center bg-primary-50">
     <p class="text-lg text-gray-500">Loading profile...</p>

@@ -264,10 +264,20 @@ app.post("/users/signup", async (req, res) => {
     `[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`
   );
 
-  const existingUser = await Users.findOne({ email: req.body.email });
-  if (existingUser) {
+  // Check if ID number is already used
+  const existingID = await Users.findOne({ id_number: req.body.idNumber });
+  if (existingID) {
+    console.log("!! ID number is already in use");
+    return res.status(409).json({ error: "ID number already in use." });
+  }
+
+  // Check if email is already used
+  const existingEmail = await Users.findOne({ email: req.body.email });
+  if (existingEmail) {
+    console.log("!! Email is already in use");
     return res.status(409).json({ error: "Email already in use." });
   }
+
   try {
     const fullName = `${req.body.firstName} ${req.body.lastName}`;
     const newUser = await Users.create({
@@ -782,6 +792,37 @@ app.put("/users/me", async (req, res) => {
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
+
+app.delete('/users/me', async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.id;
+    const { password } = req.body;
+
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (password !== user.password) {
+      return res.status(401).json({ message: "Incorrect password. Please try again." });
+    }
+
+    await Users.findByIdAndDelete(userId);
+    console.log(`User ${user.email} deleted.`);
+    res.status(204).send(); // No content
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

@@ -6,8 +6,6 @@
 
     let selectedDate = $state(new Date());
 
-
-
     let eventDuration = $state("0.5");
     let eventType = $state([]);
  
@@ -128,15 +126,17 @@
       console.log 
       
       if (result.success) {
-        alert('Reservation successful!');
+        successModal = true;
         console.log('Created reservations:', result.data.reservations);
       } else {
-        defaultModal = true;
+        failModal = true;
+        console.log('Failed to create reservation.');
       }
 
     }
     
-    let defaultModal = $state(false);
+    let failModal = $state(false);
+    let successModal = $state(false);
 
   </script>
   
@@ -215,10 +215,44 @@
     </div>
   </div>
 
-<Modal title="Reservation Failed" bind:open={defaultModal} autoclose>
-  
-  {#snippet footer()}
-    <Button type="submit" value="success">I accept</Button>
-    <Button type="submit" value="decline" color="alternative">Decline</Button>
-  {/snippet}
+<Modal bind:open={failModal} autoclose class="backdrop-blur-sm border-2 border-red-300 rounded-xl px-8 py-10 bg-white dark:bg-gray-900 shadow-md flex flex-col items-center space-y-5 text-center">
+
+  <svg class="w-20 h-20 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 5a7 7 0 1 1 0 14a7 7 0 0 1 0-14z" />
+  </svg>
+
+  <h1 class="text-3xl font-bold text-red-600 dark:text-red-400">
+    Reservation Failed
+  </h1>
+
+  <p class="text-gray-700 dark:text-gray-300 text-base">
+    Something went wrong while submitting your reservation.<br/>
+    Please try again later or contact support.
+  </p>
+
+  <button onclick={() => (failModal = false)} class="px-6 py-2 text-white font-medium rounded-full text-lg shadow-sm bg-red-500 hover:bg-red-600 transition-all">
+    Try Again
+  </button>
+
+</Modal>
+
+
+<Modal bind:open={successModal} autoclose class="backdrop-blur-sm border-2 border-green-300 rounded-xl px-8 py-10 bg-white dark:bg-gray-900 shadow-md flex flex-col items-center space-y-5 text-center">
+
+  <svg class="w-20 h-20 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+
+  <h1 class="text-3xl font-bold text-green-600 dark:text-green-400">
+    Reservation Confirmed!
+  </h1>
+
+  <p class="text-gray-700 dark:text-gray-300 text-base">
+    Your reservation has been successfully submitted.<br/>
+  </p>
+
+  <button onclick={() => (successModal = false)} class="px-6 py-2 text-white font-medium rounded-full text-lg shadow-sm bg-green-500 hover:bg-green-600 transition-all">
+    Done
+  </button>
+
 </Modal>
