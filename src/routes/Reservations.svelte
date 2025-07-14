@@ -35,18 +35,19 @@
   async function saveEdit(e?: Event) {
     e?.preventDefault();
 
-    if (!editSeats.trim())                 return alert("Seat is required");
-    const seatMatch = editSeats.trim().match(/^([A-Z])(\d+)$/);
-    if (!seatMatch)                        return alert("Seat must look like A1, B3 …");
+    // validation — no split/join any more
+    if (!editSeats.trim()) return alert("Seat is required");
+    const seatMatch = editSeats.trim().toUpperCase().match(/^([A-Z])(\d+)$/);
+    if (!seatMatch)        return alert("Seat must look like A1, B3 …");
 
     const [, column, rowStr] = seatMatch;
-    const row = +rowStr;
+    const row = Number(rowStr);
 
     const [h, m]   = editStart.split(":").map(Number);
     const startISO = new Date(`${editDate}T${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:00`).toISOString();
     const endISO   = new Date(new Date(startISO).getTime() + editHours*60*60*1000).toISOString();
 
-    const payload  = { time_in: startISO, time_out: endISO, column, row };
+    const payload = { time_in: startISO, time_out: endISO, column, row };
 
     const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
     const res   = await fetch(`http://localhost:3000/reservations/${editing.id}`, {
@@ -120,7 +121,7 @@
     editStart = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
     const halfHours = Math.round((end.getTime() - start.getTime()) / 1_800_000);
     editHours = halfHours * 0.5;
-    editSeats = r.rawSeats.join(", ");
+    editSeats = r.seat ?? r.rawSeats[0] ?? "";
   }
 
   async function deleteReservation() {
@@ -342,7 +343,7 @@
             </div>
 
             <div class="space-y-1">
-              <label for="edit-seats" class="block text-sm font-medium text-surface-700">Seat(s)&nbsp;(comma‑separated)</label>
+              <label for="edit-seats" class="block text-sm font-medium text-surface-700">Seat</label>
               <input id="edit-seats" type="text" bind:value={editSeats} class="w-full border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary-600" />
             </div>
 
