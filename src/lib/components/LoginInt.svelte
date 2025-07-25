@@ -34,11 +34,10 @@
 
 			if (data.error) {
 				errorMessage = data.error;
+				alert(errorMessage);
 				return;
 			}
 			
-			// Login successful - store the token and user data
-			// JWT to be stored on local storage
 			if(rememberMe) {
 				localStorage.setItem('accessToken', data.accessToken);
 			} else {
@@ -47,9 +46,8 @@
 			console.log('Login successful:', data.user);
 
 			// Redirect to homepage w/ modal
-			window.location.href = "../../../index.html?signedIn=1";
+			window.location.href = "../../../index.html";
 		} catch (err) {
-			console.error("Login failed:", err);
 			errorMessage = "An error occurred during login. Please try again.";
 			alert(errorMessage);
 		}

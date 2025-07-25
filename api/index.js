@@ -32,26 +32,8 @@ app.use(
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-function authenticateJWT(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    console.error("Token verification failed:", err);
-    return res.status(403).json({ error: "Invalid token" });
-  }
-}
-
-const mongoURI =
-  "mongodb+srv://erozeroelectro:YkhFRSmwU9iOmWS1@apdev-mco.h5f8ux9.mongodb.net/LabReservation?retryWrites=true&w=majority&appName=APDEV-MCO";
+// DB Connection
+const mongoURI = process.env.DB_URL;
 
 mongoose
   .connect(mongoURI)
@@ -227,13 +209,8 @@ app.get("/users", async (req, res) => {
 });
 
 app.post("/users/login", async (req, res) => {
-  console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] POST /users/login (Login attempt)`
-  );
 
   try {
-    console.log(`Looking up user with email: ${req.body.email}`);
     const user = await Users.findOne({ email: req.body.email }).exec();
 
     if (!user) {
@@ -242,22 +219,21 @@ app.post("/users/login", async (req, res) => {
     }
 
     if (req.body.password === user.password) {
-      console.log("Password matched");
-      console.log("Successfully logged in.");
-
       const accessToken = jwt.sign(
         {
           id: user._id.toString(),
+          firstName: user.name.first_name,
+          lastName: user.name.last_name,
+          role: user.role,
+          avatar: user.avatar,
+          email: user.email,
+          bio: user.bio
         },
         process.env.ACCESS_TOKEN_SECRET
       );
+
       res.json({
         accessToken: accessToken,
-        user: {
-          first_name: user.name.first_name,
-          last_name: user.name.last_name,
-          role: user.role,
-        },
       });
     } else {
       res.status(403).json({ error: "Wrong email or password" });

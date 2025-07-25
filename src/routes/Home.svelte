@@ -16,26 +16,13 @@
 
 	onMount(async () => {
 		const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+
+		// Checks if there is a token stored && the welcome modal has NOT been shown
 		if (token && !sessionStorage.getItem('welcomeShown')) {
-			console.log('Token found:', token);
-			try {
-				const response = await fetch('http://localhost:3000/users/me', {
-					headers: {
-						'Authorization': `Bearer ${token}`
-					}
-				});
-
-				if (!response.ok) {
-					throw new Error("Failed to fetch user info");
-				}
-
-				const userData = await response.json();
-				user = userData;
-				defaultModal = true;
-				sessionStorage.setItem('welcomeShown', 'true');
-			} catch (err) {
-				console.error("Error fetching user:", err);
-			}
+  			const userData = JSON.parse(atob(token.split('.')[1]));
+			user = userData;
+			defaultModal = true;
+			sessionStorage.setItem('welcomeShown', 'true');
 		}
 	});
 </script>

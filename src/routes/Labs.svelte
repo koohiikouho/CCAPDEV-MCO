@@ -22,18 +22,6 @@ onMount( async () => {
     }
 });
 
-  // const getLabs = async () => {
-  //   const res = await fetch(
-  //     "http://localhost:3000/labs"
-  //   );
-  //   const data = await res.json();
-  //   console.log(data[0].lab_name);
-  //   labCardsData = data;
-
-  //   return true;
-  // };
-  
-
   let testing = $state();
   let labCardsData = $state([
   ]);
