@@ -132,9 +132,16 @@
         {/each}
       </div>
     {:else}
-      <p class="text-center text-gray-500">No suggestions submitted yet.</p>
+      <div class="flex items-center justify-center min-h-[900px]">
+        <p class="text-center text-gray-500">No suggestions submitted yet.</p>
+      </div>
     {/if}
   </div>
+
+  {:else}
+    <div class="flex items-center justify-center min-h-[900px]">
+      <p class="text-gray-500">Login to submit a suggestion.</p>
+    </div>
   {/if}
 
 <div class="-z-10">

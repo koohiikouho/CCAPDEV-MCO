@@ -2,12 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import Suggestions from "./models/suggestions.js";
-import { idText } from "typescript";
 import dotenv from "dotenv";
 import path from "path";
 import userUploadRoutes from "./controllers/users.js";
@@ -218,7 +216,7 @@ app.post("/users/login", async (req, res) => {
       return res.status(400).json({ error: "Wrong email or password" });
     }
 
-    if (req.body.password === user.password) {
+    if (await user.comparePassword(req.body.password)) {
       const accessToken = jwt.sign(
         {
           id: user._id.toString(),
