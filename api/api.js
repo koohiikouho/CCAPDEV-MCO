@@ -24,7 +24,7 @@ export async function getSuggestions() {
 }
 
 export async function verifyLogin(email, password) {
-  const response = await fetch('http://localhost:3000/users/login', {
+  const response = await fetch('http://localhost:3000/user/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -35,7 +35,7 @@ export async function verifyLogin(email, password) {
 }
 
 export async function verifySignUp(firstName, lastName, idNumber, email, password) {
-  const response = await fetch('http://localhost:3000/users/signup', {
+  const response = await fetch('http://localhost:3000/user/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstName, lastName, idNumber, email, password })
@@ -46,7 +46,7 @@ export async function verifySignUp(firstName, lastName, idNumber, email, passwor
 }
 
 export async function updateUserProfile(payload, token) {
-  const response = await fetch("http://localhost:3000/users/me", {
+  const response = await fetch("http://localhost:3000/user/me", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export async function updateUserProfile(payload, token) {
 }
 
 export async function sendSuggestion(email, subject, message) {
-  const response = await fetch('http://localhost:3000/users/suggestions', {
+  const response = await fetch('http://localhost:3000/user/suggestions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, subject, message })

@@ -2,15 +2,16 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import path from "path";
+import bodyParser from "body-parser";
+
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
 import Reservations from "./models/reservations.js";
 import Suggestions from "./models/suggestions.js";
-import dotenv from "dotenv";
-import path from "path";
-import userUploadRoutes from "./controllers/users.js";
 
-import bodyParser from "body-parser";
+import userRoutes from "./controllers/users.js";
 
 dotenv.config();
 
@@ -37,6 +38,11 @@ mongoose
   .connect(mongoURI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB error:", err));
+
+
+// User routes
+app.use('/users', userRoutes);
+
 
 app.get("/labs", async (req, res) => {
   console.log("---");
@@ -188,107 +194,6 @@ app.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
   }
 });
 
-app.get("/users", async (req, res) => {
-  console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] Received a request for /users`
-  );
-  try {
-    console.log("Querying the database with Users.find()...");
-    const users = await Users.find().exec();
-    console.log(`Database query finished. Found ${users.length} documents.`);
-
-    res.status(200).json(users);
-    console.log("Successfully sent JSON response.");
-  } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching users:", err);
-    res.status(500).send("Error fetching users");
-  }
-});
-
-app.post("/users/login", async (req, res) => {
-
-  try {
-    const user = await Users.findOne({ email: req.body.email }).exec();
-
-    if (!user) {
-      console.log("User not found.");
-      return res.status(400).json({ error: "Wrong email or password" });
-    }
-
-    if (await user.comparePassword(req.body.password)) {
-      const accessToken = jwt.sign(
-        {
-          id: user._id.toString(),
-          firstName: user.name.first_name,
-          lastName: user.name.last_name,
-          role: user.role,
-          avatar: user.avatar,
-          email: user.email,
-          bio: user.bio
-        },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-
-      res.json({
-        accessToken: accessToken,
-      });
-    } else {
-      res.status(403).json({ error: "Wrong email or password" });
-    }
-  } catch (err) {
-    console.error("!!! AN ERROR OCCURRED during login:", err);
-    res.status(500).json({ error: "Server error during login" });
-  }
-});
-
-app.post("/users/signup", async (req, res) => {
-  console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] POST /users/signup (Signup attempt)`
-  );
-
-  const existingID = await Users.findOne({ id_number: req.body.idNumber });
-  if (existingID) {
-    console.log("!! ID number is already in use");
-    return res.status(409).json({ error: "ID number already in use." });
-  }
-
-  const existingEmail = await Users.findOne({ email: req.body.email });
-  if (existingEmail) {
-    console.log("!! Email is already in use");
-    return res.status(409).json({ error: "Email already in use." });
-  }
-
-  try {
-    const fullName = `${req.body.firstName} ${req.body.lastName}`;
-    const newUser = await Users.create({
-      id_number: req.body.idNumber,
-      name: {
-        first_name: req.body.firstName,
-        last_name: req.body.lastName,
-      },
-      role: "student",
-      email: req.body.email,
-      password: req.body.password,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=3b82f6&color=fff`,
-      bio: "",
-    });
-
-    const accessToken = jwt.sign(
-      {
-        id: newUser._id.toString(),
-      },
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    res.json({ accessToken: accessToken });
-
-    console.log("New user created:", newUser.email);
-  } catch (err) {
-    console.error("Signup error:", err);
-    res.status(500).json({ message: "Internal server error." });
-  }
-});
 
 app.get("/lab-seats/:labId", async (req, res) => {
   try {
@@ -321,38 +226,6 @@ app.get("/lab-seats/:labId", async (req, res) => {
       error: "Server error while fetching seats",
       details: err.message,
     });
-  }
-});
-
-app.get("/users/me", async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await Users.findById(decoded.id).exec();
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json({
-      id: user._id.toString(),
-      id_number: user.id_number,
-      first_name: user.name.first_name,
-      last_name: user.name.last_name,
-      email: user.email,
-      avatar: user.avatar,
-      role: user.role,
-      bio: user.bio,
-    });
-  } catch (err) {
-    console.error("Token verification failed:", err);
-    res.status(403).json({ error: "Invalid token" });
   }
 });
 
@@ -482,79 +355,6 @@ app.get("/reservations", async (req, res) => {
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
     res.status(500).send("Error fetching reservations");
-  }
-});
-
-// NEW ENDPOINT: Get user-specific reservations
-app.get("/user-reservations", async (req, res) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({ error: "No token provided" });
-    }
-
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.id;
-
-    console.log(`[DEBUG] Fetching reservations for user: ${userId}`);
-
-    const labs = await Labs.find()
-      .populate({
-        path: "seats.reservations",
-        populate: {
-          path: "user_id",
-          select: "name email",
-        },
-      })
-      .exec();
-
-    const userReservations = [];
-
-    labs.forEach((lab) => {
-      lab.seats.forEach((seat) => {
-        seat.reservations.forEach((reservation) => {
-          if (
-            reservation.user_id &&
-            reservation.user_id._id.toString() === userId
-          ) {
-            console.log(
-              `[DEBUG] Found reservation ${reservation._id} in seat ${seat.col}${seat.row}`
-            );
-            userReservations.push({
-              _id: reservation._id,
-              lab_id: {
-                _id: lab._id,
-                lab_name: lab.lab_name,
-              },
-              user_id: reservation.user_id,
-              time_in: reservation.time_in,
-              time_out: reservation.time_out,
-              status: reservation.status,
-              seat: `${seat.col}${seat.row}`,
-              isAnonymous: reservation.isAnonymous,
-              createdAt: reservation.createdAt,
-              updatedAt: reservation.updatedAt,
-            });
-          }
-        });
-      });
-    });
-
-    console.log(`[DEBUG] Returning ${userReservations.length} reservations`);
-    console.log(
-      `[DEBUG] Sample reservation seats:`,
-      userReservations.slice(0, 3).map((r) => ({ id: r._id, seat: r.seat }))
-    );
-
-    res.status(200).json(userReservations);
-  } catch (err) {
-    console.error("Error fetching user reservations:", err);
-    res.status(500).json({
-      error: "Error fetching user reservations",
-      details: err.message,
-    });
   }
 });
 
@@ -788,93 +588,8 @@ app.listen(port, () => {
   console.log(`labclub api listening on port ${port}`);
 });
 
-app.put("/users/me", async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "No token provided" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const updates = req.body;
-
-    const allowedFields = ["name", "bio", "avatar"];
-    const updateData = {};
-
-    for (const key of allowedFields) {
-      if (updates[key]) {
-        updateData[key] = updates[key];
-      }
-    }
-
-    if (updateData.name && typeof updateData.name === "string") {
-      const parts = updateData.name.trim().split(" ");
-      updateData.name = {
-        first_name: parts[0],
-        last_name: parts.slice(1).join(" ") || "",
-      };
-    }
-
-    const updatedUser = await Users.findByIdAndUpdate(
-      decoded.id,
-      { $set: updateData },
-      { new: true }
-    );
-
-    if (!updatedUser) return res.status(404).json({ error: "User not found" });
-
-    res.status(200).json({
-      message: "Profile updated successfully",
-      user: {
-        id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        bio: updatedUser.bio,
-        avatar: updatedUser.avatar,
-        role: updatedUser.role,
-      },
-    });
-  } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({ error: "Failed to update profile" });
-  }
-});
-
-app.delete("/users/me", async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "No token provided" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.id;
-    const { password } = req.body;
-
-    const user = await Users.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (password !== user.password) {
-      return res
-        .status(401)
-        .json({ message: "Incorrect password. Please try again." });
-    }
-
-    await Users.findByIdAndDelete(userId);
-    console.log(`User ${user.email} deleted.`);
-    res.status(204).send();
-  } catch (err) {
-    console.error("Error deleting user:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
-app.use("/users", userUploadRoutes);
 
 app.get("/admin/reservations", async (req, res) => {
   try {
@@ -1561,23 +1276,5 @@ app.get("/suggestions", async (req, res) => {
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching suggestions:", err);
     res.status(500).send("Error fetching suggestions");
-  }
-});
-
-app.post("/users/suggestions", async (req, res) => {
-  console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] POST /users/suggestions`);
-
-  try {
-    const newSuggestion = await Suggestions.create({
-      email: req.body.email,
-      subject: req.body.subject,
-      message: req.body.message,
-    });
-    console.log("New suggestion sent:");
-    res.status(201).json({ message: "Suggestion submitted successfully." });
-  } catch (err) {
-    console.error("Suggestion error:", err);
-    res.status(500).json({ message: "Internal server error." });
   }
 });
