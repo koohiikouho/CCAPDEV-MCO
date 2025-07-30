@@ -283,4 +283,5 @@ router.post("/upload-avatar", parser.single("avatar"), (req, res) => {
     res.status(500).json({ error: "Upload failed", details: err.message });
   }
 });
+
 export default router;
