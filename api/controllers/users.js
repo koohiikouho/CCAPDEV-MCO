@@ -3,6 +3,7 @@ import { Router } from "express";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -49,16 +50,11 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Wrong email or password" });
     }
 
-    if (await user.comparePassword(req.body.password)) {
+    // if (await user.comparePassword(req.body.password)) {
+    if (req.body.password === user.password) {
       const accessToken = jwt.sign(
         {
-          id: user._id.toString(),
-          firstName: user.name.first_name,
-          lastName: user.name.last_name,
-          role: user.role,
-          avatar: user.avatar,
-          email: user.email,
-          bio: user.bio
+          id: user._id.toString()
         },
         process.env.ACCESS_TOKEN_SECRET
       );

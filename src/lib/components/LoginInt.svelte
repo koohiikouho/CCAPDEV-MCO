@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { Section, Register } from 'flowbite-svelte-blocks';
-	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
+	import { Button, Checkbox, Label, Input, Modal } from 'flowbite-svelte';
 
-	import { verifyLogin } from '../../../api/api.js';
-	import {Modal, P } from "flowbite-svelte";
 	let defaultModal = $state(false);
 
 	let result = $state(false);
@@ -30,8 +28,13 @@
 		e.preventDefault();
 
 		try {
-			const data = await verifyLogin(emailInput, passwordInput);
+			const response = await fetch('http://localhost:3000/users/login', {
+    			method: 'POST',
+    			headers: { 'Content-Type': 'application/json' },
+    			body: JSON.stringify({ email: emailInput, password: passwordInput })
+			})
 
+			const data = await response.json();
 			if (data.error) {
 				errorMessage = data.error;
 				alert(errorMessage);

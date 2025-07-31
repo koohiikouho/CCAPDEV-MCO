@@ -1,10 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import path from "path";
 import bodyParser from "body-parser";
+import jwt from "jsonwebtoken";
 
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
@@ -41,6 +41,24 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB error:", err));
 
+function isAuthenticated(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {  
+    res.redirect('/login');
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.redirect('/login'); // Invalid/expired token
+    }
+
+    req.user = decoded;
+    next();
+  });
+
+  res.redirect('/login');
+}
 
 // User routes
 app.use('/users', userRoutes);

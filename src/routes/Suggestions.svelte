@@ -34,18 +34,33 @@
       const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       
       if (token) {
-  			const userData = JSON.parse(atob(token.split('.')[1]));
-        user = userData;
-		
-        if (user.role === 'Admin') {
-          const data = await getSuggestions();
-          suggestions = data.map((s) => ({
-            _id: s._id,
-            email: s.email,
-            subject: s.subject,
-            message: s.message,
-            createdAt: s.createdAt
+        console.log('Token found:', token);
+        try {
+          const response = await fetch('http://localhost:3000/users/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch user info");
+          }
+
+          const userData = await response.json();
+          user = userData;
+
+          if (user.role === 'Admin') {
+            const data = await getSuggestions();
+            suggestions = data.map((s) => ({
+              _id: s._id,
+              email: s.email,
+              subject: s.subject,
+              message: s.message,
+              createdAt: s.createdAt
           }));
+          }
+        } catch (err) {
+          console.error("Error fetching user:", err);
         }
       }
     });

@@ -48,6 +48,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Password hashing
+/*
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next(); // Only hash if password is new or modified
   try {
@@ -62,5 +64,6 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
+*/
 
 export default mongoose.model("Users", userSchema);
