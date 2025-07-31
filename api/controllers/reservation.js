@@ -818,24 +818,4 @@ router.get("/upcoming/:labId", async (req, res) => {
   }
 });
 
-router.get("/suggestions", async (req, res) => {
-  console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] Received a request for /suggestions`
-  );
-  try {
-    console.log("Querying the database with Suggestions.find()...");
-    const suggestions = await Suggestions.find().exec();
-    console.log(
-      `Database query finished. Found ${suggestions.length} documents.`
-    );
-
-    res.status(200).json(suggestions);
-    console.log("Successfully sent JSON response.");
-  } catch (err) {
-    console.error("!!! AN ERROR OCCURRED while fetching suggestions:", err);
-    res.status(500).send("Error fetching suggestions");
-  }
-});
-
 export default router;
