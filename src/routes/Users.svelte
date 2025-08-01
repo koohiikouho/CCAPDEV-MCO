@@ -21,7 +21,15 @@
 
   onMount(async () => {
     try {
-      const data = await getUserData();
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const response = await fetch('http://localhost:3000/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json();
       users = data.map((user) => ({
         id: user._id, // Use MongoDB ObjectId as unique ID
         name: `${user.name.first_name} ${user.name.last_name}`,

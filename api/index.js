@@ -41,23 +41,42 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB error:", err));
 
-function isAuthenticated(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {  
-    res.redirect('/login');
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.redirect('/login');
+  export function isAuthenticated(role) {
+  return function (req, res, next) {
+    const token = req.header('Authorization');
+    if (!token) {
+      return res.redirect('/users/login');
     }
 
-    req.user = decoded;
-    next();
-  });
+    try {
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      
+      // Student access - anyone authenticated can access
+      if (role === 'student') {
+        req.user = decoded;
+        return next();
+      }
 
-  res.redirect('/login');
+      // Lab Technician access - Lab Technician or Admin can access
+      if (role === 'Lab Technician' && (decoded.role === 'Lab Technician' || decoded.role === 'Admin')) {
+        req.user = decoded;
+        return next();
+      }
+
+      // Admin access - only Admin can access
+      if (role === 'Admin' && decoded.role === 'Admin') {
+        req.user = decoded;
+        return next();
+      }
+
+      // If none of the above conditions matched
+      return res.redirect('/users/login');
+      //return res.status(403).json({ error: 'Access Denied!!!' });
+
+    } catch (error) {
+      return res.redirect('/users/login');
+    }
+  }
 }
 
 // User routes

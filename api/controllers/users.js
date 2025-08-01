@@ -1,9 +1,10 @@
 import Users from "../models/users.js";
-import { Router } from "express";
+import jwt from "jsonwebtoken";
 import multer from "multer";
+import { Router } from "express";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
-import jwt from "jsonwebtoken";
+import { isAuthenticated } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ const storage = new CloudinaryStorage({
 const parser = multer({ storage });
 
 // Fetches all users
-router.get("/", async (req, res) => {
+router.get("/",  isAuthenticated('student'), async (req, res) => {
   try {
     const users = await Users.find().exec();
 
@@ -69,6 +70,13 @@ router.post("/login", async (req, res) => {
     console.error("!!! AN ERROR OCCURRED during login:", err);
     res.status(500).json({ error: "Server error during login" });
   }
+});
+
+router.get('/login', (req, res) => {
+  res.render('login', { 
+    title: 'Login',
+    error: req.flash('error') // If you're using flash messages
+  });
 });
 
 
@@ -143,7 +151,7 @@ router.post("/suggestions", async (req, res) => {
 
 
 // Fetching user info from user in jwt
-router.get("/me", async (req, res) => {
+router.get("/me", isAuthenticated('student'), async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -177,7 +185,7 @@ router.get("/me", async (req, res) => {
 
 
 // Updates user info
-router.put("/me", async (req, res) => {
+router.put("/me", isAuthenticated('student'), async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -231,7 +239,7 @@ router.put("/me", async (req, res) => {
 
 
 // Deletes user
-router.delete("/me", async (req, res) => {
+router.delete("/me", isAuthenticated('student'), async (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -265,7 +273,7 @@ router.delete("/me", async (req, res) => {
 
 
 // Upload avatar
-router.post("/upload-avatar", parser.single("avatar"), (req, res) => {
+router.post("/upload-avatar", isAuthenticated('student'), parser.single("avatar"), (req, res) => {
   try {
     if (!req.file) {
       console.log("Upload failed: no file");
