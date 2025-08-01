@@ -30,6 +30,12 @@
         }
       })
       const data = await response.json();
+      // Not authorized
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = '/src/routes/login/login.html'; // Redirect to login
+        return;
+      }
+
       users = data.map((user) => ({
         id: user._id, // Use MongoDB ObjectId as unique ID
         name: `${user.name.first_name} ${user.name.last_name}`,

@@ -4,7 +4,7 @@ export function isAuthenticated(role) {
   return function (req, res, next) {
     const token = req.header('Authorization');
     if (!token) {
-      return res.redirect('/users/login');
+      return res.status(401).json({ error: 'Unauthorized - No token provided' });
     }
 
     try {
@@ -29,11 +29,10 @@ export function isAuthenticated(role) {
       }
 
       // If none of the above conditions matched
-      return res.redirect('/users/login');
-      //return res.status(403).json({ error: 'Access Denied!!!' });
+      return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
 
     } catch (error) {
-      return res.redirect('/users/login');
+      return res.status(401).json({ error: 'Unauthorized - Invalid token' });
     }
   }
 }
