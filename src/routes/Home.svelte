@@ -22,7 +22,8 @@
 			try {
 				const response = await fetch('http://localhost:3000/users/me', {
 					headers: {
-						'Authorization': `Bearer ${token}`
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
 					}
 				});
 

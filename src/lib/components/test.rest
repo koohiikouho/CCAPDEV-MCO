@@ -1,14 +1,18 @@
 GET http://localhost:3000/users
 
 ###
-POST http://localhost:3000/users/signup
+POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-  "idNumber": "12345678",
-  "firstName": "Sample",
-  "lastName": "Sample",
-  "role": "student",
-  "email": "sample@dlsu.edu.ph",
-  "password": "sample1234"
+  "email": "clark_kent@dlsu.edu.ph",
+  "password": "superman123"
+}
+
+###
+
+GET http://localhost:3000/users/me 
+
+{
+  "id": "687452c48876e3b5b9eea3cb"
 }

@@ -31,9 +31,7 @@ const parser = multer({ storage });
 router.get("/",  isAuthenticated('student'), async (req, res) => {
   try {
     const users = await Users.find().exec();
-
     res.status(200).json(users);
-    
   } catch (err) {
     res.status(500).send("Error fetching users");
   }
@@ -42,10 +40,8 @@ router.get("/",  isAuthenticated('student'), async (req, res) => {
 
 // User login
 router.post("/login", async (req, res) => {
-
   try {
     const user = await Users.findOne({ email: req.body.email }).exec();
-
     if (!user) {
       console.log("User not found.");
       return res.status(400).json({ error: "Wrong email or password" });
@@ -71,14 +67,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error during login" });
   }
 });
-
-router.get('/login', (req, res) => {
-  res.render('login', { 
-    title: 'Login',
-    error: req.flash('error') // If you're using flash messages
-  });
-});
-
 
 // User signup
 router.post("/signup", async (req, res) => {
@@ -152,16 +140,8 @@ router.post("/suggestions", async (req, res) => {
 
 // Fetching user info from user in jwt
 router.get("/me", isAuthenticated('student'), async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await Users.findById(decoded.id).exec();
+    const user = await Users.findById(req.user.id).exec();
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
