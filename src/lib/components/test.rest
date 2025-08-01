@@ -11,8 +11,10 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3000/users/me 
+POST http://localhost:3000/users/suggestions
 
 {
-  "id": "687452c48876e3b5b9eea3cb"
+  "email": "max@dlsu.edu.ph",
+  "subject": "Test",
+  "message": "Testintgwearetesting"
 }

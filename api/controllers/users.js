@@ -1,4 +1,5 @@
 import Users from "../models/users.js";
+import Suggestions from "../models/suggestions.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import { Router } from "express";
@@ -70,20 +71,13 @@ router.post("/login", async (req, res) => {
 
 // User signup
 router.post("/signup", async (req, res) => {
-  console.log("---");
-  console.log(
-    `[${new Date().toLocaleTimeString()}] POST /user/signup (Signup attempt)`
-  );
-
   const existingID = await Users.findOne({ id_number: req.body.idNumber });
   if (existingID) {
-    console.log("!! ID number is already in use");
     return res.status(409).json({ error: "ID number already in use." });
   }
 
   const existingEmail = await Users.findOne({ email: req.body.email });
   if (existingEmail) {
-    console.log("!! Email is already in use");
     return res.status(409).json({ error: "Email already in use." });
   }
 
@@ -119,10 +113,7 @@ router.post("/signup", async (req, res) => {
 
 
 // Sending suggestions
-router.post("/suggestions", async (req, res) => {
-  console.log("---");
-  console.log(`[${new Date().toLocaleTimeString()}] POST /user/suggestions`);
-
+router.post("/suggestions", isAuthenticated('student'), async (req, res) => {
   try {
     const newSuggestion = await Suggestions.create({
       email: req.body.email,
@@ -166,13 +157,7 @@ router.get("/me", isAuthenticated('student'), async (req, res) => {
 
 // Updates user info
 router.put("/me", isAuthenticated('student'), async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "No token provided" });
-
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const updates = req.body;
 
     const allowedFields = ["name", "bio", "avatar"];
@@ -193,7 +178,7 @@ router.put("/me", isAuthenticated('student'), async (req, res) => {
     }
 
     const updatedUser = await Users.findByIdAndUpdate(
-      decoded.id,
+      req.user.id,
       { $set: updateData },
       { new: true }
     );

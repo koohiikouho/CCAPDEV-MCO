@@ -1,4 +1,4 @@
-import Reservation from "../models/reservations.js";
+import Reservations from "../models/reservations.js";
 import createError from "http-errors";
 import { Router } from "express";
 

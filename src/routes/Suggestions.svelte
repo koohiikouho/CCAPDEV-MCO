@@ -69,7 +69,19 @@
 		  e.preventDefault();
       
       try {
-        const data = await sendSuggestion(user.email, subject, message);
+        const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const response = await fetch('http://localhost:3000/users/suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: user.email,
+          subject: subject,
+          message: message
+        })
+      })
         defaultModal = true;
         console.log('Suggestion sent successfully');
         message = "";
