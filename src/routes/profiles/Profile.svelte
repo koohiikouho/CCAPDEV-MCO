@@ -7,7 +7,6 @@
     FlaskOutline, ComputerSpeakerOutline
   } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
-  import { getUserData, getLabReservations } from "../../../api/api.js";
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
@@ -95,8 +94,15 @@
         bio: user?.bio || "No description provided.",
       }));
       currentUser = users.find(u => u._id === userCode);
-
-      const reservationData = await getLabReservations();
+      
+      const response2 = await fetch('http://localhost:3000/reservations', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const reservationData = await response2.json();
       if (currentUser) {
         reservations = reservationData
           .filter(r => String(r.user_id?._id || r.user_id) === String(currentUser._id))

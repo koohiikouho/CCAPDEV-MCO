@@ -10,7 +10,6 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-  import { updateUserProfile } from "../../../api/api.js";
 
   let currentUser = null;
   let reservations = [];
@@ -57,12 +56,13 @@
 
       console.log("Saving profile with payload:", payload);
 
-      const result = await updateUserProfile(payload, token);
-
-      if (result.error) {
-        console.error("Update failed:", result.error);
-        return;
-      }
+      const response = await fetch("http://localhost:3000/users/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        }
+      });
 
       currentUser = { ...currentUser, ...editableUser };
       showEditModal = false;
@@ -305,6 +305,7 @@
               try {
                 const res = await fetch("http://localhost:3000/users/upload-avatar", {
                   method: "POST",
+                  'Authorization': `Bearer ${token}`,
                   body: formData,
                 });
 

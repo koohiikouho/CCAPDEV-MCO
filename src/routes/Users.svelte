@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import UserCard from "../lib/components/UserCard.svelte";
   import Particles from "../lib/components/Particles.svelte";
-  import { getUserData } from '../../api/api.js';
+
   import { Input } from "flowbite-svelte";
   import { SearchOutline, UserCircleOutline } from "flowbite-svelte-icons";
   import { cubicOut } from "svelte/easing";

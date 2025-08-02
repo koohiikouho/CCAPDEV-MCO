@@ -3,8 +3,6 @@
 	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
 	import { Modal, P } from "flowbite-svelte";
 
-	import { verifySignUp } from '../../../api/api.js';
-
 	let checked = $state(false);
 	let defaultModal = $state(false);
 
@@ -47,8 +45,14 @@
 
 		try {
 
-			// Call backend to verify signup
-			const data = await verifySignUp(firstNameInput, lastNameInput, idNumberInput, emailInput, passwordInput);
+			const response = await fetch('http://localhost:3000/users', {
+				method: 'POST',
+				headers: {
+				'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ firstNameInput, lastNameInput, idNumberInput, emailInput, passwordInput })
+			})
+			const data = await response.json();
 
 			// If the backend sent an error, handle it
 			if (data.error) {

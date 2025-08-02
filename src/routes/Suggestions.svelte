@@ -7,8 +7,6 @@
 	import { Label, Input, Textarea} from 'flowbite-svelte';
   import { onMount } from 'svelte';
   import Particles from "../lib/components/Particles.svelte";
-  import { sendSuggestion } from '../../api/api.js';
-  import { getSuggestions } from '../../api/api.js';
 
   let qty: number = 100;
   let vx: number = 0;
@@ -50,7 +48,14 @@
           user = userData;
 
           if (user.role === 'Admin') {
-            const data = await getSuggestions();
+            const response = await fetch('http://localhost:3000/suggestions', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            })
+            const data = await response.json();
             suggestions = data.map((s) => ({
               _id: s._id,
               email: s.email,

@@ -32,7 +32,7 @@
     			method: 'POST',
     			headers: { 'Content-Type': 'application/json' },
     			body: JSON.stringify({ email: emailInput, password: passwordInput })
-			})
+			});
 
 			const data = await response.json();
 			if (data.error) {

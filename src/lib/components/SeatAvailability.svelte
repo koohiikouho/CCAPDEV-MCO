@@ -53,7 +53,13 @@
   let availableSeatQuery = $derived(`http://localhost:3000/available-seats/${encodeURIComponent(roomCode)}?date=${encodeURIComponent(formatDate(selectedDate))}&time_in=${encodeURIComponent(selectedTimeRange.time)}&time_out=${encodeURIComponent(selectedTimeRange.endTime)}`);
 
   const getAvailableSeats = async (availableSeatQuery) => {
-    const res = await fetch(availableSeatQuery);
+    const res = await fetch(availableSeatQuery, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
     const data = await res.json();
 
     return data.available_seats;
