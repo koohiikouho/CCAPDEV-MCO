@@ -48,7 +48,7 @@ app.use('/users', userRoutes);
 app.use('/reservations', reservationRoutes);
 
 // Lab routes
-app.use('/labs', labRoutes);
+app.use('/', labRoutes);
 
 /* simple error handler */
 app.use((err, req, res, _next) => {

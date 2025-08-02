@@ -1,5 +1,7 @@
 import Reservations from "../models/reservations.js";
 import Labs from "../models/labs.js";
+import Users from "../models/users.js";
+import mongoose from "mongoose";
 import createError from "http-errors";
 import { Router } from "express";
 import { isAuthenticated } from '../middlewares/auth.js';

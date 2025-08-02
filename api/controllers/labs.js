@@ -1,4 +1,5 @@
 import Labs from "../models/labs.js";
+import mongoose from "mongoose";
 import { Router } from "express";
 import { isAuthenticated } from '../middlewares/auth.js';
 
@@ -6,7 +7,7 @@ import { isAuthenticated } from '../middlewares/auth.js';
 const router = Router();
 
 // Fetch all labs
-router.get("/", isAuthenticated('student'), async (req, res) => {
+router.get("/labs", isAuthenticated('student'), async (req, res) => {
   console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs`

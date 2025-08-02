@@ -11,10 +11,10 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3000/users/suggestions
+PUT http://localhost:3000/hash
+Content-Type: application/json
 
 {
-  "email": "max@dlsu.edu.ph",
-  "subject": "Test",
-  "message": "Testintgwearetesting"
+  "id": "688e3383b0d8ab34b7c22b9b",
+  "password": "superman123"
 }

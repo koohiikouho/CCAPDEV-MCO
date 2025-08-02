@@ -48,8 +48,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Wrong email or password" });
     }
 
-    // if (await user.comparePassword(req.body.password)) {
-    if (req.body.password === user.password) {
+    if (await user.comparePassword(req.body.password)) {
       const accessToken = jwt.sign(
         {
           id: user._id.toString()
@@ -71,27 +70,27 @@ router.post("/login", async (req, res) => {
 
 // User signup
 router.post("/signup", async (req, res) => {
-  const existingID = await Users.findOne({ id_number: req.body.idNumber });
+  const existingID = await Users.findOne({ id_number: req.body.idNumberInput });
   if (existingID) {
     return res.status(409).json({ error: "ID number already in use." });
   }
 
-  const existingEmail = await Users.findOne({ email: req.body.email });
+  const existingEmail = await Users.findOne({ email: req.body.emailInput });
   if (existingEmail) {
     return res.status(409).json({ error: "Email already in use." });
   }
 
   try {
-    const fullName = `${req.body.firstName} ${req.body.lastName}`;
+    const fullName = `${req.body.firstNameInput} ${req.body.lastNameInput}`;
     const newUser = await Users.create({
-      id_number: req.body.idNumber,
+      id_number: req.body.idNumberInput,
       name: {
-        first_name: req.body.firstName,
-        last_name: req.body.lastName,
+        first_name: req.body.firstNameInput,
+        last_name: req.body.lastNameInput,
       },
       role: "student",
-      email: req.body.email,
-      password: req.body.password,
+      email: req.body.emailInput,
+      password: req.body.passwordInput,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=3b82f6&color=fff`,
       bio: "",
     });
@@ -130,10 +129,13 @@ router.post("/suggestions", isAuthenticated('student'), async (req, res) => {
 
 
 // Fetching user info from user in jwt
-router.get("/me", isAuthenticated('student'), async (req, res) => {
+router.get("/me", async (req, res) => {
   try {
-    const user = await Users.findById(req.user.id).exec();
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
+    const user = await Users.findById(decoded.id).exec();
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
