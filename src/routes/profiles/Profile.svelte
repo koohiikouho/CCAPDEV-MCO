@@ -53,10 +53,15 @@
       try {
         const res = await fetch("http://localhost:3000/users/me", {
           headers: {
-            Authorization: `Bearer ${token}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           }
         });
-
+        // Not authorized
+        if (res.status === 401 || res.status === 403) {
+          window.location.href = '/src/routes/login/login.html'; // Redirect to login
+          return;
+        }
         if (res.ok) {
           const me = await res.json();
           loggedInUser = {
@@ -73,7 +78,14 @@
     }
 
     try {
-      const data = await getUserData();
+      const response = await fetch('http://localhost:3000/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
       users = data.map((user) => ({
         _id: user._id,
         name: `${user?.name?.first_name || "Unnamed"} ${user?.name?.last_name || ""}`,
