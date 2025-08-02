@@ -115,10 +115,11 @@
     const createReservation = async (reservationData) => {
       console.log(reservationData);
       try {
+        const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
         const response = await axios.post('http://localhost:3000/reservations', reservationData, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           }
         });
 

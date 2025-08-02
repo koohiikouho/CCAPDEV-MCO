@@ -125,7 +125,13 @@
         bio: user.bio || "No description provided.",
       };
 
-      const resReservations = await fetch("http://localhost:3000/reservations");
+      const resReservations = await fetch("http://localhost:3000/reservations", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const all = await resReservations.json();
 
       reservations = all

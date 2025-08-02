@@ -79,7 +79,14 @@
 	let filteredItems = $derived(paginationData.filter((item) => item.student_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1));
 
 	async function delReservation(resId){
-		const res = await axios.delete('http://localhost:3000/reservations/'.concat(resId));
+		const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
+		const res = await axios.delete('http://localhost:3000/reservations/'.concat(resId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
     	alert("Reservation ".concat(resId).concat(" Removed Successfully!"));
 	}
 

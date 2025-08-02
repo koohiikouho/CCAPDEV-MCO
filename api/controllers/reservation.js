@@ -1,4 +1,5 @@
 import Reservations from "../models/reservations.js";
+import Labs from "../models/labs.js";
 import createError from "http-errors";
 import { Router } from "express";
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -62,7 +63,7 @@ export async function listReservationsByLab(req, res, next) {
 
 
 // Fetch all reservation
-router.get("/", async (req, res) => {
+router.get("/", isAuthenticated('student'), async (req, res) => {
   console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /reservations`
@@ -112,7 +113,7 @@ router.get("/", async (req, res) => {
 
 
 // Fetch reservation acc to labId
-router.get("/:labId", async (req, res) => {
+router.get("/:labId", isAuthenticated('student'), async (req, res) => {
   try {
     const labId = req.params.labId;
     const today = new Date();
@@ -186,7 +187,7 @@ router.get("/:labId", async (req, res) => {
 
 
 // Create a reservation
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated('student'), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -411,7 +412,7 @@ router.post("/", async (req, res) => {
 
 
 // Update reservation
-router.put("/reservationId", async (req, res) => {
+router.put("/reservationId", isAuthenticated('student'), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -664,7 +665,7 @@ router.put("/reservationId", async (req, res) => {
 
 
 // Delete reservation
-router.delete("/reservationId", async (req, res) => {
+router.delete("/reservationId", isAuthenticated('student'), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
