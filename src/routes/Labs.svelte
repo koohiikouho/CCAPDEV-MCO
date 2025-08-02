@@ -10,12 +10,20 @@
   import { onMount } from "svelte";
 onMount( async () => {
   try {
-
-    const res = await fetch(
-      "http://localhost:3000/labs"
-    );
-    const data = await res.json();
-    console.log(data[0].lab_name);
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const response = await fetch("http://localhost:3000/labs", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+    });
+    const data = await response.json();
+    // Not authorized
+    if (response.status === 401 || response.status === 403) {
+      window.location.href = '/src/routes/login/login.html'; // Redirect to login
+      return;
+    }
     labCardsData = data;
   }catch (err) {
       console.error("Failed to fetch labs:", err);

@@ -1,10 +1,12 @@
 import Labs from "../models/labs.js";
 import { Router } from "express";
+import { isAuthenticated } from '../middlewares/auth.js';
+
 
 const router = Router();
 
 // Fetch all labs
-router.get("/", async (req, res) => {
+router.get("/", isAuthenticated('student'), async (req, res) => {
   console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs`
@@ -24,7 +26,7 @@ router.get("/", async (req, res) => {
 
 
 // Fetch lab by id
-router.get("/labs/:id", async (req, res) => {
+router.get("/labs/:id", isAuthenticated('student'), async (req, res) => {
   console.log("---");
   console.log(
     `[${new Date().toLocaleTimeString()}] Received a request for /labs/${req.params.id}`
@@ -80,7 +82,7 @@ router.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
   }
 });
 
-router.get("/lab-seats/:labId", async (req, res) => {
+router.get("/lab-seats/:labId", isAuthenticated('student'), async (req, res) => {
   try {
     const { labId } = req.params;
 

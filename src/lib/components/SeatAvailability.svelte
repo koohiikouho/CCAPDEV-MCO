@@ -34,8 +34,15 @@
     let roomCode: string = params.get("labCode");
     let getLabURL = "http://localhost:3000/labs/".concat(roomCode);
 
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     const getLabData = async () => {
-      const res = await fetch(getLabURL);
+      const res = await fetch(getLabURL, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       return data[0];
     };

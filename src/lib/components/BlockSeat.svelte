@@ -105,7 +105,14 @@
       let roomCode: string = params.get("labCode");
       let getSeatsURL = "http://localhost:3000/lab-seats/".concat(roomCode);
 
-      const res = await fetch(getSeatsURL);
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const res = await fetch(getSeatsURL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+    });
       const data = await res.json();
 
       return data.seats;

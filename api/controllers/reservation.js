@@ -1,6 +1,7 @@
 import Reservations from "../models/reservations.js";
 import createError from "http-errors";
 import { Router } from "express";
+import { isAuthenticated } from '../middlewares/auth.js';
 
 const router = Router();
 

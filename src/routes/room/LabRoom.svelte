@@ -12,8 +12,15 @@
   let getLabSeatsURL = "http://localhost:3000/reservations/".concat(roomCode);
   let get10Mins = "http://localhost:3000/reservations/upcoming/".concat(roomCode);
 
+  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
   const getLabData = async () => {
-    const res = await fetch(getLabURL);
+    const res = await fetch(getLabURL, { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
     const data = await res.json();
     images.pop();
     images.push(data.image);
