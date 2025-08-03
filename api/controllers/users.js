@@ -53,7 +53,8 @@ router.post("/login", async (req, res) => {
     if (await user.comparePassword(req.body.password)) {
       const accessToken = jwt.sign(
         {
-          id: user._id.toString()
+          id: user._id.toString(),
+          role: user.role
         },
         process.env.ACCESS_TOKEN_SECRET
       );
@@ -101,6 +102,7 @@ router.post("/signup", async (req, res) => {
     const accessToken = jwt.sign(
       {
         id: newUser._id.toString(),
+        role: newUser.role
       },
       process.env.ACCESS_TOKEN_SECRET
     );
