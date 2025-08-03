@@ -6,17 +6,26 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/preset-env": "^7.28.0",
     "@sveltejs/enhanced-img": "^0.6.1",
     "@sveltejs/vite-plugin-svelte": "^5.1.1",
     "@tailwindcss/vite": "^4.1.11",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "bcrypt": "^6.0.0",
     "flowbite": "^3.1.2",
     "flowbite-svelte": "^1.9.0",
     "flowbite-svelte-blocks": "^2.0.0",
     "flowbite-svelte-icons": "^2.2.1",
     "flowbite-typography": "^1.0.5",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4",
     "svelte": "^5.35.6",
     "svelte-inview": "^4.0.4",
     "tailwindcss": "^4.1.11",
@@ -29,7 +38,6 @@
   },
   "dependencies": {
     "axios": "^1.10.0",
-    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
@@ -54,5 +62,12 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.36.0",
     "wx-svelte-core": "^2.1.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ]
   }
 }

@@ -73,7 +73,6 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`labclub api listening on port ${port}`);
     try{
-    adddlert("Wow");
   } catch(err){
     console.log(err);
     errorDatabaseLogger(`Error testing`, err);
@@ -103,3 +102,5 @@ app.get("/suggestions", async (req, res) => {
     res.status(500).send("Error fetching suggestions");
   }
 });
+
+export default app
