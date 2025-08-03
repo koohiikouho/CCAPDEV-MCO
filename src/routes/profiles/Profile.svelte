@@ -4,7 +4,10 @@
   } from "flowbite-svelte";
   import {
     CalendarMonthOutline, ClockOutline, UsersOutline,
-    FlaskOutline, ComputerSpeakerOutline
+    FlaskOutline, ComputerSpeakerOutline,
+
+    RocketSolid
+
   } from "flowbite-svelte-icons";
   import TempNavbar from "../../lib/components/TempNavbar.svelte";
   import { onMount } from "svelte";
@@ -43,9 +46,8 @@
     if (hours > 0) return `${hours}h`;
     return `${minutes}m`;
   }
-
   let reservations = [];
-
+  let userRole = "";
   onMount(async () => {
     const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
     if (token) {
@@ -63,6 +65,7 @@
         }
         if (res.ok) {
           const me = await res.json();
+          userRole = me.role;
           loggedInUser = {
             name: `${me.first_name} ${me.last_name}`,
             email: me.email,
@@ -131,6 +134,7 @@
   userEmail={loggedInUser?.email || "Sign in to reserve"}
   profilePicture={loggedInUser?.avatar}
   isLoggedIn={!!loggedInUser}
+  userRole={userRole}
 />
 
 {#if currentUser}

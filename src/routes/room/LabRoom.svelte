@@ -144,7 +144,7 @@
 
 </script>
 
-<TempNavbar {userEmail} {userName} {profilePicture} {isLoggedIn} />
+<TempNavbar {userEmail} {userName} {profilePicture} {isLoggedIn} {userRole} />
 
 {#await getLabData() then labData}
   <div class="relative z-10 px-auto md:px-60">

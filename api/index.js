@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import path from "path";
 import bodyParser from "body-parser";
 import { isAuthenticated } from './middlewares/auth.js';
+import { errorDatabaseLogger } from "./middlewares/logger.js";
 
 import Labs from "./models/labs.js";
 import Users from "./models/users.js";
@@ -14,6 +15,8 @@ import Suggestions from "./models/suggestions.js";
 import userRoutes from "./controllers/users.js";
 import reservationRoutes from "./controllers/reservation.js";
 import labRoutes from "./controllers/labs.js";
+import adminRoutes from "./controllers/admin.js";
+import superAdminRoutes from "./controllers/superadmin.js";
 
 dotenv.config();
 
@@ -50,8 +53,12 @@ app.use('/reservations', reservationRoutes);
 // Lab routes
 app.use('/', labRoutes);
 
+app.use('/superadmin', superAdminRoutes);
+
 // Admin routes
-app.use('/', isAuthenticated('Admin'), labRoutes);
+//app.use('/', isAuthenticated('Admin'), labRoutes);
+app.use('/', labRoutes);
+app.use('/', adminRoutes); //needs work on here
 
 // Simple error handler
 app.use((err, req, res, _next) => {
@@ -61,14 +68,21 @@ app.use((err, req, res, _next) => {
 
 // Tester
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  
 });
 
 app.listen(port, () => {
   console.log(`labclub api listening on port ${port}`);
+    try{
+    adddlert("Wow");
+  } catch(err){
+    console.log(err);
+    errorDatabaseLogger(`Error testing`, err);
+  }
 });
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 
 app.get("/suggestions", async (req, res) => {
   console.log("---");
@@ -86,6 +100,7 @@ app.get("/suggestions", async (req, res) => {
     console.log("Successfully sent JSON response.");
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching suggestions:", err);
+    errorDatabaseLogger(`Sugestions fetching error`, err);
     res.status(500).send("Error fetching suggestions");
   }
 });

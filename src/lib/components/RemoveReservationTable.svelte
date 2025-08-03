@@ -88,6 +88,7 @@
         }
       });
     	alert("Reservation ".concat(resId).concat(" Removed Successfully!"));
+		location.reload();
 	}
 
 </script>

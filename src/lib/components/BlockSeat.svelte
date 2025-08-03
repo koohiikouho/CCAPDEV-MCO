@@ -169,6 +169,7 @@
       if (result.success) {
         alert('Reservation successful!');
         console.log('Created reservations:', result.data.reservations);
+        location.reload();
       } else {
         defaultModal = true;
       }

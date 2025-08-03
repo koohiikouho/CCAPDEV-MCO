@@ -122,7 +122,6 @@
             'Authorization': `Bearer ${token}`
           }
         });
-
         return {
           success: true,
           data: response.data,
@@ -162,6 +161,7 @@
       if (result.success) {
         successModal = true;
         console.log('Created reservations:', result.data.reservations);
+        location.reload();
       } else {
         failModal = true;
         console.log('Failed to create reservation.');

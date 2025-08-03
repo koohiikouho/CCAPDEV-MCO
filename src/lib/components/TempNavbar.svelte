@@ -17,8 +17,9 @@
     userEmail = "Log in to reserve",
     profilePicture = "https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg",
     isLoggedIn = false, // Default false to reflect guest state
+    userRole = ""
   } = $props();
- 
+
   function signOut() {
     localStorage.removeItem('accessToken');
     localStorage.clear();
@@ -48,9 +49,16 @@
       </NavBrand>
       <NavHamburger class="bg-surface-400 hover:bg-surface-600" />
       <NavUl ulClass="items-center align-middle p-1">
+        {#if userRole !== "SuperAdmin"}
         <NavLi href="../../../index.html?view=1" class="text-surface-400">Labs</NavLi>
+        {/if}
         <NavLi href="../../../index.html?view=2" class="text-surface-400">Users</NavLi>
+        {#if userRole !== "SuperAdmin"}
         <NavLi href="../../../index.html?view=5" class="text-surface-400">Suggestions</NavLi>
+        {/if}
+        {#if userRole === "SuperAdmin"}
+        <NavLi href="../../../index.html?view=6" class="text-surface-400">Promote</NavLi>
+        {/if}
         <NavLi class="flex align-center">
           <Avatar id="user-drop" src={profilePicture} class="cursor-pointer" />
           <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70">
@@ -59,7 +67,7 @@
               <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
             </DropdownHeader>
 
-            {#if isLoggedIn}
+            {#if isLoggedIn && (userRole !== "SuperAdmin")}
               <DropdownGroup class="text-white">
                 <DropdownItem
                   class="hover:text-surface-400 text-center w-full fixcursor"

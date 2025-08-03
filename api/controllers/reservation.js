@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import createError from "http-errors";
 import { Router } from "express";
 import { isAuthenticated } from '../middlewares/auth.js';
+import { errorDatabaseLogger } from "../middlewares/logger.js";
 
 const router = Router();
 
@@ -109,6 +110,7 @@ router.get("/", isAuthenticated('student'), async (req, res) => {
     res.status(200).json(formatted);
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching reservations:", err);
+    errorDatabaseLogger("Lab Fetching Error", err);
     res.status(500).send("Error fetching reservations");
   }
 });
@@ -180,6 +182,7 @@ router.get("/:labId", isAuthenticated('student'), async (req, res) => {
     res.status(200).json(formattedReservations);
   } catch (err) {
     console.error("Error fetching reservations:", err);
+    errorDatabaseLogger(`Reservation under Lab ${labId} Fetching Error`, err);
     res.status(500).json({
       error: "Error fetching reservations",
       details: err.message,
@@ -404,6 +407,7 @@ router.post("/", isAuthenticated('student'), async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Error creating reservations:", err);
+    errorDatabaseLogger(`Reserving under Lab Error`, err);
     res.status(500).json({
       error: "Error creating reservations",
       details: err.message,
@@ -414,7 +418,7 @@ router.post("/", isAuthenticated('student'), async (req, res) => {
 
 
 // Update reservation
-router.put("/reservationId", isAuthenticated('student'), async (req, res) => {
+router.put("/:reservationId", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -650,6 +654,7 @@ router.put("/reservationId", isAuthenticated('student'), async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Error updating reservation:", error);
+    errorDatabaseLogger(`Reserving under Lab Error`, error);
 
     if (error.name === "VersionError") {
       return res.status(409).json({
@@ -738,6 +743,7 @@ router.delete("/reservationId", isAuthenticated('student'), async (req, res) => 
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
+    errorDatabaseLogger(`Error deleting reservations`, err);
     console.error("Error deleting reservation:", err);
     res.status(500).json({
       error: "Error deleting reservation",
@@ -815,6 +821,7 @@ router.get("/upcoming/:labId", async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching upcoming reservations:", err);
+    errorDatabaseLogger(`Error fetching reservations`, err);
     res.status(500).json({
       error: "Error fetching upcoming reservations",
       details: err.message,

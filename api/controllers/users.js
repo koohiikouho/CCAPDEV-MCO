@@ -2,6 +2,7 @@ import Users from "../models/users.js";
 import Suggestions from "../models/suggestions.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import { errorDatabaseLogger } from "../middlewares/logger.js";
 import { Router } from "express";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
@@ -34,6 +35,7 @@ router.get("/",  isAuthenticated('student'), async (req, res) => {
     const users = await Users.find().exec();
     res.status(200).json(users);
   } catch (err) {
+    errorDatabaseLogger("User Fetching Error", err);
     res.status(500).send("Error fetching users");
   }
 });
@@ -64,6 +66,7 @@ router.post("/login", async (req, res) => {
     }
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED during login:", err);
+    errorDatabaseLogger("Login Error", err);
     res.status(500).json({ error: "Server error during login" });
   }
 });
@@ -106,6 +109,7 @@ router.post("/signup", async (req, res) => {
     console.log("New user created:", newUser.email);
   } catch (err) {
     console.error("Signup error:", err);
+    errorDatabaseLogger("Signup Error", err);
     res.status(500).json({ message: "Internal server error." });
   }
 });
@@ -123,6 +127,7 @@ router.post("/suggestions", isAuthenticated('student'), async (req, res) => {
     res.status(201).json({ message: "Suggestion submitted successfully." });
   } catch (err) {
     console.error("Suggestion error:", err);
+    errorDatabaseLogger("Suggestion error", err);
     res.status(500).json({ message: "Internal server error." });
   }
 });
@@ -152,6 +157,7 @@ router.get("/me", async (req, res) => {
     });
   } catch (err) {
     console.error("Token verification failed:", err);
+    errorDatabaseLogger("Token verification failed", err);
     res.status(403).json({ error: "Invalid token" });
   }
 });
@@ -200,6 +206,7 @@ router.put("/me", isAuthenticated('student'), async (req, res) => {
     });
   } catch (err) {
     console.error("Update error:", err);
+    errorDatabaseLogger("Update error", err);
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
@@ -234,6 +241,7 @@ router.delete("/me", isAuthenticated('student'), async (req, res) => {
     res.status(204).send();
   } catch (err) {
     console.error("Error deleting user:", err);
+    errorDatabaseLogger("Error deleting user:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -251,6 +259,7 @@ router.post("/upload-avatar", isAuthenticated('student'), parser.single("avatar"
     res.status(200).json({ url: req.file.path });
   } catch (err) {
     console.error("Upload server error:", err);
+    errorDatabaseLogger("Upload server error", err);
     res.status(500).json({ error: "Upload failed", details: err.message });
   }
 });

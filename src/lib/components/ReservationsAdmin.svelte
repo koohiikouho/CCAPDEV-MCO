@@ -180,6 +180,7 @@
     if (result.success) {
       alert('Reservation successful!');
       console.log('Created reservations:', result.data.reservations);
+      location.reload();
     } else {
       alert('Reservation Edit Unsuccessful'.concat(result.error));
 

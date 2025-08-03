@@ -1,8 +1,10 @@
-import Labs from "./models/labs.js";
-import Users from "./models/users.js";
-import Reservations from "./models/reservations.js";
+import Labs from "../models/labs.js";
+import Users from "../models/users.js";
+import Reservations from "../models/reservations.js";
+import mongoose from "mongoose";
 import multer from "multer";
 import { Router } from "express";
+import { errorDatabaseLogger } from "../middlewares/logger.js";
 
 const router = Router();
 
@@ -57,6 +59,7 @@ router.get("/reservations", async (req, res) => {
     res.status(200).json(formattedReservations);
   } catch (err) {
     console.error("Error fetching reservations:", err);
+    errorDatabaseLogger(`Reservation fetch error`, err);
     res.status(500).json({
       error: "Error fetching reservations",
       details: err.message,
@@ -64,7 +67,7 @@ router.get("/reservations", async (req, res) => {
   }
 });
 
-router.get("/students", async (req, res) => {
+router.get("/admin/students", async (req, res) => {
   try {
     const students = await Users.find(
       { role: "student" },
@@ -84,6 +87,7 @@ router.get("/students", async (req, res) => {
     res.status(200).json(formattedStudents);
   } catch (err) {
     console.error("Error fetching students:", err);
+    errorDatabaseLogger(`Student fetch error`, err);
     res.status(500).json({
       error: "Error fetching student data",
       details: err.message,
@@ -91,7 +95,7 @@ router.get("/students", async (req, res) => {
   }
 });
 
-router.post("/reservations", async (req, res) => {
+router.post("/admin/reservations", async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -260,8 +264,89 @@ router.post("/reservations", async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Error creating reservation:", err);
+    errorDatabaseLogger(`LabTech block for student error`, err);
     res.status(500).json({
       error: "Error creating reservation",
+      details: err.message,
+    });
+  }
+});
+
+router.delete("/reservationId", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { reservationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(reservationId)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid reservation ID format" });
+    }
+
+    const reservation = await Reservations.findById(reservationId)
+      .populate("lab_id")
+      .session(session);
+
+    if (!reservation) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    const lab = await Labs.findById(reservation.lab_id._id).session(session);
+
+    if (!lab) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Associated lab not found" });
+    }
+
+    let seatFound = false;
+    for (const seat of lab.seats) {
+      const reservationIndex = seat.reservations.findIndex((resId) =>
+        resId.equals(reservationId)
+      );
+
+      if (reservationIndex !== -1) {
+        seat.reservations.splice(reservationIndex, 1);
+        seatFound = true;
+        break;
+      }
+    }
+
+    if (!seatFound) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(404)
+        .json({ error: "Reservation not found in any seat" });
+    }
+
+    await lab.save({ session });
+    await Reservations.deleteOne({ _id: reservationId }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: "Reservation deleted successfully",
+      deleted_reservation: {
+        id: reservation._id,
+        lab_id: reservation.lab_id._id,
+        time_in: reservation.time_in,
+        time_out: reservation.time_out,
+        status: reservation.status,
+      },
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    errorDatabaseLogger(`Error deleting reservations`, err);
+    console.error("Error deleting reservation:", err);
+    res.status(500).json({
+      error: "Error deleting reservation",
       details: err.message,
     });
   }

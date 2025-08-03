@@ -6,13 +6,14 @@
   import Users from './routes/Users.svelte';
   import Reservations from './routes/Reservations.svelte';
   import MyProfile from './routes/profiles/MyProfile.svelte';
+  import Promote from './routes/Promote.svelte';
   import { fade } from 'svelte/transition';
   import { expoIn } from 'svelte/easing';
   import { Avatar, Dropdown, DropdownHeader, DropdownItem, DropdownGroup } from "flowbite-svelte";
   import Suggestions from './routes/Suggestions.svelte';
   import { onMount } from 'svelte';
 
-  const views = [Home, Lab, Users, Reservations, MyProfile, Suggestions];
+  const views = [Home, Lab, Users, Reservations, MyProfile, Suggestions, Promote];
 
   let params = new URLSearchParams(location.search);
   let viewNumber = Number(params.get("view"));
@@ -25,7 +26,7 @@
   let userEmail = $state("Sign in to reserve");
   let profilePicture = $state("https://i.pinimg.com/236x/08/35/0c/08350cafa4fabb8a6a1be2d9f18f2d88.jpg");
   let isLoggedIn: boolean = $state(false);
-
+  let userRole = $state("");
   onMount(async () => {
     const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (token) {
@@ -48,6 +49,7 @@
         userName = `${user.first_name} ${user.last_name}`;
         userEmail = user.email;
         profilePicture = user.avatar;
+        userRole = user.role;
         isLoggedIn = true;
 
         console.log("User loaded:", user);
@@ -87,9 +89,14 @@
     updateViewportComponent();
   }
 
-    function viewProfile() {
+  function viewProfile() {
     currentView = 4;
     updateViewportComponent();
+  }
+
+  function viewPromote() {
+      currentView = 6
+      updateViewportComponent();
   }
 
   function updateViewportComponent() {
@@ -120,7 +127,7 @@
     navbar.add();
     updateViewportComponent();  
   }
-
+  
 </script>
 
 <header>
@@ -132,9 +139,16 @@
       </NavBrand>
       <NavHamburger class="bg-surface-400 hover:bg-surface-600"/>
       <NavUl ulClass="items-center align-middle p-1">
+          {#if userRole !== "SuperAdmin"}
           <NavLi href="#a" class="text-surface-400" onclick={viewLabs}>Labs</NavLi>
+          {/if}
           <NavLi href="#a" class="text-surface-400" onclick={viewUsers}>Users</NavLi>
+          {#if userRole !== "SuperAdmin"}
           <NavLi href="#a" class="text-surface-400" onclick={viewSuggestions}>Suggestions</NavLi>
+          {/if}
+          {#if userRole === "SuperAdmin"}
+          <NavLi href="#a" class="text-surface-400" onclick={viewPromote}>Promote</NavLi>
+          {/if}
           <NavLi class="flex align-center">
             <Avatar id="user-drop" src={profilePicture} class="cursor-pointer"/>
             <Dropdown triggeredBy="#user-drop" class="mt-5 bg-primary-300/70" >
@@ -142,7 +156,7 @@
                 <span class="block text-sm text-white">{userName}</span>
                 <span class="block truncate text-sm font-medium text-white">{userEmail}</span>
               </DropdownHeader>
-              {#if isLoggedIn}
+              {#if isLoggedIn && (userRole !== "SuperAdmin")}
               <DropdownGroup class="text-white ">
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewProfile}>Profile</DropdownItem>
                 <DropdownItem class="hover:text-surface-400 text-center w-full fixcursor" onclick={viewReservations}>Reservations</DropdownItem>

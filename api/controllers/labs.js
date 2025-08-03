@@ -2,7 +2,7 @@ import Labs from "../models/labs.js";
 import mongoose from "mongoose";
 import { Router } from "express";
 import { isAuthenticated } from '../middlewares/auth.js';
-
+import { errorDatabaseLogger } from "../middlewares/logger.js";
 
 const router = Router();
 
@@ -21,6 +21,7 @@ router.get("/labs", isAuthenticated('student'), async (req, res) => {
     console.log("Successfully sent JSON response.");
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching labs:", err);
+    errorDatabaseLogger(`Lab fetch error`, err);
     res.status(500).send("Error fetching labs");
   }
 });
@@ -53,6 +54,7 @@ router.get("/labs/:id", isAuthenticated('student'), async (req, res) => {
     console.log("Successfully sent JSON response.");
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching lab:", err);
+    errorDatabaseLogger(`Lab ${id} fetch error`, err);
     res.status(500).json({
       error: "Error fetching lab",
       details: err.message,
@@ -79,6 +81,7 @@ router.get("/labs/:id/:date/:timein/:timeout", async (req, res) => {
     console.log("Successfully sent JSON response.");
   } catch (err) {
     console.error("!!! AN ERROR OCCURRED while fetching labs:", err);
+    errorDatabaseLogger(`Lab ${id} reservation fetch error`, err);
     res.status(500).send("Error fetching labs");
   }
 });
@@ -110,6 +113,7 @@ router.get("/lab-seats/:labId", isAuthenticated('student'), async (req, res) => 
     });
   } catch (err) {
     console.error("Error fetching lab seats:", err);
+    errorDatabaseLogger(`Error fetching lab seats`, err);
     res.status(500).json({
       error: "Server error while fetching seats",
       details: err.message,
@@ -117,7 +121,7 @@ router.get("/lab-seats/:labId", isAuthenticated('student'), async (req, res) => 
   }
 });
 
-app.get("/available-seats/:labId", async (req, res) => {
+router.get("/available-seats/:labId", async (req, res) => {
   try {
     const { labId } = req.params;
     const { date, time_in, time_out, exclude_reservation } = req.query; // Added exclude_reservation
@@ -187,6 +191,7 @@ app.get("/available-seats/:labId", async (req, res) => {
     res.status(200).json(response);
   } catch (err) {
     console.error("Error finding available seats:", err);
+    errorDatabaseLogger(`Available seats at lab ${labId} fetch error`, err);
     res.status(500).json({
       error: "Server error",
       details: err.message,
