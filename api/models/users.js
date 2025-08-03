@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ["student", "Admin", "Lab Technician"],
+      enum: ["student", "Admin", "SuperAdmin"],
     },
     avatar: {
       type: String,
@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 8, // placeholder for our password requirement
+      minlength: 8,
     },
     bio: {
       type: String,

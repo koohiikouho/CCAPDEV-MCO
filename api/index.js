@@ -53,12 +53,11 @@ app.use('/reservations', reservationRoutes);
 // Lab routes
 app.use('/', labRoutes);
 
-app.use('/superadmin', superAdminRoutes);
+// SuperAdmin routes
+app.use('/superadmin', isAuthenticated('SuperAdmin'), superAdminRoutes);
 
 // Admin routes
-//app.use('/', isAuthenticated('Admin'), labRoutes);
-app.use('/', labRoutes);
-app.use('/', adminRoutes); //needs work on here
+app.use('/', isAuthenticated('student') ,adminRoutes); //needs work on here
 
 // Simple error handler
 app.use((err, req, res, _next) => {

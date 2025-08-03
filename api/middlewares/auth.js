@@ -17,14 +17,14 @@ export function isAuthenticated(role) {
         return next();
       }
 
-      // Lab Technician access - Lab Technician or Admin can access
-      if (role === 'Lab Technician' && (decoded.role === 'Lab Technician' || decoded.role === 'Admin')) {
+      // Admin access - Only Admin can access
+      if (role === 'Admin' && (decoded.role === 'Admin')) {
         req.user = decoded;
         return next();
       }
 
-      // Admin access - only Admin can access
-      if (role === 'Admin' && decoded.role === 'Admin') {
+      // SuperAdmin access - only SuperAdmin can access
+      if (role === 'SuperAdmin' && decoded.role === 'SuperAdmin') {
         req.user = decoded;
         return next();
       }
