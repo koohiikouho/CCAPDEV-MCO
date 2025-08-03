@@ -117,6 +117,81 @@ router.get("/lab-seats/:labId", isAuthenticated('student'), async (req, res) => 
   }
 });
 
+app.get("/available-seats/:labId", async (req, res) => {
+  try {
+    const { labId } = req.params;
+    const { date, time_in, time_out, exclude_reservation } = req.query; // Added exclude_reservation
 
+    if (!mongoose.Types.ObjectId.isValid(labId)) {
+      return res.status(400).json({ error: "Invalid lab ID" });
+    }
+
+    const startDateTime = new Date(`${date}T${time_in}:00`);
+    const endDateTime = new Date(`${date}T${time_out}:00`);
+
+    // Build match criteria for reservations
+    const reservationMatch = {
+      $or: [
+        {
+          time_in: { $lt: endDateTime },
+          time_out: { $gt: startDateTime },
+        },
+      ],
+    };
+
+    // Exclude specific reservation if provided
+    if (
+      exclude_reservation &&
+      mongoose.Types.ObjectId.isValid(exclude_reservation)
+    ) {
+      reservationMatch._id = {
+        $ne: new mongoose.Types.ObjectId(exclude_reservation),
+      };
+      console.log(`[DEBUG] Excluding reservation: ${exclude_reservation}`);
+    }
+
+    const lab = await Labs.findById(labId).populate({
+      path: "seats.reservations",
+      match: reservationMatch,
+    });
+
+    if (!lab) {
+      return res.status(404).json({ error: "Lab not found" });
+    }
+
+    const availableSeats = lab.seats.filter((seat) => {
+      return !seat.reservations || seat.reservations.length === 0;
+    });
+
+    console.log(
+      `[DEBUG] Found ${availableSeats.length} available seats out of ${lab.seats.length} total`
+    );
+
+    const response = {
+      lab_id: labId,
+      lab_name: lab.lab_name,
+      date: date,
+      time_in: time_in,
+      time_out: time_out,
+      excluded_reservation: exclude_reservation || null,
+      available_seats: availableSeats.map((seat) => ({
+        seat_id: seat._id,
+        position: `${seat.col}${seat.row}`,
+        column: seat.col,
+        row: seat.row,
+      })),
+      total_available: availableSeats.length,
+      total_seats: lab.seats.length,
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Error finding available seats:", err);
+    res.status(500).json({
+      error: "Server error",
+      details: err.message,
+    });
+  }
+});
 
 export default router;
