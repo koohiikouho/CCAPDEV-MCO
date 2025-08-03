@@ -303,9 +303,10 @@
               avatarUploading = true;
 
               try {
+                const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
                 const res = await fetch("http://localhost:3000/users/upload-avatar", {
                   method: "POST",
-                  'Authorization': `Bearer ${token}`,
+                  headers: {'Authorization': `Bearer ${token}` },
                   body: formData,
                 });
 
