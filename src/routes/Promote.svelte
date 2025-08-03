@@ -77,16 +77,14 @@
       
       try {
         const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-        const response = await fetch('http://localhost:3000/admin/promote', {
-        method: 'POST',
+        const response = await fetch('http://localhost:3000/superadmin/promote', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          email: user.email,
-          subject: subject,
-          message: message
+          idNumber: idNumberInput,
         })
       })
         defaultModal = true;
