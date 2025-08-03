@@ -2,11 +2,14 @@ import Users from "../models/users.js";
 import Suggestions from "../models/suggestions.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import dotenv from "dotenv";
 import { errorDatabaseLogger } from "../middlewares/logger.js";
 import { Router } from "express";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import { isAuthenticated } from '../middlewares/auth.js';
+
+dotenv.config();
 
 const router = Router();
 
