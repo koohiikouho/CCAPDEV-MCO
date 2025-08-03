@@ -19,9 +19,10 @@
   let avatarUploading = false;
   let confirmPassword = "";
   let deleteErrorMessage = "";
+  let newAvatarFile: File | null = null;
 
   function getAvatar(avatar: string): string {
-    return avatar && avatar !== "" ? avatar : "/src/assets/default_avatar.png";
+    return avatar || "/src/assets/default_avatar.png";
   }
 
   function getStatusColor(status) {
@@ -45,26 +46,57 @@
 
   async function saveProfile() {
     try {
-      const token = localStorage.getItem("accessToken") || sessionStorage.getItem('accessToken');
+      const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
       if (!token) throw new Error("No access token");
 
+      let avatarUrl = editableUser.avatar; // default
+
+      if (newAvatarFile) {
+        const formData = new FormData();
+        formData.append("avatar", newAvatarFile);
+
+        avatarUploading = true;
+
+        const res = await fetch("http://localhost:3000/users/upload-avatar", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to upload avatar");
+        }
+
+        const data = await res.json();
+        avatarUrl = data.url;
+        avatarUploading = false;
+        newAvatarFile = null; // reset
+      }
+
+      // 2) Update user profile
       let payload = {
         name: editableUser.name,
         bio: editableUser.bio,
-        avatar: editableUser.avatar
+        avatar: avatarUrl,
       };
-
-      console.log("Saving profile with payload:", payload);
 
       const response = await fetch("http://localhost:3000/users/me", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        }
+        },
+        body: JSON.stringify(payload),
       });
 
-      currentUser = { ...currentUser, ...editableUser };
+      if (!response.ok) throw new Error("Failed to save profile");
+      // Force cache-bust so the Avatar/Navbars reload new image
+      const cacheBustedUrl = `${avatarUrl}?t=${Date.now()}`;
+      window.location.reload();
+      currentUser = { ...currentUser, ...payload, avatar: cacheBustedUrl };
+      editableUser.avatar = cacheBustedUrl;
       showEditModal = false;
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -162,7 +194,7 @@
 <TempNavbar
   userName={currentUser?.name || "Loading..."}
   userEmail={currentUser?.email || "Loading..."}
-  profilePicture={getAvatar(currentUser?.avatar)}
+  profilePicture={currentUser?.avatar || "/src/assets/default_avatar.png"}
   isLoggedIn={!!currentUser}
 />
 
@@ -172,7 +204,7 @@
     <div class="grid md:grid-cols-3 gap-10">
       <div class="flex flex-col items-center">
         <Avatar
-          src={getAvatar(currentUser.avatar)}
+          src={currentUser.avatar || "/src/assets/default_avatar.png"}
           class="w-70 h-70 rounded-full ring-4 ring-primary-500 shadow-lg object-cover mb-10"
         />
         <Button
@@ -298,46 +330,17 @@
           type="file"
           accept="image/*"
           class="block mb-1 pl-8"
-          onchange={async (e) => {
-            const input = e.target as HTMLInputElement;
-            const file = input?.files?.[0];
-            if (file) {
-              const formData = new FormData();
-              formData.append("avatar", file);
-              avatarUploading = true;
-
-              try {
-                const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-                const res = await fetch("http://localhost:3000/users/upload-avatar", {
-                  method: "POST",
-                  headers: {'Authorization': `Bearer ${token}` },
-                  body: formData,
-                });
-
-                if (!res.ok) {
-                  const errorText = await res.text();
-                  console.error("Upload failed:", errorText);
-                  return;
-                }
-
-                const contentType = res.headers.get("content-type");
-                if (contentType?.includes("application/json")) {
-                  const data = await res.json();
-                  if (data.url) {
-                    editableUser.avatar = data.url;
-                    console.log("Avatar set to:", editableUser.avatar);
-                  }
-                }
-              } catch (err) {
-                console.error("Upload error:", err);
-              } finally {
-                avatarUploading = false;
+          onchange={(e) => {
+            if (e.target instanceof HTMLInputElement) {
+              const file = e.target.files?.[0];
+              if (file) {
+                newAvatarFile = file;
+                // Show preview immediately
+                editableUser.avatar = URL.createObjectURL(file);
               }
-
-              console.log("New avatar URL:", editableUser.avatar);
             }
           }}
-       />
+        />
         <p class="text-sm text-gray-500 mt-1">Preview:</p>
         <img
           src={editableUser.avatar}
