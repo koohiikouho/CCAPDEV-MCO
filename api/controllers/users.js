@@ -245,22 +245,30 @@ router.delete("/me", isAuthenticated('student'), async (req, res) => {
   }
 });
 
-
-// Upload avatar
-router.post("/upload-avatar", isAuthenticated('student'), parser.single("avatar"), (req, res) => {
+router.post("/upload-avatar", isAuthenticated('student'), parser.single("avatar"), async (req, res) => {
   try {
     if (!req.file) {
       console.log("Upload failed: no file");
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    const updatedUser = await Users.findByIdAndUpdate(
+      req.user.id,
+      { avatar: req.file.path },
+      { new: true }
+    );
+
     console.log("Uploaded file:", req.file);
-    res.status(200).json({ url: req.file.path });
+    res.status(200).json({
+      message: "Avatar updated successfully",
+      avatar: updatedUser.avatar
+    });
   } catch (err) {
     console.error("Upload server error:", err);
     errorDatabaseLogger("Upload server error", err);
     res.status(500).json({ error: "Upload failed", details: err.message });
   }
 });
+
 
 export default router;
