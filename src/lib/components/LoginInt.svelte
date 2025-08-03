@@ -37,7 +37,6 @@
 			const data = await response.json();
 			if (data.error) {
 				errorMessage = data.error;
-				alert(errorMessage);
 				return;
 			}
 			
@@ -52,7 +51,6 @@
 			window.location.href = "../../../index.html";
 		} catch (err) {
 			errorMessage = "An error occurred during login. Please try again.";
-			alert(errorMessage);
 		}
 	}
 </script>

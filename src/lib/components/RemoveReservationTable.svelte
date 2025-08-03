@@ -87,7 +87,6 @@
           'Authorization': `Bearer ${token}`
         }
       });
-    	alert("Reservation ".concat(resId).concat(" Removed Successfully!"));
 		location.reload();
 	}
 

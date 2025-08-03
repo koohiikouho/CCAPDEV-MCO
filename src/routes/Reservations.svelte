@@ -36,9 +36,7 @@
     e?.preventDefault();
 
     // validation — no split/join any more
-    if (!editSeats.trim()) return alert("Seat is required");
     const seatMatch = editSeats.trim().toUpperCase().match(/^([A-Z])(\d+)$/);
-    if (!seatMatch)        return alert("Seat must look like A1, B3 …");
 
     const [, column, rowStr] = seatMatch;
     const row = Number(rowStr);
@@ -77,7 +75,6 @@
       editing = null;
     } else {
       const err = await res.json();
-      alert(err.error || "Update failed");
     }
   }
 
