@@ -85,6 +85,10 @@
         body: JSON.stringify({ password: confirmPassword })
       });
 
+      if (res.status === 204) {
+        localStorage.removeItem('accessToken');
+        sessionStorage.removeItem('accessToken');
+      }
       if (!res.ok) {
         const contentType = res.headers.get("content-type");
         if (contentType?.includes("application/json")) {

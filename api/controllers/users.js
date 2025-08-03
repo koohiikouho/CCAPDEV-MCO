@@ -216,14 +216,8 @@ router.put("/me", isAuthenticated('student'), async (req, res) => {
 
 // Deletes user
 router.delete("/me", isAuthenticated('student'), async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "No token provided" });
-
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.id;
+    const userId = req.user.id;
     const { password } = req.body;
 
     const user = await Users.findById(userId);
@@ -232,7 +226,7 @@ router.delete("/me", isAuthenticated('student'), async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (password !== user.password) {
+    if (!(await user.comparePassword(password))) {
       return res
         .status(401)
         .json({ message: "Incorrect password. Please try again." });
